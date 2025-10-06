@@ -1,0 +1,41 @@
+# Root .gitignore for StudentAttendanceSystemProject
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Environment files with sensitive info
+*.env
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Test coverage reports
+coverage/
+
+# Documentation build output
+docs/_build/
+
+# Local development files
+local-*
+dev-*
+
+# SQL scripts with sensitive data
+**/Scripts/local_*
+**/Scripts/dev_*
+
+# README specific to local development
+README.local.md
+README.dev.md

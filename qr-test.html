@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QR Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  </head>
+  <body>
+    <h2>QR Test for Mobile</h2>
+    <div id="qr-simple"></div>
+    <div id="qr-url"></div>
+
+    <script>
+      // Simple text QR
+      QRCode.toCanvas(
+        document.getElementById("qr-simple"),
+        "Hello World",
+        function (error) {
+          if (error) console.error(error);
+          console.log("Simple QR generated");
+        }
+      );
+
+      // URL QR (like our system)
+      const testUrl =
+        "http://192.168.1.138:5173/checkin?sessionId=test123&eventId=event456&autoTrigger=true&type=attendance_checkin";
+      QRCode.toCanvas(
+        document.getElementById("qr-url"),
+        testUrl,
+        function (error) {
+          if (error) console.error(error);
+          console.log("URL QR generated");
+        }
+      );
+    </script>
+  </body>
+</html>

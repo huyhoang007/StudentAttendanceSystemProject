@@ -1,0 +1,18 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=aws-1-ap-southeast-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.tvnseojmsoqxkxgrteqj;Password=unibean1234@;SSL Mode=Require;Trust Server Certificate=true"
+  },
+  "JwtSettings": {
+    "Secret": "ibelievewecandoitmyguysneverstopgoingweneedtogoforeverlifeisanunstoppablejourneyofobstaclesinwhichwecannotavoid",
+    "Issuer": "StudentAttendanceSystem",
+    "Audience": "StudentAttendanceUsers",
+    "ExpiryMinutes": 1440
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Microsoft.EntityFrameworkCore.Database.Command": "Information"
+    }
+  }
+}
