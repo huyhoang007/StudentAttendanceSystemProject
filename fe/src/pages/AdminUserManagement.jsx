@@ -305,16 +305,6 @@ const AdminUserManagement = () => {
           </Typography>
         </Box>
 
-        {/* Info Alert */}
-        <Alert severity="info" sx={{ mb: 3 }}>
-          <Typography variant="body2">
-            <strong>Lưu ý:</strong> Trang này dùng để quản lý tài khoản đăng nhập. 
-            Khi tạo sinh viên ở đây, hệ thống sẽ tự động tạo cả profile sinh viên. 
-            Để quản lý thông tin chi tiết sinh viên (đăng ký sự kiện, điểm danh), 
-            vui lòng sử dụng trang "Quản lý Sinh viên".
-          </Typography>
-        </Alert>
-
         {/* Stats Cards */}
         <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={2.4}>

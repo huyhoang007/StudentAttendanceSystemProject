@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "@mui/material/styles";
+import { CssBaseline } from "@mui/material";
 import { AuthProvider } from "./contexts/AuthContext";
 import { useTokenCheck } from "./hooks/useTokenCheck";
+import modernTheme from "./theme/modernTheme";
 import MainLayout from "./components/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
@@ -186,11 +189,14 @@ function AppWithTokenCheck() {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <AppWithTokenCheck />
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider theme={modernTheme}>
+      <CssBaseline />
+      <AuthProvider>
+        <BrowserRouter>
+          <AppWithTokenCheck />
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

@@ -33,12 +33,29 @@ const MainLayout = () => {
         }}
       >
         <Toolbar sx={{ minHeight: 64 }}>
-          <Typography
-            variant="h6"
-            sx={{ flexGrow: 1, fontWeight: 700, letterSpacing: 1 }}
-          >
-            Student Attendance System
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
+            <Avatar
+              sx={{
+                width: 40,
+                height: 40,
+                mr: 2,
+                bgcolor: "#fff",
+                boxShadow: 2
+              }}
+            >
+              <img
+                src="https://img.icons8.com/fluency/64/000000/student-center.png"
+                alt="logo"
+                style={{ width: 32, height: 32 }}
+              />
+            </Avatar>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 700, letterSpacing: 1 }}
+            >
+              Student Attendance System
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex", gap: 1 }}>
             {/* Dashboard button removed from navbar */}
             {role === "student" && (

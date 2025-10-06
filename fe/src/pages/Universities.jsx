@@ -226,7 +226,7 @@ const Universities = () => {
                   <Fade
                     in={true}
                     timeout={300 + index * 100}
-                    key={u.university_id}
+                    key={u.universityId || u.university_id || index}
                   >
                     <TableRow
                       sx={{
@@ -253,13 +253,11 @@ const Universities = () => {
                         </Typography>
                       </TableCell>
                       <TableCell sx={{ py: 2 }}>
-                        <Typography variant="body2" color="#666">
-                          <TableCell
-                            sx={{ display: "flex", alignItems: "center" }}
-                          >
-                            <Phone
-                              sx={{ mr: 1, color: "#74ebd5", fontSize: 18 }}
-                            />
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          <Phone
+                            sx={{ mr: 1, color: "#74ebd5", fontSize: 18 }}
+                          />
+                          <Typography variant="body2" color="#666">
                             {u.contactInfo || u.contact_info || (
                               <span
                                 style={{ color: "#999", fontStyle: "italic" }}
@@ -267,8 +265,8 @@ const Universities = () => {
                                 Chưa có thông tin
                               </span>
                             )}
-                          </TableCell>
-                        </Typography>
+                          </Typography>
+                        </Box>
                       </TableCell>
                       <TableCell align="right" sx={{ py: 2 }}>
                         <IconButton

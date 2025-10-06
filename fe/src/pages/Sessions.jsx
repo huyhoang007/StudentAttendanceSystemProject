@@ -35,6 +35,7 @@ import {
 } from "../services/eventSessionService";
 import { getEvents } from "../services/eventService";
 import { useAuth } from "../contexts/AuthContext";
+import { formatDateTimeLocal, formatDateTimeDisplay, formatDateTimeForBackend } from "../utils/dateUtils";
 
 const Sessions = () => {
   const [searchParams] = useSearchParams();
@@ -64,27 +65,6 @@ const Sessions = () => {
     checkin_start_time: "",
     checkin_end_time: "",
   });
-
-  // Function to format datetime for input field
-  const formatDateTimeLocal = (dateStr) => {
-    if (!dateStr) return "";
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return "";
-
-      // Format to YYYY-MM-DDTHH:MM for datetime-local input
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hours = String(date.getHours()).padStart(2, "0");
-      const minutes = String(date.getMinutes()).padStart(2, "0");
-
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "";
-    }
-  };
 
   const resetForm = () => {
     // Set default time to current time
@@ -246,22 +226,14 @@ const Sessions = () => {
 
       // Prepare session data in correct format for backend (PascalCase)
       // Keep datetime as local Vietnam time without UTC conversion
-      const formatDateTime = (dateTimeLocal) => {
-        if (!dateTimeLocal) return null;
-        // Add seconds to match backend expectation: "2025-10-01T10:43" -> "2025-10-01T10:43:00"
-        return dateTimeLocal.includes(":00")
-          ? dateTimeLocal
-          : dateTimeLocal + ":00";
-      };
-
       const sessionData = {
         EventId: eventId,
         Title: title,
-        StartTime: formatDateTime(startTime),
-        EndTime: formatDateTime(endTime),
+        StartTime: formatDateTimeForBackend(startTime),
+        EndTime: formatDateTimeForBackend(endTime),
         Location: form.location?.trim() || null,
-        CheckinStartTime: formatDateTime(form.checkin_start_time?.trim()),
-        CheckinEndTime: formatDateTime(form.checkin_end_time?.trim()),
+        CheckinStartTime: formatDateTimeForBackend(form.checkin_start_time?.trim()),
+        CheckinEndTime: formatDateTimeForBackend(form.checkin_end_time?.trim()),
       };
 
       console.log("Debug session data:", sessionData);
@@ -421,41 +393,10 @@ const Sessions = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {s.startTime || s.StartTime || s.start_time
-                    ? (() => {
-                        const dateStr =
-                          s.startTime || s.StartTime || s.start_time;
-
-                        // Backend trả về thời gian local, chỉ cần format đơn giản
-                        const date = new Date(dateStr);
-                        return date.toLocaleString("vi-VN", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        });
-                      })()
-                    : "Chưa xác định"}
+                  {formatDateTimeDisplay(s.startTime || s.StartTime || s.start_time)}
                 </TableCell>
                 <TableCell>
-                  {s.endTime || s.EndTime || s.end_time
-                    ? (() => {
-                        const dateStr = s.endTime || s.EndTime || s.end_time;
-
-                        // Backend trả về thời gian local, chỉ cần format đơn giản
-                        const date = new Date(dateStr);
-                        return date.toLocaleString("vi-VN", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: false,
-                        });
-                      })()
-                    : "Chưa xác định"}
+                  {formatDateTimeDisplay(s.endTime || s.EndTime || s.end_time)}
                 </TableCell>
                 <TableCell>{s.location || s.Location || "Chưa có"}</TableCell>
                 <TableCell>
@@ -486,46 +427,22 @@ const Sessions = () => {
                         sx={{ mt: 0.5 }}
                       >
                         <strong>Bắt đầu:</strong>{" "}
-                        {(() => {
-                          const dateStr =
-                            s.checkinStartTime ||
-                            s.CheckinStartTime ||
-                            s.checkin_start_time;
-
-                          // Backend trả về thời gian local, chỉ cần format đơn giản
-                          const date = new Date(dateStr);
-                          return date.toLocaleString("vi-VN", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: false,
-                          });
-                        })()}
+                        {formatDateTimeDisplay(
+                          s.checkinStartTime ||
+                          s.CheckinStartTime ||
+                          s.checkin_start_time
+                        )}
                         <br />
                         {(s.checkinEndTime ||
                           s.CheckinEndTime ||
                           s.checkin_end_time) && (
                           <>
                             <strong>Kết thúc:</strong>{" "}
-                            {(() => {
-                              const dateStr =
-                                s.checkinEndTime ||
-                                s.CheckinEndTime ||
-                                s.checkin_end_time;
-
-                              // Backend trả về thời gian local, chỉ cần format đơn giản
-                              const date = new Date(dateStr);
-                              return date.toLocaleString("vi-VN", {
-                                year: "numeric",
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              });
-                            })()}
+                            {formatDateTimeDisplay(
+                              s.checkinEndTime ||
+                              s.CheckinEndTime ||
+                              s.checkin_end_time
+                            )}
                           </>
                         )}
                       </Typography>
