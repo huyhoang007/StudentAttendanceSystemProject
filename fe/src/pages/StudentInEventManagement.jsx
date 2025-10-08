@@ -29,6 +29,7 @@ import {
   Upload,
   PersonAdd,
   FileDownload,
+  Search,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -63,6 +64,7 @@ const StudentInEventManagement = () => {
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [csvFile, setCsvFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
+  const [studentSearchText, setStudentSearchText] = useState(""); // Tìm kiếm sinh viên
 
   const { user, role, organizerId } = useAuth();
   const [error, setError] = useState("");
@@ -129,6 +131,7 @@ const StudentInEventManagement = () => {
   useEffect(() => {
     fetchEvents();
     fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, organizerId]);
 
   useEffect(() => {
@@ -139,7 +142,35 @@ const StudentInEventManagement = () => {
       );
       setSelectedEvent(event);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEventId, events]);
+
+  // Filter data dựa trên tìm kiếm
+  const filteredData = data.filter((item) => {
+    if (!studentSearchText) return true;
+    const studentCode = (
+      item.StudentCode ||
+      item.studentCode ||
+      ""
+    ).toLowerCase();
+    return studentCode.includes(studentSearchText.toLowerCase());
+  });
+
+  // Hàm check-in thủ công
+  const handleManualCheckIn = async (studentInEventId) => {
+    try {
+      console.log("🔄 Manual check-in for student:", studentInEventId);
+
+      // Cập nhật trạng thái thành "attended"
+      await handleStatusChange(studentInEventId, "attended");
+
+      console.log("✅ Manual check-in successful");
+      alert("Check-in thành công!");
+    } catch (error) {
+      console.error("❌ Error manual check-in:", error);
+      setError("Không thể check-in thủ công.");
+    }
+  };
 
   // Handle add single student
   const handleAddStudent = async () => {
@@ -460,71 +491,139 @@ const StudentInEventManagement = () => {
 
       {/* Students Table */}
       {selectedEventId && (
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Mã sinh viên</TableCell>
-              <TableCell>Tên sinh viên</TableCell>
-              <TableCell>Email</TableCell>
-              <TableCell>Trạng thái</TableCell>
-              <TableCell align="right">Thao tác</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {loading ? (
+        <>
+          {/* Search Box */}
+          <Box sx={{ mb: 2 }}>
+            <TextField
+              label="Tìm kiếm theo mã sinh viên"
+              variant="outlined"
+              size="small"
+              value={studentSearchText}
+              onChange={(e) => setStudentSearchText(e.target.value)}
+              placeholder="Nhập mã sinh viên để tìm kiếm..."
+              sx={{ minWidth: 300 }}
+              InputProps={{
+                startAdornment: (
+                  <Search sx={{ color: "action.active", mr: 1 }} />
+                ),
+              }}
+            />
+            {studentSearchText && (
+              <Chip
+                label={`Tìm thấy ${filteredData.length} sinh viên`}
+                size="small"
+                sx={{ ml: 2 }}
+                color="primary"
+                variant="outlined"
+              />
+            )}
+          </Box>
+
+          <Table>
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={5} align="center">
-                  Đang tải...
-                </TableCell>
+                <TableCell>Mã sinh viên</TableCell>
+                <TableCell>Tên sinh viên</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>Trạng thái</TableCell>
+                <TableCell align="center">Check-in thủ công</TableCell>
+                <TableCell align="right">Thao tác</TableCell>
               </TableRow>
-            ) : data.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={5} align="center">
-                  Chưa có sinh viên nào trong sự kiện
-                </TableCell>
-              </TableRow>
-            ) : (
-              data.map((item) => (
-                <TableRow key={item.StudentInEventId || item.studentInEventId}>
-                  <TableCell>{item.StudentCode || item.studentCode}</TableCell>
-                  <TableCell>{item.StudentName || item.studentName}</TableCell>
-                  <TableCell>
-                    {item.StudentEmail || item.studentEmail}
+            </TableHead>
+            <TableBody>
+              {loading ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    Đang tải...
                   </TableCell>
-                  <TableCell>
-                    <FormControl size="small" sx={{ minWidth: 120 }}>
-                      <Select
-                        value={item.Status || item.status || "registered"}
-                        onChange={(e) =>
-                          handleStatusChange(
-                            item.StudentInEventId || item.studentInEventId,
-                            e.target.value
+                </TableRow>
+              ) : filteredData.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    {studentSearchText
+                      ? "Không tìm thấy sinh viên nào"
+                      : "Chưa có sinh viên nào trong sự kiện"}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredData.map((item) => (
+                  <TableRow
+                    key={item.StudentInEventId || item.studentInEventId}
+                  >
+                    <TableCell>
+                      {item.StudentCode || item.studentCode}
+                    </TableCell>
+                    <TableCell>
+                      {item.StudentName || item.studentName}
+                    </TableCell>
+                    <TableCell>
+                      {item.StudentEmail || item.studentEmail}
+                    </TableCell>
+                    <TableCell>
+                      <FormControl size="small" sx={{ minWidth: 120 }}>
+                        <Select
+                          value={item.Status || item.status || "registered"}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              item.StudentInEventId || item.studentInEventId,
+                              e.target.value
+                            )
+                          }
+                        >
+                          <MenuItem value="registered">Đã đăng ký</MenuItem>
+                          <MenuItem value="attended">Đã tham dự</MenuItem>
+                          <MenuItem value="cancelled">Đã hủy</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell align="center">
+                      {(item.Status || item.status) === "registered" ? (
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="primary"
+                          onClick={() =>
+                            handleManualCheckIn(
+                              item.StudentInEventId || item.studentInEventId
+                            )
+                          }
+                        >
+                          Check-in
+                        </Button>
+                      ) : (item.Status || item.status) === "attended" ? (
+                        <Chip
+                          label="Đã check-in"
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                        />
+                      ) : (
+                        <Chip
+                          label="Không khả dụng"
+                          size="small"
+                          color="default"
+                          variant="outlined"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell align="right">
+                      <IconButton
+                        color="error"
+                        onClick={() =>
+                          handleRemoveStudent(
+                            item.StudentInEventId || item.studentInEventId
                           )
                         }
                       >
-                        <MenuItem value="registered">Đã đăng ký</MenuItem>
-                        <MenuItem value="attended">Đã tham dự</MenuItem>
-                        <MenuItem value="cancelled">Đã hủy</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </TableCell>
-                  <TableCell align="right">
-                    <IconButton
-                      color="error"
-                      onClick={() =>
-                        handleRemoveStudent(
-                          item.StudentInEventId || item.studentInEventId
-                        )
-                      }
-                    >
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+                        <Delete />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </>
       )}
 
       {/* Add Single Student Dialog */}
