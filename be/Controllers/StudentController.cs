@@ -292,5 +292,19 @@ namespace Student_Attendance_System.Controllers
                 return StatusCode(500, new { message = "An error occurred while checking email uniqueness.", error = ex.Message });
             }
         }
+
+        [HttpGet("not-in-event/{eventId}")]
+        public async Task<ActionResult<IEnumerable<StudentDto>>> GetStudentsNotInEvent(Guid eventId)
+        {
+            try
+            {
+                var students = await _studentService.GetStudentsNotInEventAsync(eventId);
+                return Ok(students);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "An error occurred while retrieving students not in event.", error = ex.Message });
+            }
+        }
     }
 }

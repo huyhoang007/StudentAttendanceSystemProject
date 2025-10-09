@@ -82,6 +82,16 @@ namespace Student_Attendance_System.Repositories
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Student>> GetStudentsNotInEventAsync(Guid eventId)
+        {
+            return await _context.Students
+                .Include(s => s.University)
+                .Include(s => s.User)
+                .Where(s => !_context.StudentInEvents
+                    .Any(sie => sie.StudentId == s.StudentId && sie.EventId == eventId))
+                .ToListAsync();
+        }
+
         public override async Task<Student?> GetByIdAsync(Guid id)
         {
             return await _dbSet

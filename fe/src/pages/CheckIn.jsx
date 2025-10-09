@@ -43,39 +43,57 @@ const CheckIn = () => {
       console.log("Current user data:", user);
       console.log("Current role:", role);
 
+      // Set loading state
+      setLoading(true);
+
+      // Add timeout protection (10 seconds)
+      const timeoutId = setTimeout(() => {
+        console.error("Check-in timeout after 10 seconds");
+        setLoading(false);
+        setIsAutoCheckIn(false);
+        setCheckInStatus({
+          type: "error",
+          message: "Quá trình điểm danh bị timeout. Vui lòng thử lại.",
+        });
+      }, 10000);
+
       // Check if user is logged in and is a student
       if (!user) {
+        clearTimeout(timeoutId);
         setCheckInStatus({
           type: "error",
           message:
             "Bạn cần đăng nhập trước khi check-in. Vui lòng đăng nhập với tài khoản sinh viên.",
         });
         setLoading(false);
+        setIsAutoCheckIn(false);
         return;
       }
 
       if (role !== "student") {
+        clearTimeout(timeoutId);
         setCheckInStatus({
           type: "error",
           message: "Chỉ sinh viên mới có thể check-in điểm danh.",
         });
         setLoading(false);
+        setIsAutoCheckIn(false);
         return;
       }
 
       if (!user.studentId && !user.StudentId) {
+        clearTimeout(timeoutId);
         setCheckInStatus({
           type: "error",
           message:
             "Không tìm thấy thông tin sinh viên. Vui lòng đăng nhập lại.",
         });
         setLoading(false);
+        setIsAutoCheckIn(false);
         return;
       }
 
       try {
-        setLoading(true);
-
         // First, get student details to get the correct StudentCode
         console.log("Fetching student details for studentId:", user.studentId);
         const studentRes = await fetch(`/api/Student/${user.studentId}`);
@@ -125,18 +143,21 @@ const CheckIn = () => {
         const result = await checkInRes.json();
         console.log("Check-in result:", result);
 
+        clearTimeout(timeoutId);
         setCheckInStatus({
           type: "success",
-          message: `Điểm danh thành công cho phiên "${qrData.sessionTitle}"!`,
+          message: "QR đã được quét thành công!",
         });
 
         // Close QR modal
         setQrModalOpen(false);
       } catch (error) {
         console.error("Check-in error:", error);
+        clearTimeout(timeoutId);
         setCheckInStatus({ type: "error", message: error.message });
       } finally {
         setLoading(false);
+        setIsAutoCheckIn(false);
       }
     },
     [user, role]
@@ -163,6 +184,18 @@ const CheckIn = () => {
       autoTrigger === "true"
     ) {
       console.log("Auto-processing check-in from QR scan");
+      console.log("URL params:", {
+        sessionId,
+        eventId,
+        sessionTitle,
+        eventTitle,
+        startTime,
+        endTime,
+        locationParam,
+        type,
+        autoTrigger,
+      });
+
       const qrData = {
         sessionId,
         eventId,
@@ -263,9 +296,28 @@ const CheckIn = () => {
                 <Typography variant="h5" gutterBottom>
                   Đang xử lý điểm danh...
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   Bạn đã quét QR thành công! Vui lòng chờ hệ thống xử lý.
                 </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setLoading(false);
+                    setIsAutoCheckIn(false);
+                    setCheckInStatus({
+                      type: "info",
+                      message:
+                        "Đã hủy quá trình điểm danh. Bạn có thể thử lại.",
+                    });
+                  }}
+                  sx={{ mt: 2 }}
+                >
+                  Hủy và thử lại
+                </Button>
               </>
             ) : (
               <>
@@ -287,7 +339,7 @@ const CheckIn = () => {
                   size="large"
                   startIcon={<QrCodeScanner />}
                   onClick={() => setQrModalOpen(true)}
-                  disabled={!user}
+                  disabled={!user || loading}
                   sx={{ px: 4 }}
                 >
                   Mở máy quét QR

@@ -245,7 +245,9 @@ namespace Student_Attendance_System.Services
                 SessionTitle = checkIn.EventSession?.Title ?? string.Empty,
                 EventTitle = checkIn.EventSession?.Event?.Title ?? string.Empty,
                 StudentName = checkIn.StudentInEvent?.Student?.Name ?? string.Empty,
-                StudentCode = checkIn.StudentInEvent?.Student?.StudentCode ?? string.Empty
+                StudentCode = checkIn.StudentInEvent?.Student?.StudentCode ?? string.Empty,
+                UniversityId = checkIn.StudentInEvent?.Student?.UniversityId,
+                OrganizerId = checkIn.EventSession?.Event?.OrganizerId
             };
         }
     }

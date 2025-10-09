@@ -1,5 +1,3 @@
-// src/pages/Events.jsx
-
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Typography,
@@ -18,6 +16,10 @@ import {
   TableBody,
   Chip,
   Alert,
+  Card,
+  CardContent,
+  CircularProgress,
+  Tooltip,
 } from "@mui/material";
 import {
   Add,
@@ -26,6 +28,7 @@ import {
   Schedule,
   Group,
   Visibility,
+  Event as EventIcon,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -53,69 +56,40 @@ const Events = () => {
     OrganizerId: "",
   });
   const [eventError, setEventError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
+      setLoading(true);
       let res;
-      console.log("Fetching events. Role:", role, "OrganizerId:", organizerId);
-
       if (role === "organizer") {
         if (!organizerId) {
-          console.warn("Organizer role but no organizerId found");
           setEventError(
             "Không tìm thấy thông tin organizer. Vui lòng đăng xuất và đăng nhập lại."
           );
           setData([]);
           return;
         }
-
-        // Organizer chỉ xem events của mình
-        console.log("Fetching events for organizer:", organizerId);
         res = await fetch(`/api/event/by-organizer/${organizerId}`);
-        console.log("Response status:", res.status);
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          console.error("API Error:", errorText);
-          throw new Error(`HTTP ${res.status}: ${errorText}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
         res = await res.json();
-        console.log("Events data for organizer:", res);
-        console.log("First event sample:", res[0]);
-        console.log(
-          "Event properties:",
-          res.length > 0 ? Object.keys(res[0]) : "No events"
-        );
       } else {
-        // Admin/user khác xem tất cả events
-        console.log("Fetching all events");
         res = await getEvents();
-        console.log("All events data:", res);
       }
-
       setData(Array.isArray(res) ? res : []);
     } catch (error) {
       console.error("Error fetching events:", error);
       setEventError("Không thể tải danh sách sự kiện: " + error.message);
       setData([]);
+    } finally {
+      setLoading(false);
     }
   }, [role, organizerId]);
 
   const loadOrganizerInfo = useCallback(async () => {
-    if (!organizerId) {
-      console.warn("Cannot load organizer info: organizerId is undefined");
-      return;
-    }
-
+    if (!organizerId) return;
     try {
-      console.log(
-        "[Events] Loading organizer info for organizerId:",
-        organizerId
-      );
       const orgData = await getOrganizerById(organizerId);
-      console.log("[Events] Organizer info loaded:", orgData);
-      console.log("[Events] University data:", orgData.university);
-      console.log("[Events] UniversityId:", orgData.universityId);
       setOrganizerInfo(orgData);
     } catch (error) {
       console.error("Error loading organizer info:", error);
@@ -124,10 +98,7 @@ const Events = () => {
 
   useEffect(() => {
     fetchData();
-    // Load organizer info when component mounts
-    if (role === "organizer" && organizerId) {
-      loadOrganizerInfo();
-    }
+    if (role === "organizer" && organizerId) loadOrganizerInfo();
   }, [fetchData, role, organizerId, loadOrganizerInfo]);
 
   const handleOpen = (item = null) => {
@@ -155,18 +126,14 @@ const Events = () => {
     );
     setOpen(true);
   };
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleClose = () => setOpen(false);
 
-  const isGuid = (str) => {
-    return /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
+  const isGuid = (str) =>
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(
       str
     );
-  };
 
   const handleSave = async () => {
-    // Đảm bảo OrganizerId luôn đúng và là Guid hợp lệ
     let eventData = { ...form };
     if (role === "organizer" && isGuid(organizerId)) {
       eventData.OrganizerId = organizerId;
@@ -176,7 +143,6 @@ const Events = () => {
       eventData.OrganizerId = "";
     }
 
-    // Đảm bảo ngày không rỗng và đúng định dạng yyyy-MM-dd
     if (!eventData.StartDate || !eventData.EndDate) {
       alert("Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc!");
       return;
@@ -184,20 +150,14 @@ const Events = () => {
     eventData.StartDate = eventData.StartDate.slice(0, 10);
     eventData.EndDate = eventData.EndDate.slice(0, 10);
 
-    // Kiểm tra OrganizerId là GUID hợp lệ
     if (!eventData.OrganizerId || !isGuid(eventData.OrganizerId)) {
       alert(
-        "OrganizerId không hợp lệ! Hãy kiểm tra lại tài khoản tổ chức hoặc admin.\nOrganizerId hiện tại: " +
-          eventData.OrganizerId
+        "OrganizerId không hợp lệ! Hãy kiểm tra lại tài khoản tổ chức hoặc admin."
       );
       return;
     }
 
-    // Log dữ liệu gửi lên để debug
     const token = localStorage.getItem("token");
-    console.log("Token gửi lên:", token);
-    console.log("eventData gửi lên:", eventData);
-
     setEventError("");
     try {
       if (editId) await updateEvent(editId, eventData, token);
@@ -205,17 +165,14 @@ const Events = () => {
       setOpen(false);
       fetchData();
     } catch (err) {
-      if (err && err.message && err.message.includes("401")) {
-        setEventError(
-          "Bạn không có quyền tạo/sửa sự kiện. Vui lòng đăng nhập bằng tài khoản admin hoặc organizer."
-        );
-      } else if (err && err.message) {
-        setEventError("Lỗi: " + err.message);
-      } else {
-        setEventError("Lỗi không xác định khi tạo/sửa sự kiện.");
-      }
+      setEventError(
+        err && err.message
+          ? "Lỗi: " + err.message
+          : "Lỗi không xác định khi tạo/sửa sự kiện."
+      );
     }
   };
+
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       const token = localStorage.getItem("token");
@@ -225,256 +182,242 @@ const Events = () => {
   };
 
   return (
-    <Box>
-      {eventError && <Box sx={{ color: "red", mb: 2 }}>{eventError}</Box>}
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{ color: "#1976d2", fontWeight: 600 }}
+    <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: 3,
+          boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
+          background: "linear-gradient(135deg, #1976d2, #42a5f5)",
+          color: "white",
+        }}
       >
-        Quản lý sự kiện
-      </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        startIcon={<Add />}
-        onClick={() => handleOpen()}
-        sx={{ mb: 2 }}
+        <CardContent>
+          <Box display="flex" alignItems="center" gap={2}>
+            <EventIcon sx={{ fontSize: 40 }} />
+            <Box>
+              <Typography variant="h4" fontWeight={700}>
+                Quản lý Sự kiện NVH Sinh viên
+              </Typography>
+              <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                Quản lý, theo dõi và điểm danh sinh viên tham gia các hoạt động.
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
+
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
       >
-        Thêm sự kiện
-      </Button>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Tiêu đề</TableCell>
-            <TableCell>Mô tả</TableCell>
-            <TableCell>Đơn vị tổ chức</TableCell>
-            <TableCell>Ngày bắt đầu</TableCell>
-            <TableCell>Ngày kết thúc</TableCell>
-            {role === "admin" && <TableCell>Quyền hạn</TableCell>}
-            <TableCell align="right">Thao tác</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {data.length === 0 ? (
-            <TableRow>
-              <TableCell
-                colSpan={role === "admin" ? 7 : 6}
-                align="center"
-                sx={{ py: 3 }}
-              >
-                {eventError ? (
-                  <Typography color="error">{eventError}</Typography>
-                ) : (
-                  <Typography color="textSecondary">
-                    Chưa có sự kiện nào
-                  </Typography>
-                )}
-              </TableCell>
-            </TableRow>
-          ) : (
-            data.map((e) => (
-              <TableRow key={e.eventId || e.EventId}>
-                <TableCell>
-                  <Box>
-                    <Typography variant="subtitle2">
-                      {e.title || e.Title || "Chưa có tiêu đề"}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      label={(() => {
-                        const startDate = e.startDate || e.StartDate;
-                        const endDate = e.endDate || e.EndDate;
+        <Typography variant="h5" fontWeight={600}>
+          Danh sách sự kiện
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<Add />}
+          onClick={() => handleOpen()}
+          sx={{
+            borderRadius: 2,
+            textTransform: "none",
+            px: 3,
+            py: 1,
+            fontWeight: 600,
+          }}
+        >
+          Thêm sự kiện
+        </Button>
+      </Box>
 
-                        if (!startDate || isNaN(new Date(startDate))) {
-                          return "Chưa xác định";
-                        }
-
-                        const eventStartDate = new Date(startDate);
-                        const eventEndDate = endDate ? new Date(endDate) : null;
-                        const today = new Date();
-
-                        // Reset time to compare only dates
-                        const todayDate = new Date(
-                          today.getFullYear(),
-                          today.getMonth(),
-                          today.getDate()
-                        );
-                        const eventStartDateOnly = new Date(
-                          eventStartDate.getFullYear(),
-                          eventStartDate.getMonth(),
-                          eventStartDate.getDate()
-                        );
-                        const eventEndDateOnly = eventEndDate
-                          ? new Date(
-                              eventEndDate.getFullYear(),
-                              eventEndDate.getMonth(),
-                              eventEndDate.getDate()
-                            )
-                          : null;
-
-                        if (eventStartDateOnly > todayDate) {
-                          return "Sắp diễn ra";
-                        } else if (
-                          eventEndDateOnly &&
-                          eventEndDateOnly >= todayDate
-                        ) {
-                          return "Đang diễn ra";
-                        } else if (eventStartDateOnly <= todayDate) {
-                          return "Đã diễn ra";
-                        }
-
-                        return "Chưa xác định";
-                      })()}
-                      color={(() => {
-                        const startDate = e.startDate || e.StartDate;
-                        const endDate = e.endDate || e.EndDate;
-
-                        if (!startDate || isNaN(new Date(startDate))) {
-                          return "warning";
-                        }
-
-                        const eventStartDate = new Date(startDate);
-                        const eventEndDate = endDate ? new Date(endDate) : null;
-                        const today = new Date();
-
-                        // Reset time to compare only dates
-                        const todayDate = new Date(
-                          today.getFullYear(),
-                          today.getMonth(),
-                          today.getDate()
-                        );
-                        const eventStartDateOnly = new Date(
-                          eventStartDate.getFullYear(),
-                          eventStartDate.getMonth(),
-                          eventStartDate.getDate()
-                        );
-                        const eventEndDateOnly = eventEndDate
-                          ? new Date(
-                              eventEndDate.getFullYear(),
-                              eventEndDate.getMonth(),
-                              eventEndDate.getDate()
-                            )
-                          : null;
-
-                        if (eventStartDateOnly > todayDate) {
-                          return "primary";
-                        } else if (
-                          eventEndDateOnly &&
-                          eventEndDateOnly >= todayDate
-                        ) {
-                          return "success";
-                        } else {
-                          return "default";
-                        }
-                      })()}
-                    />
-                  </Box>
-                </TableCell>
-                <TableCell>
-                  {e.description || e.Description || "Chưa có mô tả"}
-                </TableCell>
-                <TableCell>
-                  {e.organizer || e.Organizer || "Chưa có tổ chức"}
-                </TableCell>
-                <TableCell>
-                  {(e.startDate || e.StartDate) &&
-                  !isNaN(new Date(e.startDate || e.StartDate))
-                    ? new Date(e.startDate || e.StartDate).toLocaleDateString()
-                    : "Invalid Date"}
-                </TableCell>
-                <TableCell>
-                  {(e.endDate || e.EndDate) &&
-                  !isNaN(new Date(e.endDate || e.EndDate))
-                    ? new Date(e.endDate || e.EndDate).toLocaleDateString()
-                    : "Invalid Date"}
-                </TableCell>
-                {role === "admin" && (
-                  <TableCell>
-                    <Chip
-                      label={
-                        e.organizerId === organizerId ||
-                        e.OrganizerId === organizerId
-                          ? "Admin Override"
-                          : "Organizer Event"
-                      }
-                      color={
-                        e.organizerId === organizerId ||
-                        e.OrganizerId === organizerId
-                          ? "error"
-                          : "primary"
-                      }
-                      size="small"
-                    />
-                  </TableCell>
-                )}
-                <TableCell align="right">
-                  <Box sx={{ display: "flex", gap: 0.5 }}>
-                    <IconButton
-                      color="info"
-                      title="Quản lý phiên"
-                      onClick={() =>
-                        navigate(`/sessions?eventId=${e.eventId || e.EventId}`)
-                      }
-                    >
-                      <Schedule />
-                    </IconButton>
-                    <IconButton
-                      color="secondary"
-                      title="Quản lý sinh viên"
-                      onClick={() =>
-                        navigate(
-                          `/student-in-event-management?eventId=${
-                            e.eventId || e.EventId
-                          }`
-                        )
-                      }
-                    >
-                      <Group />
-                    </IconButton>
-
-                    {/* Organizer có thể edit/delete events của mình, Admin có thể edit/delete tất cả */}
-                    {(role === "organizer" &&
-                      (e.organizerId === organizerId ||
-                        e.OrganizerId === organizerId)) ||
-                    role === "admin" ? (
-                      <>
-                        <IconButton
-                          color="primary"
-                          title="Sửa sự kiện"
-                          onClick={() => handleOpen(e)}
-                        >
-                          <Edit />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          title="Xóa sự kiện"
-                          onClick={() => handleDelete(e.eventId || e.EventId)}
-                        >
-                          <Delete />
-                        </IconButton>
-                      </>
-                    ) : (
-                      <IconButton
-                        color="default"
-                        title="Xem chi tiết"
-                        onClick={() =>
-                          navigate(`/event-details/${e.eventId || e.EventId}`)
-                        }
-                      >
-                        <Visibility />
-                      </IconButton>
-                    )}
-                  </Box>
-                </TableCell>
+      {loading ? (
+        <Box display="flex" justifyContent="center" my={5}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Card
+          sx={{
+            borderRadius: 3,
+            boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
+          }}
+        >
+          <Table>
+            <TableHead sx={{ backgroundColor: "#e3f2fd" }}>
+              <TableRow>
+                <TableCell>Tiêu đề</TableCell>
+                <TableCell>Mô tả</TableCell>
+                <TableCell>Đơn vị tổ chức</TableCell>
+                <TableCell>Ngày bắt đầu</TableCell>
+                <TableCell>Ngày kết thúc</TableCell>
+                {role === "admin" && <TableCell>Phân quyền</TableCell>}
+                <TableCell align="center">Thao tác</TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            </TableHead>
+            <TableBody>
+              {data.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                    {eventError ? (
+                      <Typography color="error">{eventError}</Typography>
+                    ) : (
+                      "Chưa có sự kiện nào"
+                    )}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.map((e) => (
+                  <TableRow
+                    key={e.eventId || e.EventId}
+                    hover
+                    sx={{
+                      transition: "all 0.2s",
+                      "&:hover": {
+                        backgroundColor: "#f1f8ff",
+                      },
+                    }}
+                  >
+                    <TableCell>
+                      <Typography fontWeight={600}>
+                        {e.title || e.Title || "Chưa có tiêu đề"}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        label={
+                          (() => {
+                            const startDate = e.startDate || e.StartDate;
+                            const endDate = e.endDate || e.EndDate;
+                            if (!startDate || isNaN(new Date(startDate)))
+                              return "Chưa xác định";
+                            const now = new Date();
+                            const s = new Date(startDate);
+                            const ed = endDate ? new Date(endDate) : null;
+                            if (s > now) return "Sắp diễn ra";
+                            if (ed && ed >= now) return "Đang diễn ra";
+                            return "Đã kết thúc";
+                          })()
+                        }
+                        color={
+                          (() => {
+                            const s = new Date(e.startDate || e.StartDate);
+                            const ed = new Date(e.endDate || e.EndDate);
+                            const now = new Date();
+                            if (s > now) return "primary";
+                            if (ed >= now) return "success";
+                            return "default";
+                          })()
+                        }
+                        sx={{ mt: 0.5 }}
+                      />
+                    </TableCell>
+                    <TableCell>{e.description || e.Description}</TableCell>
+                    <TableCell>{e.organizer || e.Organizer}</TableCell>
+                    <TableCell>
+                      {new Date(e.startDate || e.StartDate).toLocaleDateString()}
+                    </TableCell>
+                    <TableCell>
+                      {new Date(e.endDate || e.EndDate).toLocaleDateString()}
+                    </TableCell>
+                    {role === "admin" && (
+                      <TableCell>
+                        <Chip
+                          label={
+                            e.organizerId === organizerId ||
+                            e.OrganizerId === organizerId
+                              ? "Admin Override"
+                              : "Organizer Event"
+                          }
+                          color={
+                            e.organizerId === organizerId ||
+                            e.OrganizerId === organizerId
+                              ? "error"
+                              : "info"
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                    )}
+                    <TableCell align="center">
+                      <Box display="flex" justifyContent="center" gap={0.8}>
+                        <Tooltip title="Quản lý phiên">
+                          <IconButton
+                            color="info"
+                            onClick={() =>
+                              navigate(
+                                `/sessions?eventId=${e.eventId || e.EventId}`
+                              )
+                            }
+                          >
+                            <Schedule />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Quản lý sinh viên">
+                          <IconButton
+                            color="secondary"
+                            onClick={() =>
+                              navigate(
+                                `/student-in-event-management?eventId=${
+                                  e.eventId || e.EventId
+                                }`
+                              )
+                            }
+                          >
+                            <Group />
+                          </IconButton>
+                        </Tooltip>
+                        {(role === "organizer" &&
+                          (e.organizerId === organizerId ||
+                            e.OrganizerId === organizerId)) ||
+                        role === "admin" ? (
+                          <>
+                            <Tooltip title="Sửa sự kiện">
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleOpen(e)}
+                              >
+                                <Edit />
+                              </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Xóa sự kiện">
+                              <IconButton
+                                color="error"
+                                onClick={() =>
+                                  handleDelete(e.eventId || e.EventId)
+                                }
+                              >
+                                <Delete />
+                              </IconButton>
+                            </Tooltip>
+                          </>
+                        ) : (
+                          <Tooltip title="Xem chi tiết">
+                            <IconButton
+                              onClick={() =>
+                                navigate(
+                                  `/event-details/${e.eventId || e.EventId}`
+                                )
+                              }
+                            >
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </Card>
+      )}
 
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{editId ? "Sửa sự kiện" : "Thêm sự kiện"}</DialogTitle>
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+        <DialogTitle sx={{ fontWeight: 600, color: "#1976d2" }}>
+          {editId ? "Sửa sự kiện" : "Thêm sự kiện"}
+        </DialogTitle>
         <DialogContent>
           {role === "organizer" && organizerInfo && (
             <Alert severity="info" sx={{ mb: 2 }}>
@@ -484,11 +427,8 @@ const Events = () => {
                   organizerInfo.universityName ||
                   "Chưa xác định trường"}
               </strong>
-              <br />
-              Chỉ sinh viên trong trường này mới có thể xem và đăng ký sự kiện.
             </Alert>
           )}
-
           <TextField
             label="Tiêu đề"
             fullWidth
@@ -500,6 +440,8 @@ const Events = () => {
             label="Mô tả"
             fullWidth
             margin="normal"
+            multiline
+            rows={3}
             value={form.Description}
             onChange={(e) => setForm({ ...form, Description: e.target.value })}
           />
@@ -529,9 +471,9 @@ const Events = () => {
             InputLabelProps={{ shrink: true }}
           />
         </DialogContent>
-        <DialogActions>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
           <Button onClick={handleClose}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
+          <Button variant="contained" onClick={handleSave}>
             Lưu
           </Button>
         </DialogActions>

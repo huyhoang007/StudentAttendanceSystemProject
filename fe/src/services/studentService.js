@@ -68,3 +68,32 @@ export const importStudentsFromFile = async (file) => {
 
   return res.json();
 };
+
+export const getStudentsNotInEvent = async (eventId) => {
+  const res = await fetch(`/api/student/not-in-event/${eventId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+
+  return res.json();
+};
+
+// Tạo studentService object để compatibility với component
+export const studentService = {
+  getAllStudents: getStudents,
+  getStudentById,
+  getStudentByCode,
+  getStudentByUserId,
+  addStudent,
+  updateStudent,
+  deleteStudent,
+  importStudentsFromFile,
+  getStudentsNotInEvent,
+};

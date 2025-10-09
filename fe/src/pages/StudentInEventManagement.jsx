@@ -22,6 +22,9 @@ import {
   Paper,
   Grid,
   CircularProgress,
+  Menu,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 import {
   Add,
@@ -30,6 +33,9 @@ import {
   PersonAdd,
   FileDownload,
   Search,
+  Person as PersonIcon,
+  People as PeopleIcon,
+  MoreVert as MoreVertIcon,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -43,6 +49,7 @@ import {
 import { getEvents } from "../services/eventService";
 import { getStudents } from "../services/studentService";
 import { useAuth } from "../contexts/AuthContext";
+import StudentSelectionDialog from "../components/StudentSelectionDialog";
 
 const StudentInEventManagement = () => {
   const [searchParams] = useSearchParams();
@@ -58,6 +65,8 @@ const StudentInEventManagement = () => {
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openBatchDialog, setOpenBatchDialog] = useState(false);
   const [openImportDialog, setOpenImportDialog] = useState(false);
+  const [selectionDialogOpen, setSelectionDialogOpen] = useState(false);
+  const [isMultiSelect, setIsMultiSelect] = useState(false);
 
   // Form states
   const [selectedStudentId, setSelectedStudentId] = useState("");
@@ -65,6 +74,9 @@ const StudentInEventManagement = () => {
   const [csvFile, setCsvFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [studentSearchText, setStudentSearchText] = useState(""); // Tìm kiếm sinh viên
+
+  // Menu state
+  const [anchorEl, setAnchorEl] = useState(null);
 
   const { user, role, organizerId } = useAuth();
   const [error, setError] = useState("");
@@ -250,6 +262,78 @@ const StudentInEventManagement = () => {
     } catch (err) {
       setError("Lỗi khi import CSV: " + (err.message || "Không xác định"));
     }
+  };
+
+  // Handle add students from dialog
+  const handleAddStudents = (studentsToAdd) => {
+    if (Array.isArray(studentsToAdd)) {
+      // Multiple students
+      handleAddMultipleStudentsFromDialog(studentsToAdd);
+    } else {
+      // Single student
+      handleAddSingleStudentFromDialog(studentsToAdd);
+    }
+  };
+
+  const handleAddSingleStudentFromDialog = async (student) => {
+    try {
+      const token = localStorage.getItem("token");
+      await addStudentToEvent(
+        {
+          EventId: selectedEventId,
+          StudentId: student.student_id || student.id,
+          Status: "registered",
+        },
+        token
+      );
+
+      fetchStudentsInEvent();
+      setError("");
+    } catch (err) {
+      setError("Lỗi khi thêm sinh viên: " + (err.message || "Không xác định"));
+    }
+  };
+
+  const handleAddMultipleStudentsFromDialog = async (studentsToAdd) => {
+    try {
+      const token = localStorage.getItem("token");
+      await addMultipleStudentsToEvent(
+        {
+          EventId: selectedEventId,
+          StudentIds: studentsToAdd.map((s) => s.student_id || s.id),
+          Status: "registered",
+        },
+        token
+      );
+
+      fetchStudentsInEvent();
+      setError("");
+    } catch (err) {
+      setError(
+        "Lỗi khi thêm nhiều sinh viên: " + (err.message || "Không xác định")
+      );
+    }
+  };
+
+  // Menu handlers
+  const openAddMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const closeAddMenu = () => {
+    setAnchorEl(null);
+  };
+
+  const openSingleStudentDialog = () => {
+    setIsMultiSelect(false);
+    setSelectionDialogOpen(true);
+    closeAddMenu();
+  };
+
+  const openMultiStudentDialog = () => {
+    setIsMultiSelect(true);
+    setSelectionDialogOpen(true);
+    closeAddMenu();
   };
 
   // Handle status change
@@ -463,19 +547,10 @@ const StudentInEventManagement = () => {
             variant="contained"
             color="primary"
             startIcon={<PersonAdd />}
-            onClick={() => setOpenAddDialog(true)}
+            onClick={openAddMenu}
             sx={{ mr: 1 }}
           >
             Thêm sinh viên
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<Add />}
-            onClick={() => setOpenBatchDialog(true)}
-            sx={{ mr: 1 }}
-          >
-            Thêm nhiều sinh viên
           </Button>
           <Button
             variant="contained"
@@ -796,6 +871,33 @@ const StudentInEventManagement = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Add Menu */}
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeAddMenu}>
+        <MenuItem onClick={openSingleStudentDialog}>
+          <ListItemIcon>
+            <PersonIcon />
+          </ListItemIcon>
+          <ListItemText primary="Thêm một sinh viên" />
+        </MenuItem>
+        <MenuItem onClick={openMultiStudentDialog}>
+          <ListItemIcon>
+            <PeopleIcon />
+          </ListItemIcon>
+          <ListItemText primary="Thêm nhiều sinh viên" />
+        </MenuItem>
+      </Menu>
+
+      {/* Student Selection Dialog */}
+      <StudentSelectionDialog
+        open={selectionDialogOpen}
+        onClose={() => setSelectionDialogOpen(false)}
+        onConfirm={handleAddStudents}
+        title={isMultiSelect ? "Chọn nhiều sinh viên" : "Chọn sinh viên"}
+        multiSelect={isMultiSelect}
+        eventId={selectedEventId}
+        excludeRegistered={true}
+      />
     </Box>
   );
 };

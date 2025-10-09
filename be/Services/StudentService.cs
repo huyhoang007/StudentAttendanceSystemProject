@@ -340,6 +340,12 @@ namespace Student_Attendance_System.Services
             return importDtos;
         }
 
+        public async Task<IEnumerable<StudentDto>> GetStudentsNotInEventAsync(Guid eventId)
+        {
+            var students = await _studentRepository.GetStudentsNotInEventAsync(eventId);
+            return students.Select(MapToDto);
+        }
+
         private static StudentDto MapToDto(Student student)
         {
             return new StudentDto

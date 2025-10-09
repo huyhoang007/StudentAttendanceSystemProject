@@ -11,5 +11,6 @@ namespace Student_Attendance_System.Repositories
         Task<IEnumerable<Student>> SearchAsync(string searchTerm);
         Task<bool> IsStudentCodeUniqueAsync(string studentCode, Guid? excludeStudentId = null);
         Task<bool> IsEmailUniqueAsync(string email, Guid? excludeStudentId = null);
+        Task<IEnumerable<Student>> GetStudentsNotInEventAsync(Guid eventId);
     }
 }

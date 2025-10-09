@@ -344,9 +344,7 @@ const EventSessions = () => {
                                   color={status.color}
                                   size="small"
                                 />
-                                {(role === "organizer" ||
-                                  role === "admin" ||
-                                  role === "student") && (
+                                {(role === "organizer" || role === "admin") && (
                                   <IconButton
                                     size="small"
                                     onClick={(e) => {

@@ -18,5 +18,6 @@ namespace Student_Attendance_System.Services.Interfaces
         Task<StudentImportResultDto> ImportStudentsFromFileAsync(IFormFile file);
         Task<bool> IsStudentCodeUniqueAsync(string studentCode, Guid? excludeStudentId = null);
         Task<bool> IsEmailUniqueAsync(string email, Guid? excludeStudentId = null);
+        Task<IEnumerable<StudentDto>> GetStudentsNotInEventAsync(Guid eventId);
     }
 }
