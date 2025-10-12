@@ -25,7 +25,10 @@ import {
   Menu,
   ListItemIcon,
   ListItemText,
+  List,
+  ListItem,
 } from "@mui/material";
+// ListItemText đã được import ở trên, không import lại
 import {
   Add,
   Delete,
@@ -48,6 +51,11 @@ import {
 } from "../services/studentInEventService";
 import { getEvents } from "../services/eventService";
 import { getStudents } from "../services/studentService";
+import { getSessionsByEvent } from "../services/eventSessionService";
+import {
+  addCheckIn,
+  getCheckInsBySession,
+} from "../services/sessionCheckInService";
 import { useAuth } from "../contexts/AuthContext";
 import StudentSelectionDialog from "../components/StudentSelectionDialog";
 
@@ -168,19 +176,78 @@ const StudentInEventManagement = () => {
     return studentCode.includes(studentSearchText.toLowerCase());
   });
 
-  // Hàm check-in thủ công
+  // State cho check-in thủ công theo phiên
+  const [manualCheckInDialogOpen, setManualCheckInDialogOpen] = useState(false);
+  const [manualCheckInSessions, setManualCheckInSessions] = useState([]);
+  const [manualCheckInStatus, setManualCheckInStatus] = useState({}); // { sessionId: true/false }
+  const [manualCheckInStudentId, setManualCheckInStudentId] = useState(null);
+  const [manualCheckInLoading, setManualCheckInLoading] = useState(false);
+
+  // Hàm mở dialog chọn phiên khi check-in thủ công
   const handleManualCheckIn = async (studentInEventId) => {
     try {
-      console.log("🔄 Manual check-in for student:", studentInEventId);
-
-      // Cập nhật trạng thái thành "attended"
-      await handleStatusChange(studentInEventId, "attended");
-
-      console.log("✅ Manual check-in successful");
-      alert("Check-in thành công!");
+      setManualCheckInStudentId(studentInEventId);
+      setManualCheckInLoading(true);
+      // Lấy danh sách phiên của sự kiện
+      const sessions = await getSessionsByEvent(selectedEventId);
+      setManualCheckInSessions(sessions);
+      // Lấy trạng thái check-in của sinh viên cho từng phiên
+      const statusObj = {};
+      for (const session of sessions) {
+        const sessionId = session.sessionId || session.SessionId;
+        try {
+          const checkIns = await getCheckInsBySession(sessionId);
+          // Kiểm tra xem có check-in nào của studentInEventId này không
+          statusObj[sessionId] = checkIns.some(
+            (ci) =>
+              (ci.studentInEventId || ci.StudentInEventId) === studentInEventId
+          );
+        } catch (e) {
+          statusObj[sessionId] = false;
+        }
+      }
+      setManualCheckInStatus(statusObj);
+      setManualCheckInDialogOpen(true);
     } catch (error) {
-      console.error("❌ Error manual check-in:", error);
-      setError("Không thể check-in thủ công.");
+      setError("Không thể tải danh sách phiên cho check-in thủ công.");
+    } finally {
+      setManualCheckInLoading(false);
+    }
+  };
+
+  // Hàm thực hiện check-in thủ công cho phiên đã chọn
+  const handleManualCheckInSession = async (session) => {
+    try {
+      setManualCheckInLoading(true);
+      const sessionId = session.sessionId || session.SessionId;
+      const studentInEventId = manualCheckInStudentId;
+      if (!sessionId || !studentInEventId) {
+        setError("Thiếu sessionId hoặc studentInEventId khi check-in thủ công.");
+        setManualCheckInLoading(false);
+        return;
+      }
+      await addCheckIn({
+        sessionId,
+        studentInEventId,
+        method: "manual",
+      });
+      await handleStatusChange(studentInEventId, "attended");
+      await handleManualCheckIn(studentInEventId);
+      fetchStudentsInEvent();
+      setError("");
+      alert("Check-in thủ công thành công cho phiên đã chọn!");
+    } catch (error) {
+      // Nếu đã điểm danh rồi thì chỉ cảnh báo, không setError
+      if (error && error.message && error.message.includes("already checked in")) {
+        alert("Sinh viên đã được điểm danh cho phiên này!");
+        setError("");
+      } else {
+        setError("Lỗi khi check-in thủ công: " + (error?.message || "Không xác định"));
+        alert("Lỗi khi check-in thủ công: " + (error?.message || "Không xác định"));
+      }
+      console.error("[ERROR] Manual check-in:", error);
+    } finally {
+      setManualCheckInLoading(false);
     }
   };
 
@@ -652,35 +719,95 @@ const StudentInEventManagement = () => {
                       </FormControl>
                     </TableCell>
                     <TableCell align="center">
-                      {(item.Status || item.status) === "registered" ? (
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          color="primary"
-                          onClick={() =>
-                            handleManualCheckIn(
-                              item.StudentInEventId || item.studentInEventId
-                            )
-                          }
-                        >
-                          Check-in
-                        </Button>
-                      ) : (item.Status || item.status) === "attended" ? (
-                        <Chip
-                          label="Đã check-in"
-                          size="small"
-                          color="success"
-                          variant="outlined"
-                        />
-                      ) : (
-                        <Chip
-                          label="Không khả dụng"
-                          size="small"
-                          color="default"
-                          variant="outlined"
-                        />
-                      )}
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        color="primary"
+                        onClick={() =>
+                          handleManualCheckIn(
+                            item.StudentInEventId || item.studentInEventId
+                          )
+                        }
+                      >
+                        Check-in
+                      </Button>
                     </TableCell>
+                    {/* Dialog chọn phiên khi check-in thủ công */}
+                    <Dialog
+                      open={manualCheckInDialogOpen}
+                      onClose={() => setManualCheckInDialogOpen(false)}
+                    >
+                      <DialogTitle>Chọn phiên để check-in thủ công</DialogTitle>
+                      <DialogContent>
+                        {manualCheckInLoading ? (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              minHeight: 100,
+                            }}
+                          >
+                            <CircularProgress />
+                          </Box>
+                        ) : manualCheckInSessions.length === 0 ? (
+                          <Typography>
+                            Không có phiên nào cho sự kiện này.
+                          </Typography>
+                        ) : (
+                          <List>
+                            {manualCheckInSessions.map((session) => {
+                              const sessionId =
+                                session.sessionId || session.SessionId;
+                              const checkedIn = manualCheckInStatus[sessionId];
+                              return (
+                                <ListItem key={sessionId}>
+                                  <ListItemText
+                                    primary={session.title || session.Title}
+                                    secondary={`⏰ ${
+                                      session.startTime || session.StartTime
+                                    } - ${session.endTime || session.EndTime}`}
+                                  />
+                                  {checkedIn ? (
+                                    <Chip
+                                      label="Đã check-in"
+                                      color="success"
+                                      size="small"
+                                    />
+                                  ) : (
+                                    <Button
+                                      variant="outlined"
+                                      size="small"
+                                      color="primary"
+                                      onClick={() =>
+                                        handleManualCheckInSession(session)
+                                      }
+                                      disabled={
+                                        manualCheckInLoading || checkedIn
+                                      }
+                                      title={
+                                        checkedIn
+                                          ? "Sinh viên đã check-in phiên này (QR hoặc thủ công)"
+                                          : ""
+                                      }
+                                    >
+                                      Check-in
+                                    </Button>
+                                  )}
+                                </ListItem>
+                              );
+                            })}
+                          </List>
+                        )}
+                      </DialogContent>
+                      <DialogActions>
+                        <Button
+                          onClick={() => setManualCheckInDialogOpen(false)}
+                        >
+                          Đóng
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
                     <TableCell align="right">
                       <IconButton
                         color="error"

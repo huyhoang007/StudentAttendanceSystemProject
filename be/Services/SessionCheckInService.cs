@@ -59,67 +59,59 @@ namespace Student_Attendance_System.Services
             // Validate session exists
             var session = await _sessionRepository.GetByIdAsync(createDto.SessionId);
             if (session == null)
-            {
                 throw new KeyNotFoundException($"Session with ID {createDto.SessionId} not found.");
-            }
 
             // Validate student in event exists
             var studentInEvent = await _studentInEventRepository.GetByIdAsync(createDto.StudentInEventId);
             if (studentInEvent == null)
-            {
                 throw new KeyNotFoundException($"Student registration with ID {createDto.StudentInEventId} not found.");
-            }
 
             // Validate check-in time if configured
             var now = DateTime.UtcNow;
             Console.WriteLine($"[DEBUG] Current UTC time: {now}");
             Console.WriteLine($"[DEBUG] Session CheckinStartTime: {session.CheckinStartTime}");
             Console.WriteLine($"[DEBUG] Session CheckinEndTime: {session.CheckinEndTime}");
-            
-            // TEMPORARILY DISABLED FOR TESTING
-            /* 
-            if (session.CheckinStartTime.HasValue && session.CheckinEndTime.HasValue)
-            {
-                Console.WriteLine($"[DEBUG] Comparing: {now} < {session.CheckinStartTime} = {now < session.CheckinStartTime}");
-                Console.WriteLine($"[DEBUG] Comparing: {now} > {session.CheckinEndTime} = {now > session.CheckinEndTime}");
-                
-                if (now < session.CheckinStartTime || now > session.CheckinEndTime)
-                {
-                    throw new InvalidOperationException($"Check-in is not allowed at this time for this session. Current time: {now}, Check-in window: {session.CheckinStartTime} - {session.CheckinEndTime}");
-                }
-            }
-            */
 
             // Check if student is already checked in
             var existingCheckIn = await _checkInRepository.GetBySessionAndStudentInEventAsync(createDto.SessionId, createDto.StudentInEventId);
             if (existingCheckIn != null)
-            {
                 throw new InvalidOperationException("Student is already checked in for this session.");
-            }
 
             var checkIn = new SessionCheckIn
             {
+                // KHÔNG gán CheckinId, để BE tự sinh Guid mới
                 SessionId = createDto.SessionId,
                 StudentInEventId = createDto.StudentInEventId,
                 CheckinTime = now,
                 Method = createDto.Method,
                 Location = createDto.Location
             };
-            var createdCheckIn = await _checkInRepository.AddAsync(checkIn);
+            // Nếu location bị null hoặc rỗng, tự động lấy từ session
+            if (string.IsNullOrEmpty(checkIn.Location))
+            {
+                Console.WriteLine($"[DEBUG] Session.Location: {session.Location}");
+                checkIn.Location = session.Location;
+            }
 
-            // Update student registration status to attended if not already
+            // ✅ Chỉ thêm MỘT lần
+            var createdCheckIn = await _checkInRepository.AddAsync(checkIn);
+            Console.WriteLine($"[DEBUG] New CheckinId: {checkIn.CheckinId}");
+
+            // Cập nhật trạng thái sinh viên
             if (studentInEvent.Status != "attended")
             {
                 studentInEvent.Status = "attended";
                 await _studentInEventRepository.UpdateAsync(studentInEvent);
             }
 
-            var addedCheckIn = await _checkInRepository.AddAsync(checkIn);
-            
-            // Reload with related data
+            // ✅ Không thêm lại nữa!
+            // var addedCheckIn = await _checkInRepository.AddAsync(checkIn);
+
+            // Lấy lại dữ liệu đầy đủ
             var checkInWithData = await _checkInRepository.GetByIdAsync(createdCheckIn.CheckinId);
             return MapToDto(checkInWithData!);
         }
+
 
         public async Task<SessionCheckInDto> QRCheckInAsync(QRCheckInDto qrDto)
         {
@@ -215,7 +207,7 @@ namespace Student_Attendance_System.Services
             // Optionally update student status back to Registered if no other check-ins exist
             var studentCheckIns = await _checkInRepository.GetByEventIdAsync(checkIn.EventSession.EventId);
             var hasOtherCheckIns = studentCheckIns.Any(ci => ci.StudentInEventId == checkIn.StudentInEventId && ci.CheckinId != id);
-            
+
             if (!hasOtherCheckIns)
             {
                 var studentInEvent = await _studentInEventRepository.GetByIdAsync(checkIn.StudentInEventId);

@@ -83,17 +83,7 @@ const QRCodeGenerator = ({ session, event }) => {
       const sessionId = session.sessionId || session.SessionId;
       const eventId = event.eventId || event.EventId;
 
-      const autoCheckinUrl = `${baseUrl}/checkin?sessionId=${sessionId}&eventId=${eventId}&sessionTitle=${encodeURIComponent(
-        session.title || session.Title
-      )}&eventTitle=${encodeURIComponent(
-        event.title || event.Title
-      )}&startTime=${encodeURIComponent(
-        session.startTime || session.StartTime
-      )}&endTime=${encodeURIComponent(
-        session.endTime || session.EndTime
-      )}&location=${encodeURIComponent(
-        session.location || session.Location || ""
-      )}&timestamp=${new Date().toISOString()}&type=attendance_checkin&autoTrigger=true`;
+      const autoCheckinUrl = `${baseUrl}/checkin?sessionId=${sessionId}&eventId=${eventId}`;
 
       setQrData(autoCheckinUrl);
       setError("");
@@ -232,7 +222,6 @@ const QRCodeGenerator = ({ session, event }) => {
               align="center"
               sx={{ fontWeight: "bold", mb: 2 }}
             >
-              🔗 Hoặc gửi link dưới đây cho sinh viên:
             </Typography>
 
             {/* QR Data Display with Copy Button */}

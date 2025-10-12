@@ -53,7 +53,7 @@ const Report = () => {
     user: user,
     role: role,
     userType: typeof user,
-    roleType: typeof role
+    roleType: typeof role,
   });
 
   // Debug user object structure in detail
@@ -65,7 +65,7 @@ const Report = () => {
       organizerId: user.organizerId,
       OrganizerId: user.OrganizerId,
       university: user.university,
-      University: user.University
+      University: user.University,
     });
   }
 
@@ -73,7 +73,7 @@ const Report = () => {
   useEffect(() => {
     console.log("Universities state changed:", {
       count: universities.length,
-      universities: universities
+      universities: universities,
     });
   }, [universities]);
 
@@ -150,33 +150,34 @@ const Report = () => {
         role: role,
         userUniversityId: user?.universityId,
         userUniversityID: user?.UniversityId,
-        userOrgId: user?.organizerId
+        userOrgId: user?.organizerId,
       });
-      
+
       const res = await getUniversities();
       console.log("All universities from API:", res);
-      
+
       let filteredUniversities = [...res];
-      
+
       // SECURITY: If user is organizer, only show their university
-      if (role === 'organizer' && user?.universityId) {
-        filteredUniversities = res.filter(uni => 
-          (uni.universityId || uni.id) === user.universityId
+      if (role === "organizer" && user?.universityId) {
+        filteredUniversities = res.filter(
+          (uni) => (uni.universityId || uni.id) === user.universityId
         );
         console.log("Organizer university filter applied:", {
           userUniversityId: user.universityId,
           allUniversities: res.length,
           filteredUniversities: filteredUniversities.length,
-          filtered: filteredUniversities
+          filtered: filteredUniversities,
         });
       } else {
         console.log("No university filter applied:", {
           role: role,
           hasUniversityId: !!user?.universityId,
-          reason: role !== 'organizer' ? 'Not organizer role' : 'No universityId'
+          reason:
+            role !== "organizer" ? "Not organizer role" : "No universityId",
         });
       }
-      
+
       setUniversities(filteredUniversities);
     } catch (error) {
       console.error("Error fetching universities:", error);
@@ -219,28 +220,20 @@ const Report = () => {
     // Check event filter - TEMPORARILY DISABLED FOR TESTING
     // Event filter is disabled to debug the issue
     // Will re-enable after fixing the dropdown data
-    
+
     /* Event filter code - commented out
     if (filters.eventId) {
       // Event filtering logic here
     }
     */
 
-    // Check university filter - TEMPORARILY DISABLED 
-    // Data doesn't contain university info, so this filter always fails
-    /*
+    // Filter theo trường đại học nếu được chọn
     if (
       filters.universityId &&
       (item.universityId || item.university_id) !== filters.universityId
     ) {
-      console.log("University filter failed:", {
-        filterUniversityId: filters.universityId,
-        itemUniversityId: item.universityId,
-        item_university_id: item.university_id,
-      });
       return false;
     }
-    */
 
     return true;
   });
