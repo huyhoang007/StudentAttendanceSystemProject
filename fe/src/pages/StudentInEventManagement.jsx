@@ -222,7 +222,9 @@ const StudentInEventManagement = () => {
       const sessionId = session.sessionId || session.SessionId;
       const studentInEventId = manualCheckInStudentId;
       if (!sessionId || !studentInEventId) {
-        setError("Thiếu sessionId hoặc studentInEventId khi check-in thủ công.");
+        setError(
+          "Thiếu sessionId hoặc studentInEventId khi check-in thủ công."
+        );
         setManualCheckInLoading(false);
         return;
       }
@@ -238,12 +240,20 @@ const StudentInEventManagement = () => {
       alert("Check-in thủ công thành công cho phiên đã chọn!");
     } catch (error) {
       // Nếu đã điểm danh rồi thì chỉ cảnh báo, không setError
-      if (error && error.message && error.message.includes("already checked in")) {
+      if (
+        error &&
+        error.message &&
+        error.message.includes("already checked in")
+      ) {
         alert("Sinh viên đã được điểm danh cho phiên này!");
         setError("");
       } else {
-        setError("Lỗi khi check-in thủ công: " + (error?.message || "Không xác định"));
-        alert("Lỗi khi check-in thủ công: " + (error?.message || "Không xác định"));
+        setError(
+          "Lỗi khi check-in thủ công: " + (error?.message || "Không xác định")
+        );
+        alert(
+          "Lỗi khi check-in thủ công: " + (error?.message || "Không xác định")
+        );
       }
       console.error("[ERROR] Manual check-in:", error);
     } finally {

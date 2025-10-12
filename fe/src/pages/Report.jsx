@@ -194,38 +194,31 @@ const Report = () => {
 
   // Filter data based on selected filters
   const filteredData = data.filter((item) => {
-    const checkinTime =
-      item.checkinTime || item.checkin_time || item.CheckinTime;
-
-    // Debug logging
-    console.log("Filter debug:", {
-      item: item,
-      filters: filters,
-      events: events,
-      eventsCount: events?.length || 0,
-      eventCheck: !filters.eventId || "will check below",
-      universityCheck:
-        !filters.universityId ||
-        (item.universityId || item.university_id) === filters.universityId,
-    });
-
-    if (
-      filters.startDate &&
-      new Date(checkinTime) < new Date(filters.startDate)
-    )
-      return false;
-    if (filters.endDate && new Date(checkinTime) > new Date(filters.endDate))
-      return false;
-
-    // Check event filter - TEMPORARILY DISABLED FOR TESTING
-    // Event filter is disabled to debug the issue
-    // Will re-enable after fixing the dropdown data
-
-    /* Event filter code - commented out
-    if (filters.eventId) {
-      // Event filtering logic here
+    const checkinTime = item.checkinTime || item.checkin_time || item.CheckinTime;
+    // Chuẩn hóa ngày về yyyy-mm-dd để so sánh
+    const checkinDate = new Date(checkinTime).toISOString().slice(0, 10);
+    if (filters.startDate) {
+      if (checkinDate < filters.startDate) return false;
     }
-    */
+    if (filters.endDate) {
+      if (checkinDate > filters.endDate) return false;
+    }
+
+    // Lọc theo sự kiện nếu được chọn (dựa vào sessionId đối chiếu với eventId)
+    if (filters.eventId) {
+      // Tìm event chứa sessionId này
+      const event = events.find(e => {
+        // Nếu event có mảng sessions
+        if (Array.isArray(e.sessions)) {
+          return e.sessions.some(s => s.sessionId === item.sessionId || s.sessionId === item.sessionId);
+        }
+        // Nếu eventId trùng với sessionId (trường hợp đặc biệt)
+        return e.eventId === item.sessionId;
+      });
+      if (!event || event.eventId !== filters.eventId) {
+        return false;
+      }
+    }
 
     // Filter theo trường đại học nếu được chọn
     if (
@@ -382,7 +375,7 @@ const Report = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
-              <InputLabel>Sự kiện</InputLabel>
+              <InputLabel sx={{ fontSize: '1.2rem', fontWeight: 600 }}>Sự kiện</InputLabel>
               <Select
                 value={filters.eventId}
                 label="Sự kiện"
@@ -401,7 +394,7 @@ const Report = () => {
           </Grid>
           <Grid item xs={12} sm={6} md={3}>
             <FormControl fullWidth>
-              <InputLabel>Trường</InputLabel>
+              <InputLabel sx={{ fontSize: '1.2rem', fontWeight: 600 }}>Trường</InputLabel>
               <Select
                 value={filters.universityId}
                 label="Trường"
