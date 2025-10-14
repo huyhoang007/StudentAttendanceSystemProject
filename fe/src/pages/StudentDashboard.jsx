@@ -30,18 +30,7 @@ const StudentDashboard = () => {
         setError(null);
 
         const mockCheckIns = [
-          {
-            id: 1,
-            eventName: "Hội thảo khoa học",
-            checkInTime: "2025-01-05T08:30:00Z",
-            status: "present",
-          },
-          {
-            id: 2,
-            eventName: "Workshop kỹ năng mềm",
-            checkInTime: "2025-01-03T14:15:00Z",
-            status: "present",
-          },
+          
         ];
 
         setCheckIns(mockCheckIns);

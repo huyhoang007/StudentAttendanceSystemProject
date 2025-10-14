@@ -24,7 +24,6 @@ import {
   LocationOn,
   Description,
   Event as EventIcon,
-  Person,
   QrCode,
   CheckCircle,
 } from "@mui/icons-material";
@@ -43,65 +42,35 @@ const SessionDetails = () => {
     const fetchSessionDetails = async () => {
       try {
         setLoading(true);
-        console.log("🔍 SessionDetails - Loading session with ID:", sessionId);
-
-        // Lấy thông tin phiên
-        console.log("📡 Calling getSession API...");
         const sessionData = await getSession(sessionId);
-        console.log("✅ Session data received:", sessionData);
         setSession(sessionData);
 
-        // Lấy thông tin sự kiện nếu có eventId
         if (sessionData?.eventId) {
-          try {
-            console.log(
-              "📡 Calling getEvent API with eventId:",
-              sessionData.eventId
-            );
-            const eventData = await getEvent(sessionData.eventId);
-            console.log("✅ Event data received:", eventData);
-            setEvent(eventData);
-          } catch (eventError) {
-            console.warn("⚠️ Could not load event details:", eventError);
-          }
+          const eventData = await getEvent(sessionData.eventId);
+          setEvent(eventData);
         }
       } catch (err) {
         setError("Không thể tải thông tin phiên");
-        console.error("❌ Error fetching session details:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (sessionId) {
-      fetchSessionDetails();
-    } else {
-      console.error("❌ No sessionId provided");
-      setError("Không có ID phiên");
-      setLoading(false);
-    }
+    if (sessionId) fetchSessionDetails();
   }, [sessionId]);
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleString("vi-VN", {
       year: "numeric",
       month: "long",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
 
-  const handleBackToEvents = () => {
-    navigate("/student-registered-events");
-  };
-
-  const handleBackToEvent = () => {
-    navigate("/student-registered-events");
-  };
+  const handleBackToEvents = () => navigate("/student-registered-events");
 
   const handleCheckIn = () => {
-    // Chuyển đến trang điểm danh với sessionId
     if (session?.eventId) {
       navigate(`/checkin?eventId=${session.eventId}&sessionId=${sessionId}`);
     } else {
@@ -109,135 +78,139 @@ const SessionDetails = () => {
     }
   };
 
-  if (loading) {
+  const isSessionActive = () => {
+    const now = new Date();
+    return (
+      now >= new Date(session.startTime) && now <= new Date(session.endTime)
+    );
+  };
+
+  const getSessionStatus = () => {
+    const now = new Date();
+    const start = new Date(session.startTime);
+    const end = new Date(session.endTime);
+    if (now < start) return { text: "Chưa bắt đầu", color: "info" };
+    if (now > end) return { text: "Đã kết thúc", color: "default" };
+    return { text: "Đang diễn ra", color: "success" };
+  };
+
+  if (loading)
     return (
       <Box
         sx={{
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "60vh",
+          minHeight: "70vh",
+          background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
         }}
       >
         <CircularProgress />
       </Box>
     );
-  }
 
-  if (error) {
+  if (error)
     return (
-      <Box sx={{ p: 3 }}>
+      <Box
+        sx={{
+          p: 4,
+          textAlign: "center",
+          background: "linear-gradient(135deg, #fce4ec 0%, #f3e5f5 100%)",
+          minHeight: "70vh",
+        }}
+      >
         <Alert severity="error">{error}</Alert>
         <Button
           variant="outlined"
-          onClick={handleBackToEvents}
           sx={{ mt: 2 }}
           startIcon={<ArrowBack />}
+          onClick={handleBackToEvents}
         >
           Quay lại sự kiện đã đăng ký
         </Button>
       </Box>
     );
-  }
-
-  if (!session) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="info">Không tìm thấy thông tin phiên</Alert>
-        <Button
-          variant="outlined"
-          onClick={handleBackToEvents}
-          sx={{ mt: 2 }}
-          startIcon={<ArrowBack />}
-        >
-          Quay lại sự kiện đã đăng ký
-        </Button>
-      </Box>
-    );
-  }
-
-  const isSessionActive = () => {
-    const now = new Date();
-    const startTime = new Date(session.startTime);
-    const endTime = new Date(session.endTime);
-    return now >= startTime && now <= endTime;
-  };
-
-  const getSessionStatus = () => {
-    const now = new Date();
-    const startTime = new Date(session.startTime);
-    const endTime = new Date(session.endTime);
-
-    if (now < startTime) return { text: "Chưa bắt đầu", color: "info" };
-    if (now > endTime) return { text: "Đã kết thúc", color: "default" };
-    return { text: "Đang diễn ra", color: "success" };
-  };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, mx: "auto" }}>
+    <Box
+      sx={{
+        p: 3,
+        maxWidth: 1100,
+        mx: "auto",
+        background:
+          "linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 40%, #ede7f6 100%)",
+        borderRadius: 4,
+        boxShadow: "0 0 40px rgba(0,0,0,0.05)",
+        animation: "fadeIn 0.6s ease-in-out",
+        "@keyframes fadeIn": {
+          from: { opacity: 0, transform: "translateY(20px)" },
+          to: { opacity: 1, transform: "translateY(0)" },
+        },
+      }}
+    >
       {/* Header */}
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <Button
           variant="outlined"
-          onClick={handleBackToEvent}
+          onClick={handleBackToEvents}
           startIcon={<ArrowBack />}
-          sx={{ mr: 2 }}
+          sx={{
+            mr: 2,
+            borderRadius: 3,
+            borderColor: "#90caf9",
+            "&:hover": {
+              background: "linear-gradient(45deg, #64b5f6 30%, #81c784 90%)",
+              color: "white",
+            },
+          }}
         >
-          Quay lại sự kiện đã đăng ký
+          Quay lại sự kiện
         </Button>
         <Typography
           variant="h4"
           fontWeight={700}
           sx={{
-            color: "#1976d2",
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
+            color: "transparent",
+            backgroundClip: "text",
+            backgroundImage: "linear-gradient(45deg, #1976d2, #9c27b0)",
           }}
         >
-          <Schedule fontSize="large" />
           Chi tiết phiên
         </Typography>
       </Box>
 
       <Grid container spacing={3}>
-        {/* Thông tin chính của phiên */}
-        <Grid item xs={12} lg={8}>
-          <Card>
+        {/* Phần chính */}
+        <Grid item xs={12} md={8}>
+          <Card
+            sx={{
+              borderRadius: 4,
+              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+              overflow: "hidden",
+            }}
+          >
             <CardContent sx={{ p: 3 }}>
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "start",
+                  alignItems: "center",
                   mb: 2,
                 }}
               >
-                <Typography
-                  variant="h5"
-                  fontWeight={600}
-                  sx={{ color: "#1976d2" }}
-                >
-                  {session.title || "Phiên không có tên"}
+                <Typography variant="h5" fontWeight={600} color="primary">
+                  {session.title}
                 </Typography>
                 <Chip
                   label={getSessionStatus().text}
                   color={getSessionStatus().color}
-                  sx={{ fontWeight: 500 }}
                 />
               </Box>
 
-              {/* Thông tin thời gian và địa điểm */}
-              <Grid container spacing={3} sx={{ mb: 3 }}>
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 2,
-                    }}
-                  >
+              {/* Thời gian & địa điểm */}
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Schedule color="action" />
                     <Box>
                       <Typography variant="body2" color="text.secondary">
@@ -249,16 +222,8 @@ const SessionDetails = () => {
                     </Box>
                   </Box>
                 </Grid>
-
-                <Grid item xs={12} md={6}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 2,
-                    }}
-                  >
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <Schedule color="action" />
                     <Box>
                       <Typography variant="body2" color="text.secondary">
@@ -270,40 +235,35 @@ const SessionDetails = () => {
                     </Box>
                   </Box>
                 </Grid>
-
                 {session.location && (
                   <Grid item xs={12}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                       <LocationOn color="action" />
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          Địa điểm
-                        </Typography>
-                        <Typography variant="body1" fontWeight={500}>
-                          {session.location}
-                        </Typography>
-                      </Box>
+                      <Typography variant="body1" fontWeight={500}>
+                        {session.location}
+                      </Typography>
                     </Box>
                   </Grid>
                 )}
               </Grid>
 
+              {/* Mô tả */}
               {session.description && (
                 <>
                   <Divider sx={{ my: 3 }} />
-                  <Box
+                  <Typography
+                    variant="h6"
+                    fontWeight={600}
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 1,
-                      mb: 2,
+                      mb: 1,
+                      color: "transparent",
+                      backgroundClip: "text",
+                      backgroundImage:
+                        "linear-gradient(45deg, #6a1b9a, #1976d2)",
                     }}
                   >
-                    <Description color="action" />
-                    <Typography variant="h6" fontWeight={600}>
-                      Mô tả phiên
-                    </Typography>
-                  </Box>
+                    Mô tả phiên
+                  </Typography>
                   <Typography variant="body1" sx={{ lineHeight: 1.7 }}>
                     {session.description}
                   </Typography>
@@ -312,66 +272,72 @@ const SessionDetails = () => {
 
               {/* Nút điểm danh */}
               {isSessionActive() && (
-                <>
-                  <Divider sx={{ my: 3 }} />
-                  <Box sx={{ textAlign: "center" }}>
-                    <Button
-                      variant="contained"
-                      size="large"
-                      onClick={handleCheckIn}
-                      startIcon={<QrCode />}
-                      sx={{
-                        px: 4,
-                        py: 1.5,
-                        fontSize: "1.1rem",
+                <Box sx={{ textAlign: "center", mt: 4 }}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    onClick={handleCheckIn}
+                    startIcon={<QrCode />}
+                    sx={{
+                      borderRadius: 4,
+                      px: 5,
+                      py: 1.5,
+                      fontSize: "1.1rem",
+                      textTransform: "none",
+                      background:
+                        "linear-gradient(45deg, #43a047 0%, #66bb6a 100%)",
+                      boxShadow: "0 4px 15px 0 rgba(76, 175, 80, 0.4)",
+                      transition: "0.3s",
+                      "&:hover": {
+                        transform: "scale(1.05)",
                         background:
-                          "linear-gradient(45deg, #4CAF50 30%, #66BB6A 90%)",
-                        boxShadow: "0 3px 5px 2px rgba(76, 175, 80, .3)",
-                      }}
-                    >
-                      Điểm danh ngay
-                    </Button>
-                  </Box>
-                </>
+                          "linear-gradient(45deg, #2e7d32 0%, #43a047 100%)",
+                      },
+                    }}
+                  >
+                    Điểm danh ngay
+                  </Button>
+                </Box>
               )}
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Thông tin sự kiện (nếu có) */}
-        <Grid item xs={12} lg={4}>
+        {/* Sự kiện & lưu ý */}
+        <Grid item xs={12} md={4}>
           {event && (
-            <Card>
+            <Card
+              sx={{
+                mb: 2,
+                borderRadius: 4,
+                boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
+              }}
+            >
               <CardContent sx={{ p: 3 }}>
                 <Typography variant="h6" fontWeight={600} mb={2}>
                   Thuộc sự kiện
                 </Typography>
-
                 <List sx={{ p: 0 }}>
-                  <ListItem sx={{ px: 0 }}>
+                  <ListItem disablePadding>
                     <ListItemAvatar>
                       <Avatar sx={{ bgcolor: "#1976d2" }}>
                         <EventIcon />
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
-                      primary={
-                        <Typography variant="body1" fontWeight={500}>
-                          {event.title}
-                        </Typography>
-                      }
+                      primary={event.title}
                       secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
+                        <>
+                          <Typography variant="body2">
                             📅 {formatDate(event.startDate)}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2">
                             📍 {event.location}
                           </Typography>
-                          <Typography variant="body2" color="text.secondary">
+                          <Typography variant="body2">
                             👤 {event.organizerName}
                           </Typography>
-                        </Box>
+                        </>
                       }
                     />
                   </ListItem>
@@ -380,42 +346,33 @@ const SessionDetails = () => {
             </Card>
           )}
 
-          {/* Thông tin hữu ích */}
-          <Card sx={{ mt: 2 }}>
+          <Card
+            sx={{
+              borderRadius: 4,
+              background: "linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%)",
+              boxShadow: "0 6px 15px rgba(0,0,0,0.08)",
+            }}
+          >
             <CardContent sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={600} mb={2}>
                 Lưu ý
               </Typography>
-
               <List sx={{ p: 0 }}>
-                <ListItem sx={{ px: 0 }}>
+                <ListItem>
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "#ff9800", width: 32, height: 32 }}>
+                    <Avatar sx={{ bgcolor: "#ffb74d" }}>
                       <QrCode fontSize="small" />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2">
-                        Điểm danh chỉ khả dụng trong thời gian phiên diễn ra
-                      </Typography>
-                    }
-                  />
+                  <ListItemText primary="Điểm danh chỉ khả dụng trong thời gian phiên diễn ra" />
                 </ListItem>
-
-                <ListItem sx={{ px: 0 }}>
+                <ListItem>
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "#4caf50", width: 32, height: 32 }}>
+                    <Avatar sx={{ bgcolor: "#66bb6a" }}>
                       <CheckCircle fontSize="small" />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2">
-                        Hãy đến đúng giờ để không bỏ lỡ nội dung quan trọng
-                      </Typography>
-                    }
-                  />
+                  <ListItemText primary="Hãy đến đúng giờ để không bỏ lỡ nội dung quan trọng" />
                 </ListItem>
               </List>
             </CardContent>

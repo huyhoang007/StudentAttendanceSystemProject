@@ -104,7 +104,7 @@ const AdminUserManagement = () => {
     if (user && !canModifyUser(user)) {
       setSnackbar({
         open: true,
-        message: "Bạn không có quyền chỉnh sửa admin khác!",
+        message: "Bạn không có quyền chỉnh sửa Quản trị viên khác!",
         severity: "error",
       });
       return;
@@ -157,7 +157,7 @@ const AdminUserManagement = () => {
       if ((form.role === "organizer" || form.role === "student") && !form.universityId) {
         setSnackbar({
           open: true,
-          message: "Vui lòng chọn trường đại học cho organizer/student!",
+          message: "Vui lòng chọn trường đại học cho Người Tổ Chức/Sinh Viên!",
           severity: "error",
         });
         return;
@@ -179,14 +179,14 @@ const AdminUserManagement = () => {
         await updateUser(editId, form);
         setSnackbar({
           open: true,
-          message: "Cập nhật user thành công!",
+          message: "Cập nhật người dùng thành công!",
           severity: "success",
         });
       } else {
         await createUser(form);
         setSnackbar({
           open: true,
-          message: "Tạo user thành công!",
+          message: "Tạo người dùng thành công!",
           severity: "success",
         });
       }
@@ -207,18 +207,18 @@ const AdminUserManagement = () => {
     if (!canModifyUser(targetUser)) {
       setSnackbar({
         open: true,
-        message: "Bạn không có quyền xóa admin khác!",
+        message: "Bạn không có quyền xóa Quản trị viên khác!",
         severity: "error",
       });
       return;
     }
 
-    if (window.confirm("Bạn có chắc muốn xóa user này?")) {
+    if (window.confirm("Bạn có chắc muốn xóa người dùng này?")) {
       try {
         await deleteUser(userId);
         setSnackbar({
           open: true,
-          message: "Xóa user thành công!",
+          message: "Xóa người dùng thành công!",
           severity: "success",
         });
         fetchUsers();
@@ -233,18 +233,18 @@ const AdminUserManagement = () => {
   };
 
   const handleResetPassword = async (userId) => {
-    if (window.confirm("Bạn có chắc muốn reset mật khẩu của user này?")) {
+    if (window.confirm("Bạn có chắc muốn đặt lại mật khẩu của người dùng này?")) {
       try {
         const result = await resetPassword(userId);
         setSnackbar({
           open: true,
-          message: `Reset thành công! Mật khẩu mới: ${result.newPassword}`,
+          message: `Đặt lại thành công! Mật khẩu mới: ${result.newPassword}`,
           severity: "success",
         });
       } catch (error) {
         setSnackbar({
           open: true,
-          message: `Lỗi reset: ${error.message}`,
+          message: `Lỗi đặt lại: ${error.message}`,
           severity: "error",
         });
       }
@@ -317,7 +317,7 @@ const AdminUserManagement = () => {
                 <Typography variant="h4" fontWeight={700}>
                   {stats.total}
                 </Typography>
-                <Typography variant="body2">Tổng Users</Typography>
+                <Typography variant="body2">Tổng Người dùng</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -331,7 +331,7 @@ const AdminUserManagement = () => {
                 <Typography variant="h4" fontWeight={700}>
                   {stats.admins}
                 </Typography>
-                <Typography variant="body2">Admins</Typography>
+                <Typography variant="body2">Quản Trị Viên</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -345,7 +345,7 @@ const AdminUserManagement = () => {
                 <Typography variant="h4" fontWeight={700}>
                   {stats.organizers}
                 </Typography>
-                <Typography variant="body2">Organizers</Typography>
+                <Typography variant="body2">Người Tổ Chức</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -359,21 +359,7 @@ const AdminUserManagement = () => {
                 <Typography variant="h4" fontWeight={700}>
                   {stats.students}
                 </Typography>
-                <Typography variant="body2">Students</Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
-            <Card
-              sx={{
-                background: "linear-gradient(135deg, #fa709a 0%, #fee140 100%)",
-              }}
-            >
-              <CardContent sx={{ color: "white", textAlign: "center" }}>
-                <Typography variant="h4" fontWeight={700}>
-                  {stats.active}
-                </Typography>
-                <Typography variant="body2">Đang hoạt động</Typography>
+                <Typography variant="body2">Sinh Viên</Typography>
               </CardContent>
             </Card>
           </Grid>
@@ -390,7 +376,7 @@ const AdminUserManagement = () => {
             }}
             onClick={() => handleOpen()}
           >
-            Tạo User Mới
+            Tạo Người dùng Mới
           </Button>
           <Button
             variant="outlined"
@@ -519,9 +505,9 @@ const AdminUserManagement = () => {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 sx={{ borderRadius: 2, background: "#f8fafc" }}
               >
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="organizer">Organizer</MenuItem>
-                <MenuItem value="student">Student</MenuItem>
+                <MenuItem value="admin">Quản Trị Viên</MenuItem>
+                <MenuItem value="organizer">Người Tổ Chức</MenuItem>
+                <MenuItem value="student">Sinh Viên</MenuItem>
               </Select>
             </FormControl>
             

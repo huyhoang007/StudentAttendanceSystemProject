@@ -37,7 +37,8 @@ import {
   updateEvent,
   deleteEvent,
 } from "../services/eventService";
-import { getOrganizerById } from "../services/organizerService";
+import { getOrganizerById, getOrganizers } from "../services/organizerService";
+import { getUniversities } from "../services/universityService";
 import { useAuth } from "../contexts/AuthContext";
 
 const Events = () => {
@@ -54,9 +55,12 @@ const Events = () => {
     StartDate: "",
     EndDate: "",
     OrganizerId: "",
+    UniversityId: "",
   });
   const [eventError, setEventError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [universities, setUniversities] = useState([]);
+  const [organizers, setOrganizers] = useState([]);
 
   const fetchData = useCallback(async () => {
     try {
@@ -99,6 +103,10 @@ const Events = () => {
   useEffect(() => {
     fetchData();
     if (role === "organizer" && organizerId) loadOrganizerInfo();
+    if (role === "admin") {
+      getOrganizers().then(setOrganizers).catch(() => setOrganizers([]));
+      getUniversities().then(setUniversities).catch(() => setUniversities([]));
+    }
   }, [fetchData, role, organizerId, loadOrganizerInfo]);
 
   const handleOpen = (item = null) => {
@@ -112,7 +120,7 @@ const Events = () => {
             StartDate: item.startDate || item.StartDate || "",
             EndDate: item.endDate || item.EndDate || "",
             OrganizerId:
-              role === "organizer" ? organizerId : user ? user.userId : "",
+              role === "organizer" ? organizerId : item.organizerId || item.OrganizerId || "",
           }
         : {
             Title: "",
@@ -120,8 +128,7 @@ const Events = () => {
             Organizer: "",
             StartDate: "",
             EndDate: "",
-            OrganizerId:
-              role === "organizer" ? organizerId : user ? user.userId : "",
+            OrganizerId: role === "organizer" ? organizerId : "",
           }
     );
     setOpen(true);
@@ -137,11 +144,12 @@ const Events = () => {
     let eventData = { ...form };
     if (role === "organizer" && isGuid(organizerId)) {
       eventData.OrganizerId = organizerId;
-    } else if (user && isGuid(user.userId)) {
-      eventData.OrganizerId = user.userId;
+    } else if (role === "admin" && isGuid(form.OrganizerId)) {
+      eventData.OrganizerId = form.OrganizerId;
     } else {
       eventData.OrganizerId = "";
     }
+    eventData.createdByRole = role; // Gửi role khi tạo event
 
     if (!eventData.StartDate || !eventData.EndDate) {
       alert("Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc!");
@@ -428,6 +436,24 @@ const Events = () => {
                   "Chưa xác định trường"}
               </strong>
             </Alert>
+          )}
+          {role === "admin" && (
+            <TextField
+              select
+              label="Chọn organizer đại diện"
+              fullWidth
+              margin="normal"
+              value={form.OrganizerId}
+              onChange={(e) => setForm({ ...form, OrganizerId: e.target.value })}
+              SelectProps={{ native: true }}
+            >
+              <option value="">-- Chọn organizer --</option>
+              {organizers.map((o) => (
+                <option key={o.organizerId || o.OrganizerId} value={o.organizerId || o.OrganizerId}>
+                  {o.organizerName || o.OrganizerName} - {o.university?.name || o.universityName || "Không rõ trường"}
+                </option>
+              ))}
+            </TextField>
           )}
           <TextField
             label="Tiêu đề"

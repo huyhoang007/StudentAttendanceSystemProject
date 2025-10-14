@@ -15,6 +15,7 @@ namespace Student_Attendance_System.DTOs
         public List<EventSessionDto> Sessions { get; set; } = new List<EventSessionDto>();
         public int TotalRegistrations { get; set; }
         public int TotalAttendees { get; set; }
+    
     }
 
     public class CreateEventDto
@@ -34,6 +35,9 @@ namespace Student_Attendance_System.DTOs
 
         [Required]
         public Guid OrganizerId { get; set; }
+
+        public Guid? UniversityId { get; set; } // Cho phép admin chọn trường
+        public string CreatedByRole { get; set; } = "organizer";
     }
 
     public class UpdateEventDto

@@ -34,3 +34,14 @@ export const updateOrganizer = async (organizerId, updateData) => {
   if (!res.ok) throw await res.json();
   return res.json();
 };
+
+export const getOrganizers = async () => {
+  const token = localStorage.getItem("token");
+  const res = await fetch("/api/organizers", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw await res.json();
+  return res.json();
+};

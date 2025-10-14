@@ -129,9 +129,14 @@ namespace Student_Attendance_System.Services
                 throw new InvalidOperationException("Start date must be before end date.");
             }
 
-            // Get organizer's university for auto-assignment
-            var organizerEntity = await _organizerRepository.GetByIdAsync(createDto.OrganizerId);
-            
+            // Nếu có UniversityId trong DTO thì dùng, nếu không thì lấy từ organizer
+            Guid? universityId = createDto.UniversityId;
+            if (universityId == null || universityId == Guid.Empty)
+            {
+                var organizerEntity = await _organizerRepository.GetByIdAsync(createDto.OrganizerId);
+                universityId = organizerEntity?.UniversityId;
+            }
+
             var evt = new Event
             {
                 Title = createDto.Title,
@@ -140,11 +145,10 @@ namespace Student_Attendance_System.Services
                 StartDate = createDto.StartDate,
                 EndDate = createDto.EndDate,
                 OrganizerId = createDto.OrganizerId,
-                UniversityId = organizerEntity?.UniversityId // Auto-assign university from organizer
+                UniversityId = universityId
             };
 
             var createdEvent = await _eventRepository.AddAsync(evt);
-            
             // Reload with related data
             var eventWithData = await _eventRepository.GetByIdAsync(createdEvent.EventId);
             return await MapToDtoAsync(eventWithData!);
