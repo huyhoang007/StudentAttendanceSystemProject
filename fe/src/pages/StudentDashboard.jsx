@@ -14,7 +14,12 @@ import {
   Divider,
   Chip,
 } from "@mui/material";
-import { CheckCircle, School, EmojiEvents, RocketLaunch } from "@mui/icons-material";
+import {
+  CheckCircle,
+  School,
+  EmojiEvents,
+  RocketLaunch,
+} from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 
 const StudentDashboard = () => {
@@ -29,14 +34,14 @@ const StudentDashboard = () => {
         setLoading(true);
         setError(null);
 
-        const mockCheckIns = [
-          
-        ];
+        const mockCheckIns = [];
 
         setCheckIns(mockCheckIns);
       } catch (err) {
         console.error("Error in main flow:", err);
-        setError(`Lỗi khi tải dữ liệu: ${err.message || "Vui lòng thử lại sau"}`);
+        setError(
+          `Lỗi khi tải dữ liệu: ${err.message || "Vui lòng thử lại sau"}`
+        );
       } finally {
         setLoading(false);
       }
@@ -70,10 +75,17 @@ const StudentDashboard = () => {
             top: 20,
           }}
         />
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", mb: 2 }}>
-          <img 
-            src="https://img.icons8.com/fluency/64/000000/student-center.png" 
-            alt="Student Attendance Logo" 
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            mb: 2,
+          }}
+        >
+          <img
+            src="https://img.icons8.com/fluency/64/000000/student-center.png"
+            alt="Student Attendance Logo"
             style={{ width: 60, height: 60, marginRight: 16 }}
           />
           <Typography
@@ -84,14 +96,15 @@ const StudentDashboard = () => {
               textShadow: "1px 1px 3px rgba(0,0,0,0.1)",
             }}
           >
-            Student Attendance System
+            Student Attendance System 
           </Typography>
         </Box>
         <Typography variant="h6" sx={{ color: "text.secondary", mb: 2 }}>
           Nhà Văn hóa Sinh viên - Đại học Quốc gia Việt Nam
         </Typography>
         <Typography variant="h6" sx={{ color: "#333" }}>
-          Xin chào, <strong>{user?.name || user?.username || "Sinh viên"}</strong> 👋  
+          Xin chào,{" "}
+          <strong>{user?.name || user?.username || "Sinh viên"}</strong> 👋
           <br />
           Chúc bạn một ngày học tập hiệu quả và tràn đầy năng lượng!
         </Typography>
@@ -113,18 +126,26 @@ const StudentDashboard = () => {
             <CardContent>
               <Box display="flex" alignItems="center" mb={3}>
                 <School sx={{ fontSize: 40, color: "#1976d2", mr: 2 }} />
-                <Typography variant="h5" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: "bold", color: "#1976d2" }}
+                >
                   Giới thiệu về Hệ thống
                 </Typography>
               </Box>
 
               <Typography variant="body1" sx={{ mb: 3, lineHeight: 1.8 }}>
-                Hệ thống Điểm danh Sinh viên giúp bạn theo dõi hoạt động tham gia sự kiện,
-                hỗ trợ quản lý học tập & kết nối cộng đồng sinh viên ĐHQG Việt Nam.
+                Hệ thống Điểm danh Sinh viên giúp bạn theo dõi hoạt động tham
+                gia sự kiện, hỗ trợ quản lý học tập & kết nối cộng đồng sinh
+                viên ĐHQG Việt Nam.
               </Typography>
 
               <Divider sx={{ my: 3 }}>
-                <Chip label="🎯 Mục tiêu của hệ thống" color="primary" variant="outlined" />
+                <Chip
+                  label="🎯 Mục tiêu của hệ thống"
+                  color="primary"
+                  variant="outlined"
+                />
               </Divider>
 
               <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -163,7 +184,10 @@ const StudentDashboard = () => {
                     >
                       <CheckCircle sx={{ color: item.color, mt: 0.5 }} />
                       <Box>
-                        <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{ fontWeight: "bold" }}
+                        >
                           {item.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -176,7 +200,11 @@ const StudentDashboard = () => {
               </Grid>
 
               <Divider sx={{ my: 3 }}>
-                <Chip label="💡 Tính năng nổi bật" color="secondary" variant="outlined" />
+                <Chip
+                  label="💡 Tính năng nổi bật"
+                  color="secondary"
+                  variant="outlined"
+                />
               </Divider>
 
               <List>
@@ -211,11 +239,15 @@ const StudentDashboard = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="body1" sx={{ fontWeight: "bold", mb: 1, color: "#1976d2" }}>
+        <Typography
+          variant="body1"
+          sx={{ fontWeight: "bold", mb: 1, color: "#1976d2" }}
+        >
           🏛️ Nhà Văn hóa Sinh viên - Đại học Quốc gia Việt Nam
         </Typography>
         <Typography variant="body2" color="text.secondary">
-          Nơi kết nối tri thức • Không gian sáng tạo • Môi trường phát triển toàn diện
+          Nơi kết nối tri thức • Không gian sáng tạo • Môi trường phát triển
+          toàn diện
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           © 2025 VNU Student Cultural House. All rights reserved.
