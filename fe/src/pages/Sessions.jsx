@@ -35,7 +35,11 @@ import {
 } from "../services/eventSessionService";
 import { getEvents } from "../services/eventService";
 import { useAuth } from "../contexts/AuthContext";
-import { formatDateTimeLocal, formatDateTimeDisplay, formatDateTimeForBackend } from "../utils/dateUtils";
+import {
+  formatDateTimeLocal,
+  formatDateTimeDisplay,
+  formatDateTimeForBackend,
+} from "../utils/dateUtils";
 
 const Sessions = () => {
   const [searchParams] = useSearchParams();
@@ -232,7 +236,9 @@ const Sessions = () => {
         StartTime: formatDateTimeForBackend(startTime),
         EndTime: formatDateTimeForBackend(endTime),
         Location: form.location?.trim() || null,
-        CheckinStartTime: formatDateTimeForBackend(form.checkin_start_time?.trim()),
+        CheckinStartTime: formatDateTimeForBackend(
+          form.checkin_start_time?.trim()
+        ),
         CheckinEndTime: formatDateTimeForBackend(form.checkin_end_time?.trim()),
       };
 
@@ -393,7 +399,9 @@ const Sessions = () => {
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  {formatDateTimeDisplay(s.startTime || s.StartTime || s.start_time)}
+                  {formatDateTimeDisplay(
+                    s.startTime || s.StartTime || s.start_time
+                  )}
                 </TableCell>
                 <TableCell>
                   {formatDateTimeDisplay(s.endTime || s.EndTime || s.end_time)}
@@ -429,8 +437,8 @@ const Sessions = () => {
                         <strong>Bắt đầu:</strong>{" "}
                         {formatDateTimeDisplay(
                           s.checkinStartTime ||
-                          s.CheckinStartTime ||
-                          s.checkin_start_time
+                            s.CheckinStartTime ||
+                            s.checkin_start_time
                         )}
                         <br />
                         {(s.checkinEndTime ||
@@ -440,8 +448,8 @@ const Sessions = () => {
                             <strong>Kết thúc:</strong>{" "}
                             {formatDateTimeDisplay(
                               s.checkinEndTime ||
-                              s.CheckinEndTime ||
-                              s.checkin_end_time
+                                s.CheckinEndTime ||
+                                s.checkin_end_time
                             )}
                           </>
                         )}
@@ -482,120 +490,173 @@ const Sessions = () => {
       </Table>
 
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
-        <DialogTitle>{editId ? "Sửa phiên" : "Thêm phiên mới"}</DialogTitle>
-        <DialogContent>
-          {/* Event Selection (if needed) */}
-          {!selectedEventId && (
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Chọn sự kiện</InputLabel>
-              <Select
-                value={form.event_id}
-                onChange={(e) => setForm({ ...form, event_id: e.target.value })}
-                label="Chọn sự kiện"
-              >
-                {events.map((event) => (
-                  <MenuItem
-                    key={event.eventId || event.event_id}
-                    value={event.eventId || event.event_id}
-                  >
-                    {event.title || event.Title}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+        <DialogTitle
+          sx={{
+            fontWeight: 600,
+            bgcolor: "#1976d2",
+            color: "white",
+            py: 1.5,
+            px: 3,
+          }}
+        >
+          {editId ? "✏️ Chỉnh sửa phiên sự kiện" : "🗓️ Thêm phiên sự kiện mới"}
+        </DialogTitle>
 
-          <TextField
-            label="Tiêu đề phiên"
-            fullWidth
-            margin="normal"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
-            required
-          />
-
-          <TextField
-            label="Thời gian bắt đầu"
-            type="datetime-local"
-            fullWidth
-            margin="normal"
-            value={form.start_time}
-            onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-            InputLabelProps={{ shrink: true }}
-            inputProps={{
-              step: 60, // 60 seconds
-              min: "2025-01-01T00:00",
-              max: "2030-12-31T23:59",
+        <DialogContent sx={{ backgroundColor: "#fafafa", p: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 2,
+              border: "1px solid #e0e0e0",
+              bgcolor: "white",
             }}
-            helperText="Chọn ngày và giờ từ lịch hoặc nhập thủ công: YYYY-MM-DDTHH:MM"
-            required
-          />
+          >
+            {/* Chọn sự kiện */}
+            {!selectedEventId && (
+              <FormControl fullWidth margin="normal" size="small">
+                <InputLabel>Chọn sự kiện</InputLabel>
+                <Select
+                  value={form.event_id}
+                  onChange={(e) =>
+                    setForm({ ...form, event_id: e.target.value })
+                  }
+                  label="Chọn sự kiện"
+                >
+                  {events.map((event) => (
+                    <MenuItem
+                      key={event.eventId || event.event_id}
+                      value={event.eventId || event.event_id}
+                    >
+                      {event.title || event.Title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
 
-          <TextField
-            label="Thời gian kết thúc"
-            type="datetime-local"
-            fullWidth
-            margin="normal"
-            value={form.end_time}
-            onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-            InputLabelProps={{ shrink: true }}
-            inputProps={{
-              step: 60, // 60 seconds
-              min: "2025-01-01T00:00",
-              max: "2030-12-31T23:59",
-            }}
-            helperText="Chọn ngày và giờ từ lịch hoặc nhập thủ công: YYYY-MM-DDTHH:MM"
-            required
-          />
+            {/* Thông tin cơ bản */}
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ mt: 2, mb: 1 }}
+            >
+              🧾 Thông tin cơ bản
+            </Typography>
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <TextField
+                label="Tiêu đề phiên"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="Địa điểm"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                fullWidth
+                size="small"
+              />
+            </Box>
 
-          <TextField
-            label="Địa điểm"
-            fullWidth
-            margin="normal"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-            placeholder="Ví dụ: Phòng A101, Tòa nhà B"
-          />
+            {/* Thời gian sự kiện */}
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ mt: 3, mb: 1 }}
+            >
+              ⏰ Thời gian diễn ra
+            </Typography>
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <TextField
+                label="Bắt đầu"
+                type="datetime-local"
+                value={form.start_time}
+                onChange={(e) =>
+                  setForm({ ...form, start_time: e.target.value })
+                }
+                InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  step: 60,
+                  min: "2025-01-01T00:00",
+                  max: "2030-12-31T23:59",
+                }}
+                helperText="Ngày & giờ bắt đầu"
+                required
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="Kết thúc"
+                type="datetime-local"
+                value={form.end_time}
+                onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  step: 60,
+                  min: "2025-01-01T00:00",
+                  max: "2030-12-31T23:59",
+                }}
+                helperText="Ngày & giờ kết thúc"
+                required
+                fullWidth
+                size="small"
+              />
+            </Box>
 
-          <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
-            Cấu hình Check-in (Tùy chọn)
-          </Typography>
-
-          <TextField
-            label="Bắt đầu check-in"
-            type="datetime-local"
-            fullWidth
-            margin="normal"
-            value={form.checkin_start_time}
-            onChange={(e) =>
-              setForm({ ...form, checkin_start_time: e.target.value })
-            }
-            InputLabelProps={{ shrink: true }}
-            inputProps={{
-              step: 60, // 60 seconds
-            }}
-            helperText="Thời gian sinh viên có thể bắt đầu check-in"
-          />
-
-          <TextField
-            label="Kết thúc check-in"
-            type="datetime-local"
-            fullWidth
-            margin="normal"
-            value={form.checkin_end_time}
-            onChange={(e) =>
-              setForm({ ...form, checkin_end_time: e.target.value })
-            }
-            InputLabelProps={{ shrink: true }}
-            inputProps={{
-              step: 60, // 60 seconds
-            }}
-            helperText="Thời gian kết thúc check-in"
-          />
+            {/* Check-in config */}
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ mt: 3, mb: 1 }}
+            >
+              🕓 Thời gian Check-in
+            </Typography>
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <TextField
+                label="Bắt đầu check-in"
+                type="datetime-local"
+                value={form.checkin_start_time}
+                onChange={(e) =>
+                  setForm({ ...form, checkin_start_time: e.target.value })
+                }
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ step: 60 }}
+                helperText="Thời điểm mở check-in"
+                fullWidth
+                size="small"
+              />
+              <TextField
+                label="Kết thúc check-in"
+                type="datetime-local"
+                value={form.checkin_end_time}
+                onChange={(e) =>
+                  setForm({ ...form, checkin_end_time: e.target.value })
+                }
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ step: 60 }}
+                helperText="Thời điểm đóng check-in"
+                fullWidth
+                size="small"
+              />
+            </Box>
+          </Paper>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Hủy</Button>
-          <Button onClick={handleSave} variant="contained">
+
+        <DialogActions sx={{ px: 3, py: 2, bgcolor: "#f5f5f5" }}>
+          <Button onClick={handleClose} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            sx={{
+              background: "linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)",
+              px: 3,
+            }}
+          >
             {editId ? "Cập nhật" : "Tạo phiên"}
           </Button>
         </DialogActions>

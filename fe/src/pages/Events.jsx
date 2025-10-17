@@ -104,8 +104,12 @@ const Events = () => {
     fetchData();
     if (role === "organizer" && organizerId) loadOrganizerInfo();
     if (role === "admin") {
-      getOrganizers().then(setOrganizers).catch(() => setOrganizers([]));
-      getUniversities().then(setUniversities).catch(() => setUniversities([]));
+      getOrganizers()
+        .then(setOrganizers)
+        .catch(() => setOrganizers([]));
+      getUniversities()
+        .then(setUniversities)
+        .catch(() => setUniversities([]));
     }
   }, [fetchData, role, organizerId, loadOrganizerInfo]);
 
@@ -120,7 +124,9 @@ const Events = () => {
             StartDate: item.startDate || item.StartDate || "",
             EndDate: item.endDate || item.EndDate || "",
             OrganizerId:
-              role === "organizer" ? organizerId : item.organizerId || item.OrganizerId || "",
+              role === "organizer"
+                ? organizerId
+                : item.organizerId || item.OrganizerId || "",
           }
         : {
             Title: "",
@@ -293,37 +299,35 @@ const Events = () => {
                       </Typography>
                       <Chip
                         size="small"
-                        label={
-                          (() => {
-                            const startDate = e.startDate || e.StartDate;
-                            const endDate = e.endDate || e.EndDate;
-                            if (!startDate || isNaN(new Date(startDate)))
-                              return "Chưa xác định";
-                            const now = new Date();
-                            const s = new Date(startDate);
-                            const ed = endDate ? new Date(endDate) : null;
-                            if (s > now) return "Sắp diễn ra";
-                            if (ed && ed >= now) return "Đang diễn ra";
-                            return "Đã kết thúc";
-                          })()
-                        }
-                        color={
-                          (() => {
-                            const s = new Date(e.startDate || e.StartDate);
-                            const ed = new Date(e.endDate || e.EndDate);
-                            const now = new Date();
-                            if (s > now) return "primary";
-                            if (ed >= now) return "success";
-                            return "default";
-                          })()
-                        }
+                        label={(() => {
+                          const startDate = e.startDate || e.StartDate;
+                          const endDate = e.endDate || e.EndDate;
+                          if (!startDate || isNaN(new Date(startDate)))
+                            return "Chưa xác định";
+                          const now = new Date();
+                          const s = new Date(startDate);
+                          const ed = endDate ? new Date(endDate) : null;
+                          if (s > now) return "Sắp diễn ra";
+                          if (ed && ed >= now) return "Đang diễn ra";
+                          return "Đã kết thúc";
+                        })()}
+                        color={(() => {
+                          const s = new Date(e.startDate || e.StartDate);
+                          const ed = new Date(e.endDate || e.EndDate);
+                          const now = new Date();
+                          if (s > now) return "primary";
+                          if (ed >= now) return "success";
+                          return "default";
+                        })()}
                         sx={{ mt: 0.5 }}
                       />
                     </TableCell>
                     <TableCell>{e.description || e.Description}</TableCell>
                     <TableCell>{e.organizer || e.Organizer}</TableCell>
                     <TableCell>
-                      {new Date(e.startDate || e.StartDate).toLocaleDateString()}
+                      {new Date(
+                        e.startDate || e.StartDate
+                      ).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
                       {new Date(e.endDate || e.EndDate).toLocaleDateString()}
@@ -422,85 +426,158 @@ const Events = () => {
         </Card>
       )}
 
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-        <DialogTitle sx={{ fontWeight: 600, color: "#1976d2" }}>
-          {editId ? "Sửa sự kiện" : "Thêm sự kiện"}
+      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+        <DialogTitle
+          sx={{
+            fontWeight: 600,
+            bgcolor: "#1976d2",
+            color: "white",
+            py: 1.5,
+            px: 3,
+          }}
+        >
+          {editId ? "✏️ Chỉnh sửa sự kiện" : "🗓️ Thêm sự kiện mới"}
         </DialogTitle>
-        <DialogContent>
-          {role === "organizer" && organizerInfo && (
-            <Alert severity="info" sx={{ mb: 2 }}>
-              Sự kiện này sẽ thuộc về trường:{" "}
-              <strong>
-                {organizerInfo.university?.name ||
-                  organizerInfo.universityName ||
-                  "Chưa xác định trường"}
-              </strong>
-            </Alert>
-          )}
-          {role === "admin" && (
+
+        <DialogContent sx={{ backgroundColor: "#fafafa", p: 3 }}>
+          <Box
+            sx={{
+              borderRadius: 2,
+              border: "1px solid #e0e0e0",
+              bgcolor: "white",
+              p: 3,
+            }}
+          >
+            {role === "organizer" && organizerInfo && (
+              <Alert severity="info" sx={{ mb: 3 }}>
+                Sự kiện này sẽ thuộc về trường:{" "}
+                <strong>
+                  {organizerInfo.university?.name ||
+                    organizerInfo.universityName ||
+                    "Chưa xác định trường"}
+                </strong>
+              </Alert>
+            )}
+
+            {role === "admin" && (
+              <Box sx={{ mb: 3 }}>
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                  👥 Chọn người tổ chức
+                </Typography>
+                <TextField
+                  select
+                  fullWidth
+                  value={form.OrganizerId}
+                  onChange={(e) =>
+                    setForm({ ...form, OrganizerId: e.target.value })
+                  }
+                  SelectProps={{ native: true }}
+                  size="small"
+                >
+                  <option value="">-- Chọn người tổ chức để quản lý--</option>
+                  {organizers.map((o) => (
+                    <option
+                      key={o.organizerId || o.OrganizerId}
+                      value={o.organizerId || o.OrganizerId}
+                    >
+                      {o.organizerName || o.OrganizerName} -{" "}
+                      {o.university?.name ||
+                        o.universityName ||
+                        "Không rõ trường"}
+                    </option>
+                  ))}
+                </TextField>
+              </Box>
+            )}
+
+            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+              🧾 Thông tin sự kiện
+            </Typography>
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <TextField
+                label="Tiêu đề"
+                fullWidth
+                value={form.Title}
+                onChange={(e) => setForm({ ...form, Title: e.target.value })}
+                size="small"
+              />
+              <TextField
+                label="Đơn vị tổ chức"
+                fullWidth
+                value={form.Organizer}
+                onChange={(e) =>
+                  setForm({ ...form, Organizer: e.target.value })
+                }
+                size="small"
+              />
+            </Box>
+
             <TextField
-              select
-              label="Chọn organizer đại diện"
+              label="Mô tả"
               fullWidth
               margin="normal"
-              value={form.OrganizerId}
-              onChange={(e) => setForm({ ...form, OrganizerId: e.target.value })}
-              SelectProps={{ native: true }}
+              multiline
+              rows={3}
+              value={form.Description}
+              onChange={(e) =>
+                setForm({ ...form, Description: e.target.value })
+              }
+              size="small"
+            />
+
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ mt: 3, mb: 1 }}
             >
-              <option value="">-- Chọn organizer --</option>
-              {organizers.map((o) => (
-                <option key={o.organizerId || o.OrganizerId} value={o.organizerId || o.OrganizerId}>
-                  {o.organizerName || o.OrganizerName} - {o.university?.name || o.universityName || "Không rõ trường"}
-                </option>
-              ))}
-            </TextField>
-          )}
-          <TextField
-            label="Tiêu đề"
-            fullWidth
-            margin="normal"
-            value={form.Title}
-            onChange={(e) => setForm({ ...form, Title: e.target.value })}
-          />
-          <TextField
-            label="Mô tả"
-            fullWidth
-            margin="normal"
-            multiline
-            rows={3}
-            value={form.Description}
-            onChange={(e) => setForm({ ...form, Description: e.target.value })}
-          />
-          <TextField
-            label="Đơn vị tổ chức"
-            fullWidth
-            margin="normal"
-            value={form.Organizer}
-            onChange={(e) => setForm({ ...form, Organizer: e.target.value })}
-          />
-          <TextField
-            label="Ngày bắt đầu"
-            type="date"
-            fullWidth
-            margin="normal"
-            value={form.StartDate}
-            onChange={(e) => setForm({ ...form, StartDate: e.target.value })}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="Ngày kết thúc"
-            type="date"
-            fullWidth
-            margin="normal"
-            value={form.EndDate}
-            onChange={(e) => setForm({ ...form, EndDate: e.target.value })}
-            InputLabelProps={{ shrink: true }}
-          />
+              ⏰ Thời gian diễn ra
+            </Typography>
+            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+              <TextField
+                label="Ngày bắt đầu"
+                type="date"
+                fullWidth
+                value={form.StartDate}
+                onChange={(e) =>
+                  setForm({ ...form, StartDate: e.target.value })
+                }
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+              <TextField
+                label="Ngày kết thúc"
+                type="date"
+                fullWidth
+                value={form.EndDate}
+                onChange={(e) => setForm({ ...form, EndDate: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+                size="small"
+              />
+            </Box>
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose}>Hủy</Button>
-          <Button variant="contained" onClick={handleSave}>
-            Lưu
+
+        <DialogActions
+          sx={{
+            px: 3,
+            py: 2,
+            bgcolor: "#f5f5f5",
+            borderTop: "1px solid #e0e0e0",
+          }}
+        >
+          <Button onClick={handleClose} color="inherit">
+            Hủy
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleSave}
+            sx={{
+              background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+              px: 3,
+              fontWeight: 600,
+            }}
+          >
+            {editId ? "Cập nhật" : "Tạo sự kiện"}
           </Button>
         </DialogActions>
       </Dialog>

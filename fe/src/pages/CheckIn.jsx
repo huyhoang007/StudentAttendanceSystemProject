@@ -273,7 +273,7 @@ const CheckIn = () => {
         variant="h4"
         sx={{ mb: 3, color: "#1976d2", fontWeight: 600 }}
       >
-        Hệ thống Điểm danh QR
+        Điểm danh QR dành cho Sinh Viên
       </Typography>
 
       {/* QR Scanner Card - Only for Students */}

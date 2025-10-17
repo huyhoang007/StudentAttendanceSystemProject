@@ -1,3 +1,5 @@
+// src/pages/EventsStudent.jsx (Phiên bản UI nâng cấp)
+
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Typography,
@@ -15,7 +17,19 @@ import {
   Alert,
   CircularProgress,
   Chip,
+  TableContainer, // Thêm TableContainer
+  Paper, // Thêm Paper
+  Tooltip, // Thêm Tooltip
 } from "@mui/material";
+import {
+  Event, // Icon cho tiêu đề
+  AssignmentTurnedIn, // Icon cho đã đăng ký
+  CalendarToday, // Icon cho ngày tháng
+  LocationOn, // Icon cho địa điểm
+  HowToReg, // Icon cho nút đăng ký
+} from "@mui/icons-material";
+
+// Import các service (GIỮ NGUYÊN)
 import { getEvents, getEventsByUniversity } from "../services/eventService";
 import { getEventSessions } from "../services/eventSessionService";
 import {
@@ -24,6 +38,24 @@ import {
 } from "../services/studentInEventService";
 import { getStudentByUserId } from "../services/studentService";
 import { useAuth } from "../contexts/AuthContext";
+
+// --- Helper Functions cho UI ---
+
+const formatDate = (dateString, includeTime = false) => {
+  if (!dateString) return "---";
+  try {
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: includeTime ? "2-digit" : undefined,
+      minute: includeTime ? "2-digit" : undefined,
+    };
+    return new Date(dateString).toLocaleDateString("vi-VN", options);
+  } catch (e) {
+    return dateString;
+  }
+};
 
 const EventsStudent = () => {
   const [events, setEvents] = useState([]);
@@ -39,7 +71,10 @@ const EventsStudent = () => {
 
   const { user } = useAuth();
 
+  // --- LOGIC FUNCTIONS (GIỮ NGUYÊN) ---
+
   const loadEvents = useCallback(async () => {
+    // ... (Toàn bộ logic loadEvents của bạn được giữ nguyên)
     try {
       let eventsData = [];
       let studentCode = user?.studentCode || user?.username;
@@ -47,7 +82,6 @@ const EventsStudent = () => {
 
       console.log("[EventsStudent] Loading events for user:", user);
 
-      // Get student info including universityId
       if (user?.userId || user?.UserId || user?.id || user?.Id) {
         try {
           const userId = user.userId || user.UserId || user.id || user.Id;
@@ -57,11 +91,7 @@ const EventsStudent = () => {
           );
           const studentData = await getStudentByUserId(userId);
           console.log("[EventsStudent] Student data received:", studentData);
-          console.log("[EventsStudent] Raw universityId variations:", {
-            universityId: studentData.universityId,
-            UniversityId: studentData.UniversityId,
-            university_id: studentData.university_id,
-          });
+
           studentCode =
             studentData.studentCode ||
             studentData.StudentCode ||
@@ -76,14 +106,12 @@ const EventsStudent = () => {
             universityId,
           });
 
-          // Save student code to state for later use
           setCurrentStudentCode(studentCode);
         } catch (e) {
           console.warn("[EventsStudent] Error fetching student data:", e);
         }
       }
 
-      // Load events filtered by university if available
       if (universityId) {
         console.log(
           "[EventsStudent] Loading events for university:",
@@ -98,7 +126,6 @@ const EventsStudent = () => {
           "[EventsStudent] No universityId found - student may not be assigned to any university"
         );
         console.log("[EventsStudent] Loading all events as fallback");
-        // Fallback to all events if no university found
         eventsData = await getEvents();
         console.log(
           `[EventsStudent] Loaded ${eventsData.length} events (no university filter)`
@@ -107,11 +134,9 @@ const EventsStudent = () => {
 
       setEvents(eventsData);
 
-      // Check registration status for current student using already fetched studentCode
       if (studentCode && eventsData.length > 0) {
         const registeredEventIds = new Set();
 
-        // Check each event for registration status
         const checkPromises = eventsData.map(async (event) => {
           try {
             const eventId = event.eventId || event.EventId;
@@ -135,7 +160,6 @@ const EventsStudent = () => {
           }
         });
 
-        // Wait for all checks to complete
         await Promise.all(checkPromises);
         setRegisteredEvents(registeredEventIds);
       }
@@ -156,7 +180,7 @@ const EventsStudent = () => {
   };
 
   const handleConfirmEvent = async () => {
-    // Use saved student code from state
+    // ... (Toàn bộ logic handleConfirmEvent của bạn được giữ nguyên)
     let studentCode = currentStudentCode || user?.studentCode || user?.username;
 
     console.log(
@@ -168,10 +192,6 @@ const EventsStudent = () => {
       setError("Không tìm thấy mã sinh viên. Vui lòng đăng nhập lại.");
       return;
     }
-
-    console.log("Debug - User object:", user);
-    console.log("Debug - Student code:", studentCode);
-    console.log("Debug - Selected event:", selectedEvent);
 
     setLoading(true);
     setError("");
@@ -194,7 +214,6 @@ const EventsStudent = () => {
       const result = await registerStudentForEvent(eventId, studentCode, token);
       console.log("Registration result:", result);
 
-      // Cập nhật trạng thái đã đăng ký ngay lập tức
       setRegisteredEvents((prev) => new Set([...prev, eventId]));
 
       setSuccess(
@@ -204,22 +223,19 @@ const EventsStudent = () => {
       );
       setOpen(false);
 
-      // Try to get sessions, but don't fail if it errors
       try {
         const sessionsData = await getEventSessions(eventId);
         if (sessionsData && sessionsData.length > 0) {
           setSessions(sessionsData);
           setOpenSession(true);
         } else {
-          // No sessions available yet - this is normal
           setSuccess(`Đăng ký sự kiện "${
             selectedEvent.title || selectedEvent.Title
           }" thành công! 
-            Organizer chưa tạo phiên cho sự kiện này. Bạn sẽ được thông báo khi có phiên mới.`);
+            Sự kiện này chưa có phiên. Hệ thống sẽ sớm cập nhật phiên cho bạn.`);
         }
       } catch (sessionError) {
         console.warn("Could not load sessions:", sessionError);
-        // Still show success even if sessions fail to load
         setSuccess(`Đăng ký sự kiện "${
           selectedEvent.title || selectedEvent.Title
         }" thành công! 
@@ -228,7 +244,6 @@ const EventsStudent = () => {
     } catch (err) {
       console.error("Registration error:", err);
 
-      // If already registered error, treat as success
       if (err.message && err.message.includes("already registered")) {
         const eventId = selectedEvent.eventId || selectedEvent.EventId;
         if (eventId) {
@@ -248,13 +263,26 @@ const EventsStudent = () => {
     }
   };
 
-  return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h5" fontWeight={700} color="#1976d2" mb={2}>
-        Danh sách tất cả sự kiện
-      </Typography>
+  // --- RENDERING UI (PHIÊN BẢN NÂNG CẤP) ---
 
-      {/* Error and Success Messages */}
+  return (
+    <Box sx={{ p: { xs: 2, md: 4 } }}>
+      {/* HEADER */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          borderBottom: "2px solid #e0e0e0",
+          pb: 1,
+          mb: 3,
+        }}
+      >
+        <Event sx={{ fontSize: 36, color: "#1976d2", mr: 1 }} />
+        <Typography variant="h4" fontWeight={700} color="#1976d2">
+          Danh sách tất cả sự kiện
+        </Typography>
+      </Box>
+      {/* --- Alert Messages --- */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
           {error}
@@ -266,95 +294,199 @@ const EventsStudent = () => {
         </Alert>
       )}
 
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Tiêu đề</TableCell>
-            <TableCell>Mô tả</TableCell>
-            <TableCell>Đơn vị tổ chức</TableCell>
-            <TableCell>Ngày bắt đầu</TableCell>
-            <TableCell>Ngày kết thúc</TableCell>
-            <TableCell align="center">Trạng thái</TableCell>
-            <TableCell align="right">Thao tác</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {events.map((e) => {
-            const eventId = e.eventId || e.EventId;
-            const isRegistered = registeredEvents.has(eventId);
-
-            return (
-              <TableRow key={eventId}>
-                <TableCell>{e.title || e.Title}</TableCell>
-                <TableCell>{e.description || e.Description}</TableCell>
-                <TableCell>{e.organizer || e.Organizer}</TableCell>
-                <TableCell>
-                  {e.startDate || e.StartDate
-                    ? new Date(e.startDate || e.StartDate).toLocaleDateString(
-                        "vi-VN"
-                      )
-                    : e.start_date}
-                </TableCell>
-                <TableCell>
-                  {e.endDate || e.EndDate
-                    ? new Date(e.endDate || e.EndDate).toLocaleDateString(
-                        "vi-VN"
-                      )
-                    : e.end_date}
-                </TableCell>
-                <TableCell align="center">
-                  {isRegistered ? (
-                    <Chip label="Đã đăng ký" color="success" size="small" />
-                  ) : (
-                    <Chip label="Chưa đăng ký" color="default" size="small" />
-                  )}
-                </TableCell>
-                <TableCell align="right">
-                  {isRegistered ? (
-                    <Button variant="outlined" color="primary" disabled>
-                      Đã đăng ký
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={() => handleRegisterEvent(e)}
-                    >
-                      Đăng ký
-                    </Button>
-                  )}
+      {/* --- Main Table --- */}
+      <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 2 }}>
+        <Table size="small">
+          <TableHead sx={{ bgcolor: "#f5f5f5" }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Tiêu đề</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Mô tả</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Đơn vị tổ chức</TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                Ngày bắt đầu
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                Ngày kết thúc
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                Trạng thái
+              </TableCell>
+              <TableCell align="center" sx={{ fontWeight: 700 }}>
+                Thao tác
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {events.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
+                  <Typography variant="subtitle1" color="textSecondary">
+                    Không tìm thấy sự kiện nào phù hợp.
+                  </Typography>
                 </TableCell>
               </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+            ) : (
+              events.map((e) => {
+                const eventId = e.eventId || e.EventId;
+                const isRegistered = registeredEvents.has(eventId);
+
+                return (
+                  <TableRow
+                    key={eventId}
+                    hover
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell>
+                      <Typography variant="body1" fontWeight={600}>
+                        {e.title || e.Title}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Tooltip
+                        title={
+                          e.description || e.Description || "Không có mô tả"
+                        }
+                      >
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitLineClamp: "2",
+                            WebkitBoxOrient: "vertical",
+                            maxWidth: "200px",
+                          }}
+                        >
+                          {e.description || e.Description || "Không có mô tả"}
+                        </Typography>
+                      </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2" color="text.secondary">
+                        {e.organizer || e.Organizer || "Chưa xác định"}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        icon={<CalendarToday />}
+                        label={formatDate(e.startDate || e.StartDate)}
+                        size="small"
+                        variant="outlined"
+                        color="default"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        icon={<CalendarToday />}
+                        label={formatDate(e.endDate || e.EndDate)}
+                        size="small"
+                        variant="outlined"
+                        color="default"
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      {isRegistered ? (
+                        <Chip
+                          label="Đã đăng ký"
+                          color="success"
+                          size="small"
+                          icon={<AssignmentTurnedIn />}
+                        />
+                      ) : (
+                        <Chip
+                          label="Chưa đăng ký"
+                          color="default"
+                          size="small"
+                          variant="outlined"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      {isRegistered ? (
+                        <Button
+                          variant="text"
+                          color="success"
+                          disabled
+                          startIcon={<AssignmentTurnedIn />}
+                          size="small"
+                          sx={{ fontWeight: 600 }}
+                        >
+                          Đã đăng ký
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={() => handleRegisterEvent(e)}
+                          startIcon={<HowToReg />}
+                          size="small"
+                        >
+                          Đăng ký
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* Registration Confirmation Dialog */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle>Đăng ký sự kiện</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Bạn có chắc muốn đăng ký sự kiện{" "}
-            <strong>{selectedEvent?.title || selectedEvent?.Title}</strong>?
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ bgcolor: "primary.main", color: "white" }}>
+          <Box display="flex" alignItems="center">
+            <HowToReg sx={{ mr: 1 }} /> Xác nhận Đăng ký Sự kiện
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers sx={{ p: 3 }}>
+          <Typography variant="h6" mb={2}>
+            Bạn có chắc muốn đăng ký sự kiện này không?
           </Typography>
+          <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
+            <Typography variant="body1">
+              Sự kiện:{selectedEvent?.title || selectedEvent?.Title}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              Tổ chức: {selectedEvent?.organizer || selectedEvent?.Organizer}
+            </Typography>
+          </Box>
           {error && (
             <Alert severity="error" sx={{ mt: 2 }}>
               {error}
             </Alert>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpen(false)} disabled={loading}>
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setOpen(false)}
+            disabled={loading}
+            color="error"
+            variant="outlined"
+          >
             Hủy
           </Button>
           <Button
             onClick={handleConfirmEvent}
             variant="contained"
             disabled={loading}
-            startIcon={loading ? <CircularProgress size={20} /> : null}
+            color="primary"
+            startIcon={
+              loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <HowToReg />
+              )
+            }
           >
-            {loading ? "Đang đăng ký..." : "Xác nhận"}
+            {loading ? "Đang xử lý..." : "Xác nhận Đăng ký"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -366,62 +498,74 @@ const EventsStudent = () => {
         maxWidth="md"
         fullWidth
       >
-        <DialogTitle>Danh sách phiên của sự kiện</DialogTitle>
-        <DialogContent>
-          <Typography mb={2}>
-            Bạn đã đăng ký sự kiện{" "}
-            <strong>{selectedEvent?.title || selectedEvent?.Title}</strong>{" "}
-            thành công!
+        <DialogTitle sx={{ bgcolor: "success.main", color: "white" }}>
+          <Box display="flex" alignItems="center">
+            <AssignmentTurnedIn sx={{ mr: 1 }} /> Đăng ký thành công & Phiên sự
+            kiện
+          </Box>
+        </DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" mb={1} color="success.main">
+            🎉 Đã đăng ký thành công sự kiện "
+            {selectedEvent?.title || selectedEvent?.Title}"!
           </Typography>
           <Typography mb={2} variant="body2" color="textSecondary">
             Dưới đây là danh sách các phiên trong sự kiện:
           </Typography>
           {sessions.length === 0 ? (
-            <Box sx={{ textAlign: "center", py: 3 }}>
+            <Box
+              sx={{
+                textAlign: "center",
+                py: 3,
+                border: "1px dashed grey",
+                borderRadius: 1,
+              }}
+            >
               <Typography variant="h6" color="textSecondary" gutterBottom>
                 Chưa có phiên nào cho sự kiện này
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Organizer chưa tạo các phiên cho sự kiện này.
-                <br />
-                Bạn đã đăng ký sự kiện thành công và sẽ được thông báo khi có
-                phiên mới.
+                Bạn đã đăng ký thành công!.Sự kiện này chưa được tạo phiên. Hệ
+                thống sẽ sớm cập nhật phiên cho bạn.
               </Typography>
             </Box>
           ) : (
-            <Table>
-              <TableHead>
+            <Table size="small">
+              <TableHead sx={{ bgcolor: "info.light" }}>
                 <TableRow>
-                  <TableCell>Tên phiên</TableCell>
-                  <TableCell>Thời gian bắt đầu</TableCell>
-                  <TableCell>Thời gian kết thúc</TableCell>
-                  <TableCell>Địa điểm</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Tên phiên</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }} align="center">
+                    Thời gian bắt đầu
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }} align="center">
+                    Thời gian kết thúc
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>Địa điểm</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {sessions.map((s) => (
                   <TableRow key={s.sessionId || s.SessionId}>
                     <TableCell>
-                      {s.sessionName ||
-                        s.SessionName ||
-                        `Phiên ${s.sessionId || s.SessionId}`}
+                      <Typography variant="body1" fontWeight={500}>
+                        {s.sessionName ||
+                          s.SessionName ||
+                          `Phiên ${s.sessionId || s.SessionId}`}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      {formatDate(s.startTime || s.StartTime, true)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {formatDate(s.endTime || s.EndTime, true)}
                     </TableCell>
                     <TableCell>
-                      {s.startTime || s.StartTime
-                        ? new Date(s.startTime || s.StartTime).toLocaleString(
-                            "vi-VN"
-                          )
-                        : s.start_time}
-                    </TableCell>
-                    <TableCell>
-                      {s.endTime || s.EndTime
-                        ? new Date(s.endTime || s.EndTime).toLocaleString(
-                            "vi-VN"
-                          )
-                        : s.end_time}
-                    </TableCell>
-                    <TableCell>
-                      {s.location || s.Location || "Chưa xác định"}
+                      <Chip
+                        icon={<LocationOn />}
+                        label={s.location || s.Location || "Chưa xác định"}
+                        size="small"
+                        variant="outlined"
+                      />
                     </TableCell>
                   </TableRow>
                 ))}
@@ -429,8 +573,12 @@ const EventsStudent = () => {
             </Table>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenSession(false)} variant="contained">
+        <DialogActions sx={{ p: 2 }}>
+          <Button
+            onClick={() => setOpenSession(false)}
+            variant="contained"
+            color="success"
+          >
             Đóng
           </Button>
         </DialogActions>

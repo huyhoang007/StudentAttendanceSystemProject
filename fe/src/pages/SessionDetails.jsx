@@ -17,6 +17,7 @@ import {
   ListItem,
   ListItemAvatar,
   ListItemText,
+  styled, // Import styled for custom components
 } from "@mui/material";
 import {
   ArrowBack,
@@ -26,9 +27,51 @@ import {
   Event as EventIcon,
   QrCode,
   CheckCircle,
+  AccessTime, // Thay thế Schedule cho thời gian bắt đầu/kết thúc
 } from "@mui/icons-material";
 import { getSession } from "../services/eventSessionService";
 import { getEvent } from "../services/eventService";
+
+// --- CUSTOM STYLED COMPONENTS CHO GIAO DIỆN MỚI ---
+const GlassCard = styled(Card)(({ theme }) => ({
+  borderRadius: 16,
+  backdropFilter: "blur(5px)",
+  backgroundColor: "rgba(255, 255, 255, 0.9)",
+  boxShadow: "0 8px 32px 0 rgba(0, 0, 0, 0.08)",
+  border: "1px solid rgba(255, 255, 255, 0.18)",
+  transition: "all 0.3s ease-in-out",
+  "&:hover": {
+    boxShadow: "0 10px 40px 0 rgba(0, 0, 0, 0.12)",
+  },
+}));
+
+const DetailItem = ({ icon, label, value }) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      gap: 2,
+      mb: 1,
+      p: 1.5,
+      borderRadius: 2,
+      backgroundColor: "rgba(0, 150, 136, 0.05)", // Màu nền nhẹ
+    }}
+  >
+    <Avatar sx={{ bgcolor: "primary.main", width: 36, height: 36 }}>
+      {icon}
+    </Avatar>
+    <Box>
+      <Typography variant="caption" color="text.secondary" fontWeight={600}>
+        {label}
+      </Typography>
+      <Typography variant="body1" fontWeight={600} color="text.primary">
+        {value}
+      </Typography>
+    </Box>
+  </Box>
+);
+
+// --- LOGIC CODE (GIỮ NGUYÊN) ---
 
 const SessionDetails = () => {
   const { sessionId } = useParams();
@@ -50,7 +93,7 @@ const SessionDetails = () => {
           setEvent(eventData);
         }
       } catch (err) {
-        setError("Không thể tải thông tin phiên");
+        setError("Không thể tải thông tin phiên. Vui lòng thử lại.");
       } finally {
         setLoading(false);
       }
@@ -79,6 +122,7 @@ const SessionDetails = () => {
   };
 
   const isSessionActive = () => {
+    if (!session) return false;
     const now = new Date();
     return (
       now >= new Date(session.startTime) && now <= new Date(session.endTime)
@@ -86,6 +130,7 @@ const SessionDetails = () => {
   };
 
   const getSessionStatus = () => {
+    if (!session) return { text: "Không rõ", color: "default" };
     const now = new Date();
     const start = new Date(session.startTime);
     const end = new Date(session.endTime);
@@ -94,6 +139,7 @@ const SessionDetails = () => {
     return { text: "Đang diễn ra", color: "success" };
   };
 
+  // --- RENDERING LOADING & ERROR STATES ---
   if (loading)
     return (
       <Box
@@ -102,14 +148,17 @@ const SessionDetails = () => {
           justifyContent: "center",
           alignItems: "center",
           minHeight: "70vh",
-          background: "linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%)",
+          background: "linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 100%)",
         }}
       >
-        <CircularProgress />
+        <CircularProgress color="primary" />
+        <Typography variant="h6" color="text.secondary" ml={2}>
+          Đang tải chi tiết phiên...
+        </Typography>
       </Box>
     );
 
-  if (error)
+  if (error || !session)
     return (
       <Box
         sx={{
@@ -119,10 +168,10 @@ const SessionDetails = () => {
           minHeight: "70vh",
         }}
       >
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error">{error || "Không tìm thấy thông tin phiên."}</Alert>
         <Button
-          variant="outlined"
-          sx={{ mt: 2 }}
+          variant="contained"
+          sx={{ mt: 3, borderRadius: 2 }}
           startIcon={<ArrowBack />}
           onClick={handleBackToEvents}
         >
@@ -131,40 +180,35 @@ const SessionDetails = () => {
       </Box>
     );
 
+  // --- RENDERING SUCCESS STATE (GIAO DIỆN MỚI) ---
   return (
     <Box
       sx={{
-        p: 3,
-        maxWidth: 1100,
+        p: { xs: 2, md: 4 },
+        maxWidth: 1200,
         mx: "auto",
+        minHeight: "100vh",
         background:
-          "linear-gradient(135deg, #f0f9ff 0%, #e0f7fa 40%, #ede7f6 100%)",
-        borderRadius: 4,
-        boxShadow: "0 0 40px rgba(0,0,0,0.05)",
-        animation: "fadeIn 0.6s ease-in-out",
-        "@keyframes fadeIn": {
-          from: { opacity: 0, transform: "translateY(20px)" },
-          to: { opacity: 1, transform: "translateY(0)" },
-        },
+          "linear-gradient(135deg, #f0f4f8 0%, #e3f2fd 100%)", // Nền nhẹ nhàng
       }}
     >
       {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={handleBackToEvents}
           startIcon={<ArrowBack />}
           sx={{
-            mr: 2,
+            mr: 3,
             borderRadius: 3,
-            borderColor: "#90caf9",
+            textTransform: "none",
+            bgcolor: "#00bcd4",
             "&:hover": {
-              background: "linear-gradient(45deg, #64b5f6 30%, #81c784 90%)",
-              color: "white",
+              bgcolor: "#00a3b8",
             },
           }}
         >
-          Quay lại sự kiện
+          Quay lại Sự kiện
         </Button>
         <Typography
           variant="h4"
@@ -172,77 +216,61 @@ const SessionDetails = () => {
           sx={{
             color: "transparent",
             backgroundClip: "text",
-            backgroundImage: "linear-gradient(45deg, #1976d2, #9c27b0)",
+            backgroundImage: "linear-gradient(45deg, #00bcd4, #2196f3)", // Màu xanh ngọc & xanh dương
           }}
         >
-          Chi tiết phiên
+          Chi tiết Phiên: {session.title}
         </Typography>
       </Box>
 
-      <Grid container spacing={3}>
-        {/* Phần chính */}
+      <Grid container spacing={4}>
+        {/* Phần chính: Chi tiết Phiên */}
         <Grid item xs={12} md={8}>
-          <Card
-            sx={{
-              borderRadius: 4,
-              boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-              overflow: "hidden",
-            }}
-          >
-            <CardContent sx={{ p: 3 }}>
+          <GlassCard>
+            <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  mb: 2,
+                  mb: 3,
+                  pb: 1,
+                  borderBottom: "2px solid #e0f7fa",
                 }}
               >
-                <Typography variant="h5" fontWeight={600} color="primary">
+                <Typography variant="h5" fontWeight={700} color="primary.dark">
                   {session.title}
                 </Typography>
                 <Chip
                   label={getSessionStatus().text}
                   color={getSessionStatus().color}
+                  sx={{ fontWeight: 600, fontSize: "0.9rem" }}
                 />
               </Box>
 
-              {/* Thời gian & địa điểm */}
+              {/* Thông tin Chi tiết */}
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Schedule color="action" />
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Bắt đầu
-                      </Typography>
-                      <Typography variant="body1" fontWeight={500}>
-                        {formatDate(session.startTime)}
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <DetailItem
+                    icon={<AccessTime />}
+                    label="BẮT ĐẦU"
+                    value={formatDate(session.startTime)}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Schedule color="action" />
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Kết thúc
-                      </Typography>
-                      <Typography variant="body1" fontWeight={500}>
-                        {formatDate(session.endTime)}
-                      </Typography>
-                    </Box>
-                  </Box>
+                  <DetailItem
+                    icon={<Schedule />}
+                    label="KẾT THÚC"
+                    value={formatDate(session.endTime)}
+                  />
                 </Grid>
                 {session.location && (
                   <Grid item xs={12}>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <LocationOn color="action" />
-                      <Typography variant="body1" fontWeight={500}>
-                        {session.location}
-                      </Typography>
-                    </Box>
+                    <DetailItem
+                      icon={<LocationOn />}
+                      label="ĐỊA ĐIỂM"
+                      value={session.location}
+                    />
                   </Grid>
                 )}
               </Grid>
@@ -250,21 +278,23 @@ const SessionDetails = () => {
               {/* Mô tả */}
               {session.description && (
                 <>
-                  <Divider sx={{ my: 3 }} />
-                  <Typography
-                    variant="h6"
-                    fontWeight={600}
-                    sx={{
-                      mb: 1,
-                      color: "transparent",
-                      backgroundClip: "text",
-                      backgroundImage:
-                        "linear-gradient(45deg, #6a1b9a, #1976d2)",
-                    }}
+                  <Divider sx={{ my: 4 }} />
+                  <Box
+                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
                   >
-                    Mô tả phiên
-                  </Typography>
-                  <Typography variant="body1" sx={{ lineHeight: 1.7 }}>
+                    <Description color="action" sx={{ mr: 1 }} />
+                    <Typography
+                      variant="h6"
+                      fontWeight={600}
+                      color="text.secondary"
+                    >
+                      Mô tả chi tiết
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="body1"
+                    sx={{ lineHeight: 1.8, color: "#4a4a4a", pl: 4 }}
+                  >
                     {session.description}
                   </Typography>
                 </>
@@ -272,7 +302,7 @@ const SessionDetails = () => {
 
               {/* Nút điểm danh */}
               {isSessionActive() && (
-                <Box sx={{ textAlign: "center", mt: 4 }}>
+                <Box sx={{ textAlign: "center", mt: 5 }}>
                   <Button
                     variant="contained"
                     size="large"
@@ -280,103 +310,113 @@ const SessionDetails = () => {
                     startIcon={<QrCode />}
                     sx={{
                       borderRadius: 4,
-                      px: 5,
-                      py: 1.5,
+                      px: 6,
+                      py: 1.8,
                       fontSize: "1.1rem",
+                      fontWeight: 700,
                       textTransform: "none",
                       background:
-                        "linear-gradient(45deg, #43a047 0%, #66bb6a 100%)",
-                      boxShadow: "0 4px 15px 0 rgba(76, 175, 80, 0.4)",
+                        "linear-gradient(45deg, #4caf50 30%, #81c784 90%)", // Gradient xanh lá
+                      boxShadow: "0 6px 20px 0 rgba(76, 175, 80, 0.5)",
                       transition: "0.3s",
                       "&:hover": {
-                        transform: "scale(1.05)",
-                        background:
-                          "linear-gradient(45deg, #2e7d32 0%, #43a047 100%)",
+                        transform: "translateY(-2px)",
+                        boxShadow: "0 8px 25px 0 rgba(76, 175, 80, 0.6)",
                       },
                     }}
                   >
-                    Điểm danh ngay
+                    Quét Mã Điểm danh
                   </Button>
                 </Box>
               )}
             </CardContent>
-          </Card>
+          </GlassCard>
         </Grid>
 
-        {/* Sự kiện & lưu ý */}
+        {/* Cột bên phải: Sự kiện & Lưu ý */}
         <Grid item xs={12} md={4}>
+          {/* Thông tin Sự kiện Gốc */}
           {event && (
-            <Card
-              sx={{
-                mb: 2,
-                borderRadius: 4,
-                boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-              }}
-            >
+            <GlassCard sx={{ mb: 3 }}>
               <CardContent sx={{ p: 3 }}>
-                <Typography variant="h6" fontWeight={600} mb={2}>
-                  Thuộc sự kiện
-                </Typography>
+                <Box
+                  sx={{ display: "flex", alignItems: "center", mb: 2 }}
+                >
+                  <EventIcon color="secondary" sx={{ mr: 1 }} />
+                  <Typography variant="h6" fontWeight={600}>
+                    Thuộc sự kiện
+                  </Typography>
+                </Box>
                 <List sx={{ p: 0 }}>
                   <ListItem disablePadding>
                     <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: "#1976d2" }}>
+                      <Avatar sx={{ bgcolor: "#2196f3" }}>
                         <EventIcon />
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText
-                      primary={event.title}
+                      primary={
+                        <Typography variant="subtitle1" fontWeight={700}>
+                          {event.title}
+                        </Typography>
+                      }
                       secondary={
-                        <>
-                          <Typography variant="body2">
-                            📅 {formatDate(event.startDate)}
+                        <Box mt={0.5}>
+                          <Typography variant="body2" color="text.secondary">
+                            🗓️ Ngày: {formatDate(event.startDate).split(",")[0]}
                           </Typography>
-                          <Typography variant="body2">
-                            📍 {event.location}
-                          </Typography>
-                          <Typography variant="body2">
-                            👤 {event.organizerName}
-                          </Typography>
-                        </>
+                        </Box>
                       }
                     />
                   </ListItem>
                 </List>
               </CardContent>
-            </Card>
+            </GlassCard>
           )}
 
-          <Card
+          {/* Lưu ý */}
+          <GlassCard
             sx={{
-              borderRadius: 4,
-              background: "linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%)",
-              boxShadow: "0 6px 15px rgba(0,0,0,0.08)",
+              background:
+                "linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 248, 225, 0.9) 100%)",
             }}
           >
             <CardContent sx={{ p: 3 }}>
-              <Typography variant="h6" fontWeight={600} mb={2}>
-                Lưu ý
+              <Typography variant="h6" fontWeight={600} mb={2} color="#ff9800">
+                Lưu ý quan trọng
               </Typography>
-              <List sx={{ p: 0 }}>
+              <List dense sx={{ p: 0 }}>
                 <ListItem>
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "#ffb74d" }}>
+                    <Avatar sx={{ bgcolor: "#ffb74d", width: 32, height: 32 }}>
                       <QrCode fontSize="small" />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary="Điểm danh chỉ khả dụng trong thời gian phiên diễn ra" />
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2" color="text.primary">
+                        Điểm danh chỉ khả dụng trong thời gian phiên diễn ra
+                      </Typography>
+                    }
+                  />
                 </ListItem>
                 <ListItem>
                   <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: "#66bb6a" }}>
+                    <Avatar sx={{ bgcolor: "#66bb6a", width: 32, height: 32 }}>
                       <CheckCircle fontSize="small" />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText primary="Hãy đến đúng giờ để không bỏ lỡ nội dung quan trọng" />
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2" color="text.primary">
+                        Hãy đến sớm 10-15 phút để chuẩn bị tốt nhất
+                      </Typography>
+                    }
+                  />
                 </ListItem>
               </List>
             </CardContent>
-          </Card>
+          </GlassCard>
         </Grid>
       </Grid>
     </Box>
