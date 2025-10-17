@@ -9,12 +9,16 @@ import {
   Chip,
   Grid,
   Paper,
+  Button, // added
 } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PeopleIcon from "@mui/icons-material/People";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings"; // added
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner"; // added
+import BarChartIcon from "@mui/icons-material/BarChart"; // added
 
 const Dashboard = () => {
   const { user, role } = useAuth();
@@ -173,7 +177,7 @@ const Dashboard = () => {
                 background:
                   "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
                 width: "100%",
-                maxWidth: 700,
+                maxWidth: 1000, // tăng từ 700 -> 1000 để có thêm không gian cho 3 card
                 border: "2px solid rgba(102, 126, 234, 0.2)",
                 position: "relative",
                 overflow: "hidden",
@@ -230,99 +234,203 @@ const Dashboard = () => {
                   mb: 2,
                 }}
               >
-                <Chip
-                  label={
-                    role === "admin"
-                      ? "👑 Quản trị viên"
-                      : role === "organizer"
-                      ? "🎯 Người tổ chức sự kiện"
-                      : "🎓 Sinh viên"
-                  }
+                <Button
+                  startIcon={<AdminPanelSettingsIcon sx={{ fontSize: 22 }} />}
+                  variant="contained"
+                  disableElevation
                   sx={{
-                    px: 3,
-                    py: 3,
-                    fontSize: "1.1rem",
-                    fontWeight: 700,
+                    px: 4,
+                    py: 1.25,
+                    fontSize: "1.05rem",
+                    fontWeight: 800,
+                    textTransform: "none",
+                    borderRadius: 3,
                     background:
                       role === "admin"
                         ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
                         : "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
                     color: "#fff",
-                    boxShadow: "0 6px 20px rgba(0,0,0,0.25)",
-                    transition: "all 0.3s ease",
+                    boxShadow: "0 8px 30px rgba(0,0,0,0.18)",
                     "&:hover": {
-                      transform: "scale(1.05)",
-                      boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 14px 40px rgba(0,0,0,0.2)",
                     },
                   }}
-                />
+                >
+                  {role === "admin"
+                    ? "👑 Quản trị viên"
+                    : role === "organizer"
+                    ? "🎯 Người tổ chức sự kiện"
+                    : "🎓 Sinh viên"}
+                </Button>
               </Box>
 
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 3,
-                  mt: 2,
-                  flexWrap: "wrap",
-                }}
-              >
-                <Typography
-                  variant="body2"
+              {/* New quick-action cards section (3 columns) */}
+              <Box sx={{ mt: 3 }}>
+                <Grid
+                  container
+                  spacing={3}
+                  justifyContent="center"
+                  alignItems="stretch"
+                  wrap={{ xs: "wrap", sm: "nowrap" }} // wrap on very small screens, otherwise single row
                   sx={{
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    background: "rgba(102, 126, 234, 0.1)",
-                    color: "#667eea",
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
+                    px: { xs: 0, sm: 2 },
+                    // remove internal horizontal scrollbar; allow cards to shrink if needed
                   }}
                 >
-                  📅 Quản lý Sự kiện
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    background: "rgba(118, 75, 162, 0.1)",
-                    color: "#764ba2",
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  ✅ Điểm danh QR
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    px: 2,
-                    py: 1,
-                    borderRadius: 2,
-                    background: "rgba(240, 147, 251, 0.1)",
-                    color: "#f093fb",
-                    fontWeight: 600,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  📊 Báo cáo & Thống kê
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Card>
+                  <Grid item sx={{ flex: "1 1 280px", minWidth: 220, maxWidth: 320 }}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        boxSizing: "border-box",
+                        p: 2.25,
+                        borderRadius: 3,
+                        textAlign: "center",
+                        transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                        border: "1px solid rgba(102,126,234,0.08)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        minHeight: 140, // uniform height
+                        overflow: "visible",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 12px 30px rgba(102,126,234,0.12)",
+                        },
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          mx: "auto",
+                          mb: 1.25,
+                          background: "linear-gradient(135deg,#667eea,#764ba2)",
+                          width: 54,
+                          height: 54,
+                        }}
+                      >
+                        <EventIcon sx={{ color: "#fff" }} />
+                      </Avatar>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={700}
+                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                      >
+                        Quản lý Sự kiện
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                        Tạo & quản lý các phiên sự kiện
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item sx={{ flex: "1 1 280px", minWidth: 220, maxWidth: 320 }}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        boxSizing: "border-box",
+                        p: 2.25,
+                        borderRadius: 3,
+                        textAlign: "center",
+                        transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                        border: "1px solid rgba(118,75,162,0.08)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        minHeight: 140,
+                        overflow: "visible",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 12px 30px rgba(118,75,162,0.12)",
+                        },
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          mx: "auto",
+                          mb: 1.25,
+                          background: "linear-gradient(135deg,#764ba2,#f093fb)",
+                          width: 54,
+                          height: 54,
+                        }}
+                      >
+                        <QrCodeScannerIcon sx={{ color: "#fff" }} />
+                      </Avatar>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={700}
+                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                      >
+                        Điểm danh QR
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                        Quét QR / Check-in thủ công
+                      </Typography>
+                    </Paper>
+                  </Grid>
+
+                  <Grid item sx={{ flex: "1 1 280px", minWidth: 220, maxWidth: 320 }}>
+                    <Paper
+                      elevation={0}
+                      sx={{
+                        boxSizing: "border-box",
+                        p: 2.25,
+                        borderRadius: 3,
+                        textAlign: "center",
+                        transition: "transform 0.25s ease, box-shadow 0.25s ease",
+                        border: "1px solid rgba(245,87,108,0.08)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        minHeight: 140,
+                        overflow: "visible",
+                        "&:hover": {
+                          transform: "translateY(-6px)",
+                          boxShadow: "0 12px 30px rgba(245,87,108,0.12)",
+                        },
+                      }}
+                    >
+                      <Avatar
+                        sx={{
+                          mx: "auto",
+                          mb: 1.25,
+                          background: "linear-gradient(135deg,#f5576c,#f093fb)",
+                          width: 54,
+                          height: 54,
+                        }}
+                      >
+                        <BarChartIcon sx={{ color: "#fff" }} />
+                      </Avatar>
+                      <Typography
+                        variant="subtitle1"
+                        fontWeight={700}
+                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                      >
+                        Báo cáo & Thống kê
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                        Báo cáo, xuất Excel/PDF, phân tích
+                      </Typography>
+                    </Paper>
+                  </Grid>
+                </Grid>
+               </Box>
+             </Box>
+           </Box>
+         </Card>
 
         {/* Info Cards */}
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
+        <Grid
+          container
+          spacing={3}
+          justifyContent="center"
+          alignItems="stretch"
+          sx={{
+            // keep cards centered and consistent width like the sample
+            px: 1,
+          }}
+        >
+          {/* make each card a flexible box with controlled min/max width so they sit in one row on wide screens */}
+          <Grid item xs={12} sm="auto" sx={{ flex: "1 1 320px", minWidth: 280, maxWidth: 360 }}>
             <Paper
               elevation={0}
               sx={{
@@ -433,7 +541,7 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} sm="auto" sx={{ flex: "1 1 320px", minWidth: 280, maxWidth: 360 }}>
             <Paper
               elevation={0}
               sx={{
@@ -545,7 +653,7 @@ const Dashboard = () => {
             </Paper>
           </Grid>
 
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} sm="auto" sx={{ flex: "1 1 320px", minWidth: 280, maxWidth: 360 }}>
             <Paper
               elevation={0}
               sx={{

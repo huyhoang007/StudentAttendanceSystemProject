@@ -29,8 +29,8 @@ import {
   Edit,
   Delete,
   UploadFile,
-  People as PeopleIcon,
   CloudUpload,
+  School as SchoolIcon,
 } from "@mui/icons-material";
 import {
   getStudents,
@@ -219,69 +219,145 @@ const Students = () => {
   return (
     <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
       <Box sx={{ width: "100%", maxWidth: 900 }}>
-        <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
-          <PeopleIcon sx={{ fontSize: 40, color: "#74ebd5" }} />
-          <Typography variant="h5" fontWeight={700} color="#3a3a3a">
+        {/* Header: icon + prominent title */}
+        <Box
+          sx={{
+            mb: 2,
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            justifyContent: "flex-start", // căn trái; đổi thành 'center' nếu muốn căn giữa
+          }}
+        >
+          <SchoolIcon sx={{ fontSize: 48, color: "#74ebd5" }} />
+          <Typography
+            variant="h4"
+            sx={{
+              fontWeight: 800,
+              color: "#3a3a3a",
+              fontFamily: "'Inter','Helvetica Neue', Arial, sans-serif",
+              letterSpacing: 0.2,
+            }}
+          >
             Quản lý Sinh viên
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
+
+        {/* Action buttons */}
+        <Box sx={{ mb: 2, display: "flex", gap: 2, alignItems: "center" }}>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => handleOpen()}
+            sx={{
+              fontWeight: 700,
+              px: 3,
+              py: 1,
+              background: "linear-gradient(90deg,#74ebd5,#ACB6E5)", // giữ màu chính
+              boxShadow: "0 8px 24px rgba(116,235,213,0.12)",
+              transition: "transform 0.18s ease, box-shadow 0.18s ease",
+              "&:hover": {
+                transform: "translateY(-3px)",
+                boxShadow: "0 14px 32px rgba(116,235,213,0.16)",
+              },
+            }}
+          >
+            Thêm sinh viên
+          </Button>
+
+          <Button
+            variant="outlined"
+            startIcon={<UploadFile />}
+            onClick={() => setUploadOpen(true)}
+            sx={{
+              fontWeight: 700,
+              color: "#74ebd5",
+              borderColor: "#74ebd5",
+              background: "transparent",
+              px: 2.5,
+              py: 1,
+              transition: "background 0.18s ease, transform 0.18s ease",
+              "&:hover": {
+                background: "rgba(116,235,213,0.06)",
+                transform: "translateY(-2px)",
+              },
+            }}
+          >
+            Import Excel/CSV
+          </Button>
+        </Box>
+
+        <Box
           sx={{
-            mb: 2,
-            mr: 2,
-            fontWeight: 600,
-            background: "linear-gradient(90deg,#74ebd5,#ACB6E5)",
+            background: "#fff",
+            borderRadius: 3,
+            p: 2,
+            border: "1px solid rgba(0,0,0,0.04)",
+            boxShadow: "0 10px 30px rgba(14,30,37,0.06)", // subtle shadow để nổi bật
           }}
-          onClick={() => handleOpen()}
         >
-          Thêm sinh viên
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<UploadFile />}
-          sx={{
-            mb: 2,
-            fontWeight: 600,
-            color: "#74ebd5",
-            borderColor: "#74ebd5",
-          }}
-          onClick={() => setUploadOpen(true)}
-        >
-          Import Excel/CSV
-        </Button>
-        <Box sx={{ background: "#fff", borderRadius: 3, boxShadow: 2, p: 2 }}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 700 }}>Tên</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Mã SV</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Điện thoại</TableCell>
-                <TableCell sx={{ fontWeight: 700 }}>Trường</TableCell>
-                <TableCell align="right" sx={{ fontWeight: 700 }}>
+                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                  Tên
+                </TableCell>
+                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "center" }}>
+                  Mã SV
+                </TableCell>
+                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                  Email
+                </TableCell>
+                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "center" }}>
+                  Điện thoại
+                </TableCell>
+                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                  Trường
+                </TableCell>
+                <TableCell align="right" sx={{ fontWeight: 800, color: "#2d3748" }}>
                   Thao tác
                 </TableCell>
               </TableRow>
             </TableHead>
+
             <TableBody>
-              {data.map((s) => (
-                <TableRow key={s.student_id}>
-                  <TableCell>{s.name}</TableCell>
-                  <TableCell>{s.student_code}</TableCell>
-                  <TableCell>{s.email}</TableCell>
-                  <TableCell>{s.phone}</TableCell>
-                  <TableCell>
+              {data.map((s, idx) => (
+                <TableRow
+                  key={s.student_id}
+                  sx={{
+                    // zebra stripes
+                    bgcolor: idx % 2 === 0 ? "common.white" : "#e7f1faff",
+                    // hover effect
+                    "&:hover": {
+                      bgcolor: "#d1e0feff",
+                    },
+                  }}
+                >
+                  <TableCell sx={{ textAlign: "left" }}>{s.name}</TableCell>
+
+                  <TableCell sx={{ textAlign: "center" }}>{s.student_code}</TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>{s.email}</TableCell>
+
+                  <TableCell sx={{ textAlign: "center" }}>{s.phone}</TableCell>
+
+                  <TableCell sx={{ textAlign: "left" }}>
                     {s.university_name || "Chưa chọn trường"}
                   </TableCell>
+
                   <TableCell align="right">
-                    <IconButton color="primary" onClick={() => handleOpen(s)}>
+                    <IconButton
+                      color="primary"
+                      onClick={() => handleOpen(s)}
+                      sx={{ mr: 1 }} // khoảng cách giữa icon
+                    >
                       <Edit />
                     </IconButton>
+
                     <IconButton
                       color="error"
                       onClick={() => handleDelete(s.student_id)}
+                      sx={{ ml: 0.5 }}
                     >
                       <Delete />
                     </IconButton>

@@ -10,17 +10,54 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 const MainLayout = () => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
+
+  // determine if the current route is active
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
+  // build nav items depending on role (preserve existing logic)
+  const studentNav = [
+    { to: "/", label: "Trang chủ" },
+    { to: "/events-student", label: "Sự kiện" },
+    { to: "/student-registered-events", label: "Sự kiện đã đăng ký" },
+    { to: "/checkin", label: "Điểm danh QR" },
+    { to: "/profile", label: "Hồ sơ" },
+  ];
+
+  const adminOrgNav = [
+    { to: "/", label: "Trang chủ" },
+    // admin extras will be inserted conditionally below
+    { to: "/events", label: "Sự kiện" },
+    { to: "/sessions", label: "Phiên" },
+    { to: "/student-in-event-management", label: "Quản lý SV" },
+    { to: "/report", label: "Báo cáo" },
+  ];
+
+  // compose final nav array for non-student roles, inserting admin-only items when role === 'admin'
+  let nonStudentNav = [...adminOrgNav];
+  if (role === "admin") {
+    // insert admin-specific links after Trang chủ (index 0)
+    nonStudentNav.splice(1, 0,
+      { to: "/universities", label: "Trường" },
+      { to: "/students", label: "Sinh viên" },
+      { to: "/admin-users", label: "Người dùng" }
+    );
+  }
+
+  const navItems = role === "student" ? studentNav : nonStudentNav;
 
   return (
     <Box>
@@ -56,124 +93,42 @@ const MainLayout = () => {
               Student Attendance System
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            {/* Dashboard button removed from navbar */}
-            {role === "student" && (
-              <>
+          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+            {navItems.map((item) => {
+              const active = isActive(item.to);
+              return (
                 <Button
+                  key={item.to}
                   color="inherit"
                   component={Link}
-                  to="/"
-                  sx={{ fontWeight: 600 }}
+                  to={item.to}
+                  sx={{
+                    fontWeight: 600,
+                    textTransform: "none",
+                    px: 2,
+                    py: 0.75,
+                    borderRadius: 2,
+                    gap: 1,
+                    // hover effect
+                    "&:hover": {
+                      background: "rgba(255,255,255,0.08)",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+                    },
+                    // active state styling
+                    bgcolor: active ? "rgba(255,255,255,0.12)" : "transparent",
+                    // subtle underline for active using boxShadow inset
+                    boxShadow: active ? "inset 0 -3px 0 rgba(255,255,255,0.18)" : "none",
+                    // ensure text alignment
+                    display: "flex",
+                    alignItems: "center",
+                    color: "inherit",
+                  }}
                 >
-                  Trang chủ
+                  {item.label}
                 </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/events-student"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Sự kiện
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/student-registered-events"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Sự kiện đã đăng ký
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/checkin"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Điểm danh QR
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/profile"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Hồ sơ
-                </Button>
-              </>
-            )}
-            {role !== "student" && (
-              <>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Trang chủ
-                </Button>
-                {role === "admin" && (
-                  <>
-                    <Button
-                      color="inherit"
-                      component={Link}
-                      to="/universities"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Trường
-                    </Button>
-                    <Button
-                      color="inherit"
-                      component={Link}
-                      to="/students"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Sinh viên
-                    </Button>
-                    <Button
-                      color="inherit"
-                      component={Link}
-                      to="/admin-users"
-                      sx={{ fontWeight: 600 }}
-                    >
-                      Người dùng
-                    </Button>
-                  </>
-                )}
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/events"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Sự kiện
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/sessions"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Phiên
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/student-in-event-management"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Quản lý SV
-                </Button>
-                <Button
-                  color="inherit"
-                  component={Link}
-                  to="/report"
-                  sx={{ fontWeight: 600 }}
-                >
-                  Báo cáo
-                </Button>
-              </>
-            )}
+              );
+            })}
           </Box>
           {user && (
             <Box sx={{ display: "flex", alignItems: "center", ml: 2 }}>
