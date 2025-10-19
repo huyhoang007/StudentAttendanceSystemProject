@@ -194,11 +194,48 @@ namespace Student_Attendance_System.Controllers
         {
             try
             {
-                var isCheckedIn = await _checkInService.IsStudentCheckedInAsync(sessionId, studentId);
-                return Ok(new { isCheckedIn });
+                Console.WriteLine($"[DEBUG] Checking status for Session: {sessionId}, Student: {studentId}");
+
+                // Get all check-ins for the session
+                var sessionCheckIns = await _checkInService.GetCheckInsBySessionIdAsync(sessionId);
+
+                // Kiểm tra và log số lượng check-in
+                Console.WriteLine($"[DEBUG] Found {sessionCheckIns.Count()} check-ins for session");
+                foreach (var checkIn in sessionCheckIns)
+                {
+                    Console.WriteLine($"[DEBUG] Check-in: StudentCode={checkIn.StudentCode}, StudentInEventId={checkIn.StudentInEventId}");
+                }
+
+                // Tìm check-in của sinh viên dựa trên StudentCode trong DTO
+                var studentCheckin = sessionCheckIns.FirstOrDefault(c =>
+                    !string.IsNullOrEmpty(c.StudentCode) &&
+                    c.StudentCode == studentId.ToString());
+
+                var isCheckedIn = studentCheckin != null;
+
+                Console.WriteLine($"[DEBUG] Check-in status: {isCheckedIn}");
+                if (isCheckedIn && studentCheckin != null)
+                {
+                    Console.WriteLine($"[DEBUG] Found check-in details: Time={studentCheckin.CheckinTime}, Method={studentCheckin.Method}");
+                }
+
+                return Ok(new
+                {
+                    isCheckedIn,
+                    sessionId,
+                    studentId,
+                    checkInDetails = studentCheckin,
+                    timestamp = DateTime.UtcNow
+                });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[ERROR] Failed to check status: {ex.Message}");
+                Console.WriteLine($"[ERROR] Stack trace: {ex.StackTrace}");
                 return StatusCode(500, new { message = "An error occurred while checking check-in status.", error = ex.Message });
             }
         }

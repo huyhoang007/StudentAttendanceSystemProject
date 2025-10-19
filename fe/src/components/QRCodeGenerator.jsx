@@ -31,8 +31,7 @@ const QRCodeGenerator = ({ session, event }) => {
 
   useEffect(() => {
     if (session && event) {
-      console.log("QRCodeGenerator - Generating QR for session:", session);
-      console.log("QRCodeGenerator - Event data:", event);
+      // Generate QR code when session and event data are available
       generateQRData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,10 +72,7 @@ const QRCodeGenerator = ({ session, event }) => {
 
         baseUrl = baseUrl.replace(/localhost|127\.0\.0\.1/, localIP);
         // Keep HTTP for easier access (camera will work with updated error handling)
-        console.log(
-          "Using HTTP + local network IP for mobile access:",
-          baseUrl
-        );
+        // Use HTTP for easier mobile access
       }
 
       // Create URL that will auto-trigger check-in when accessed
@@ -84,11 +80,8 @@ const QRCodeGenerator = ({ session, event }) => {
       const eventId = event.eventId || event.EventId;
 
       const autoCheckinUrl = `${baseUrl}/checkin?sessionId=${sessionId}&eventId=${eventId}`;
-
       setQrData(autoCheckinUrl);
       setError("");
-
-      console.log("Generated Auto Check-in URL:", autoCheckinUrl);
     } catch (err) {
       setError("Không thể tạo mã QR");
       console.error("Error generating QR:", err);
@@ -221,51 +214,9 @@ const QRCodeGenerator = ({ session, event }) => {
               color="text.primary"
               align="center"
               sx={{ fontWeight: "bold", mb: 2 }}
-            >
-            </Typography>
+            ></Typography>
 
-            {/* QR Data Display with Copy Button */}
-            <Box
-              sx={{
-                mt: 2,
-                p: 2,
-                backgroundColor: "#f5f5f5",
-                borderRadius: 1,
-                border: "1px solid #ddd",
-                position: "relative",
-              }}
-            >
-              <Typography
-                variant="body2"
-                sx={{
-                  fontFamily: "monospace",
-                  fontSize: "0.75rem",
-                  wordBreak: "break-all",
-                  maxHeight: "100px",
-                  overflow: "auto",
-                  pr: 5,
-                }}
-              >
-                {qrData}
-              </Typography>
-              <IconButton
-                onClick={handleCopyQRData}
-                size="small"
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  backgroundColor: "primary.main",
-                  color: "white",
-                  "&:hover": {
-                    backgroundColor: "primary.dark",
-                  },
-                }}
-                title="Copy QR data"
-              >
-                <ContentCopy fontSize="small" />
-              </IconButton>
-            </Box>
+            {/* Session Debug Info - Hidden in Production */}
           </Box>
         </Box>
       )}

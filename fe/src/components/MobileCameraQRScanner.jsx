@@ -393,25 +393,7 @@ const MobileCameraQRScanner = ({ onScanSuccess, onScanError }) => {
                 <CheckCircle fontSize="small" />
                 QR đã được quét thành công!
               </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                {result.sessionTitle ? (
-                  <>
-                    📅 <strong>Phiên:</strong> {result.sessionTitle}
-                    <br />
-                    🎯 <strong>Sự kiện:</strong> {result.eventTitle}
-                    <br />
-                    {result.startTime &&
-                      `⏰ <strong>Thời gian:</strong> ${new Date(
-                        result.startTime
-                      ).toLocaleString("vi-VN")}`}
-                  </>
-                ) : (
-                  <>
-                    📋 <strong>Dữ liệu:</strong>{" "}
-                    {typeof result === "string" ? result : result.rawData}
-                  </>
-                )}
-              </Typography>
+              {/* No additional data displayed */}
             </Box>
           </Alert>
         )}

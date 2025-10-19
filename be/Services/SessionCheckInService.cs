@@ -239,7 +239,8 @@ namespace Student_Attendance_System.Services
                 StudentName = checkIn.StudentInEvent?.Student?.Name ?? string.Empty,
                 StudentCode = checkIn.StudentInEvent?.Student?.StudentCode ?? string.Empty,
                 UniversityId = checkIn.StudentInEvent?.Student?.UniversityId,
-                OrganizerId = checkIn.EventSession?.Event?.OrganizerId
+                OrganizerId = checkIn.EventSession?.Event?.OrganizerId,
+                StudentId = checkIn.StudentInEvent?.Student?.StudentId // Thêm StudentId vào DTO
             };
         }
     }

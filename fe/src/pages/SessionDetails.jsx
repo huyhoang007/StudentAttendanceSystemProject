@@ -168,7 +168,9 @@ const SessionDetails = () => {
           minHeight: "70vh",
         }}
       >
-        <Alert severity="error">{error || "Không tìm thấy thông tin phiên."}</Alert>
+        <Alert severity="error">
+          {error || "Không tìm thấy thông tin phiên."}
+        </Alert>
         <Button
           variant="contained"
           sx={{ mt: 3, borderRadius: 2 }}
@@ -188,8 +190,7 @@ const SessionDetails = () => {
         maxWidth: 1200,
         mx: "auto",
         minHeight: "100vh",
-        background:
-          "linear-gradient(135deg, #f0f4f8 0%, #e3f2fd 100%)", // Nền nhẹ nhàng
+        background: "linear-gradient(135deg, #f0f4f8 0%, #e3f2fd 100%)", // Nền nhẹ nhàng
       }}
     >
       {/* Header */}
@@ -279,9 +280,7 @@ const SessionDetails = () => {
               {session.description && (
                 <>
                   <Divider sx={{ my: 4 }} />
-                  <Box
-                    sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                  >
+                  <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                     <Description color="action" sx={{ mr: 1 }} />
                     <Typography
                       variant="h6"
@@ -300,35 +299,36 @@ const SessionDetails = () => {
                 </>
               )}
 
-              {/* Nút điểm danh */}
-              {isSessionActive() && (
-                <Box sx={{ textAlign: "center", mt: 5 }}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    onClick={handleCheckIn}
-                    startIcon={<QrCode />}
-                    sx={{
-                      borderRadius: 4,
-                      px: 6,
-                      py: 1.8,
-                      fontSize: "1.1rem",
-                      fontWeight: 700,
-                      textTransform: "none",
-                      background:
-                        "linear-gradient(45deg, #4caf50 30%, #81c784 90%)", // Gradient xanh lá
-                      boxShadow: "0 6px 20px 0 rgba(76, 175, 80, 0.5)",
-                      transition: "0.3s",
-                      "&:hover": {
-                        transform: "translateY(-2px)",
-                        boxShadow: "0 8px 25px 0 rgba(76, 175, 80, 0.6)",
-                      },
-                    }}
-                  >
-                    Quét Mã Điểm danh
-                  </Button>
-                </Box>
-              )}
+              {/* Nút điểm danh - chỉ hiển thị cho student */}
+              {isSessionActive() &&
+                localStorage.getItem("role") === "student" && (
+                  <Box sx={{ textAlign: "center", mt: 5 }}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      onClick={handleCheckIn}
+                      startIcon={<QrCode />}
+                      sx={{
+                        borderRadius: 4,
+                        px: 6,
+                        py: 1.8,
+                        fontSize: "1.1rem",
+                        fontWeight: 700,
+                        textTransform: "none",
+                        background:
+                          "linear-gradient(45deg, #4caf50 30%, #81c784 90%)", // Gradient xanh lá
+                        boxShadow: "0 6px 20px 0 rgba(76, 175, 80, 0.5)",
+                        transition: "0.3s",
+                        "&:hover": {
+                          transform: "translateY(-2px)",
+                          boxShadow: "0 8px 25px 0 rgba(76, 175, 80, 0.6)",
+                        },
+                      }}
+                    >
+                      Quét Mã Điểm danh
+                    </Button>
+                  </Box>
+                )}
             </CardContent>
           </GlassCard>
         </Grid>
@@ -339,9 +339,7 @@ const SessionDetails = () => {
           {event && (
             <GlassCard sx={{ mb: 3 }}>
               <CardContent sx={{ p: 3 }}>
-                <Box
-                  sx={{ display: "flex", alignItems: "center", mb: 2 }}
-                >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
                   <EventIcon color="secondary" sx={{ mr: 1 }} />
                   <Typography variant="h6" fontWeight={600}>
                     Thuộc sự kiện

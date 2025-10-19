@@ -33,20 +33,23 @@ const Login = () => {
       console.log("[Login] OrganizerId in user:", data.user.OrganizerId);
 
       // Lưu token vào localStorage để các service luôn lấy được
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("authToken", data.token);
       console.log("Token sau khi đăng nhập:", data.token);
-      
+
       // Truyền toàn bộ user object và token để context nhận organizerId
       await login(data.user, data.user.role, data.token);
-      
+
       console.log("Navigation logic - User role:", data.user.role);
-      
+
       // Delay navigation một chút để đảm bảo login hoàn tất
       setTimeout(() => {
         if (data.user.role === "admin") {
           console.log("Navigating admin to universities");
           navigate("/universities");
-        } else if (data.user.role === "student" || data.user.role === "organizer") {
+        } else if (
+          data.user.role === "student" ||
+          data.user.role === "organizer"
+        ) {
           console.log("Navigating to dashboard");
           navigate("/");
         } else {

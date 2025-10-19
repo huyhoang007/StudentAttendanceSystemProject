@@ -25,7 +25,6 @@ import {
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import { useLocation } from "react-router-dom";
-import CameraQRScanner from "../components/CameraQRScanner";
 import MobileCameraQRScanner from "../components/MobileCameraQRScanner";
 
 const CheckIn = () => {

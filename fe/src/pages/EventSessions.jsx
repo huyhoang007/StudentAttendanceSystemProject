@@ -34,6 +34,7 @@ import {
 } from "@mui/icons-material";
 import { getEvent } from "../services/eventService";
 import { getSessionsByEvent } from "../services/eventSessionService";
+import { getStudentCheckInStatus } from "../services/sessionCheckInService";
 import QRCodeGenerator from "../components/QRCodeGenerator";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -57,6 +58,38 @@ const EventSessions = () => {
   // QR Code states
   const [qrDialogOpen, setQrDialogOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
+  const [checkInStatus, setCheckInStatus] = useState({});
+  const [lastRefresh, setLastRefresh] = useState(new Date());
+
+  // Refresh check-in status every 30 seconds
+  useEffect(() => {
+    if (role !== "student") return;
+
+    const refreshCheckInStatus = async () => {
+      console.log("Refreshing check-in status...");
+      if (!sessions.length) return;
+
+      const newStatus = {};
+      for (const session of sessions) {
+        const sessionId = session.id || session.sessionId || session.SessionId;
+        try {
+          const isCheckedIn = await getStudentCheckInStatus(sessionId, eventId);
+          newStatus[sessionId] = isCheckedIn;
+        } catch (e) {
+          console.error(
+            "Error refreshing check-in status for session:",
+            sessionId,
+            e
+          );
+        }
+      }
+      setCheckInStatus((prev) => ({ ...prev, ...newStatus }));
+      setLastRefresh(new Date());
+    };
+
+    const interval = setInterval(refreshCheckInStatus, 30000);
+    return () => clearInterval(interval);
+  }, [sessions, eventId, role]);
 
   // QR Code functions
   const handleGenerateQR = (session) => {
@@ -73,16 +106,19 @@ const EventSessions = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        console.log("Fetching data for event:", eventId);
 
         // Lấy thông tin sự kiện
         const eventData = await getEvent(eventId);
+        console.log("Event data received:", eventData);
         setEvent(eventData);
 
         // Lấy danh sách phiên của sự kiện
         const sessionsData = await getSessionsByEvent(eventId);
+        console.log("Sessions data received:", sessionsData);
         let filteredSessions = sessionsData || [];
 
-        // Nếu có targetSessionId, chỉ hiển thị phiên đó
+        // Nếu có targetSessionId, lọc để chỉ hiển thị phiên đó nhưng vẫn giữ dạng danh sách
         if (targetSessionId) {
           filteredSessions = filteredSessions.filter(
             (session) =>
@@ -91,6 +127,29 @@ const EventSessions = () => {
               session.SessionId === targetSessionId
           );
           console.log("Filtered to specific session:", filteredSessions);
+        }
+
+        // Luôn hiển thị dạng danh sách, không tự chuyển hướng khi chỉ có 1 phiên
+        setSessions(filteredSessions);
+
+        // Lấy trạng thái điểm danh cho từng phiên
+        const checkInStatusObj = {};
+        if (role === "student") {
+          for (const session of filteredSessions) {
+            const sessionId =
+              session.id || session.sessionId || session.SessionId;
+            try {
+              const isCheckedIn = await getStudentCheckInStatus(
+                sessionId,
+                eventId
+              );
+              checkInStatusObj[sessionId] = isCheckedIn;
+            } catch (e) {
+              console.error("Error getting check-in status:", e);
+              checkInStatusObj[sessionId] = false;
+            }
+          }
+          setCheckInStatus(checkInStatusObj);
         }
 
         setSessions(filteredSessions);
@@ -105,7 +164,7 @@ const EventSessions = () => {
     if (eventId) {
       fetchData();
     }
-  }, [eventId, targetSessionId]);
+  }, [eventId, targetSessionId, role]);
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString("vi-VN", {
@@ -117,14 +176,30 @@ const EventSessions = () => {
     });
   };
 
-  const getSessionStatus = (startTime, endTime) => {
+  const getSessionStatus = (startTime, endTime, isCheckedIn) => {
     const now = new Date();
     const start = new Date(startTime);
     const end = new Date(endTime);
 
-    if (now < start) return { text: "Chưa bắt đầu", color: "info" };
-    if (now > end) return { text: "Đã kết thúc", color: "default" };
-    return { text: "Đang diễn ra", color: "success" };
+    // Với organizer và admin: chỉ hiển thị trạng thái phiên
+    if (role !== "student") {
+      if (now > end) return { text: "Đã kết thúc", color: "error" };
+      if (now >= start) return { text: "Đang diễn ra", color: "warning" };
+      return { text: "Chưa bắt đầu", color: "info" };
+    }
+
+    // Với student: hiển thị cả trạng thái điểm danh
+    if (isCheckedIn) {
+      if (now > end) return { text: "Đã tham gia", color: "success" };
+      if (now >= start) return { text: "Đã điểm danh", color: "success" };
+      return { text: "Đã điểm danh trước", color: "success" };
+    }
+
+    // Trường hợp student chưa điểm danh
+    if (now > end) return { text: "Đã kết thúc - Vắng mặt", color: "error" };
+    if (now >= start)
+      return { text: "Đang diễn ra - Chưa điểm danh", color: "warning" };
+    return { text: "Chưa bắt đầu", color: "info" };
   };
 
   const handleBackToEvent = () => {
@@ -280,9 +355,14 @@ const EventSessions = () => {
           ) : (
             <List sx={{ p: 0 }}>
               {sessions.map((session, index) => {
+                const isCheckedIn =
+                  checkInStatus[
+                    session.id || session.sessionId || session.SessionId
+                  ];
                 const status = getSessionStatus(
                   session.startTime,
-                  session.endTime
+                  session.endTime,
+                  isCheckedIn
                 );
                 const sessionId = session.id || session.sessionId;
 
@@ -296,9 +376,28 @@ const EventSessions = () => {
                           border: "1px solid #e0e0e0",
                           mb: 1,
                           p: 2,
+                          backgroundColor:
+                            role === "student" &&
+                            checkInStatus[
+                              sessionId || session.id || session.SessionId
+                            ]
+                              ? "rgba(76, 175, 80, 0.08)"
+                              : undefined,
                           "&:hover": {
-                            backgroundColor: "rgba(25, 118, 210, 0.04)",
-                            borderColor: "#1976d2",
+                            backgroundColor:
+                              role === "student" &&
+                              checkInStatus[
+                                sessionId || session.id || session.SessionId
+                              ]
+                                ? "rgba(76, 175, 80, 0.12)"
+                                : "rgba(25, 118, 210, 0.04)",
+                            borderColor:
+                              role === "student" &&
+                              checkInStatus[
+                                sessionId || session.id || session.SessionId
+                              ]
+                                ? "#4caf50"
+                                : "#1976d2",
                           },
                         }}
                       >
@@ -343,6 +442,26 @@ const EventSessions = () => {
                                   label={status.text}
                                   color={status.color}
                                   size="small"
+                                  sx={
+                                    role === "student"
+                                      ? {
+                                          fontWeight: isCheckedIn
+                                            ? "bold"
+                                            : "normal",
+                                          "& .MuiChip-label": {
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                          },
+                                        }
+                                      : {
+                                          "& .MuiChip-label": {
+                                            display: "flex",
+                                            alignItems: "center",
+                                            gap: "4px",
+                                          },
+                                        }
+                                  }
                                 />
                                 {(role === "organizer" || role === "admin") && (
                                   <IconButton
@@ -473,13 +592,6 @@ const EventSessions = () => {
             <QRCodeGenerator session={selectedSession} event={event} />
           ) : (
             <Typography>Đang tải...</Typography>
-          )}
-          {/* Debug info */}
-          {selectedSession && (
-            <Box sx={{ mt: 2, p: 1, bgcolor: "#f5f5f5", fontSize: "12px" }}>
-              <strong>Debug:</strong> Session ID:{" "}
-              {selectedSession.id || selectedSession.sessionId || "N/A"}
-            </Box>
           )}
         </DialogContent>
       </Dialog>

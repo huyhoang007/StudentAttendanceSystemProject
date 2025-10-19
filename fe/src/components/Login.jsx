@@ -24,7 +24,7 @@ const Login = () => {
     setError("");
     try {
       const data = await login(username, password);
-      localStorage.setItem("token", data.token);
+      localStorage.setItem("authToken", data.token);
       window.location.reload();
     } catch (err) {
       setError(err.message || "Login failed");
