@@ -175,12 +175,13 @@ export const checkStudentRegistration = async (eventId, studentCode, token) => {
   }
 };
 
-export const addStudentToEvent = async (data, token) => {
+export const addStudentToEvent = async (data) => {
+  const token = localStorage.getItem("authToken");
   const res = await fetch("/api/StudentInEvent", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify(data),
   });
@@ -195,22 +196,40 @@ export const addStudentToEvent = async (data, token) => {
 };
 
 export const addMultipleStudentsToEvent = async (data, token) => {
+  // Get token from localStorage if not provided
+  const authToken = token || localStorage.getItem("authToken");
+  
+  console.log("Adding multiple students to event:", {
+    data,
+    hasToken: !!authToken
+  });
+
   const res = await fetch("/api/StudentInEvent/batch", {
-    method: "POST",
+    method: "POST", 
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      Authorization: `Bearer ${authToken}` // Always include token
     },
     body: JSON.stringify(data),
   });
+
+  console.log("Batch add response status:", res.status);
+
   if (!res.ok) {
     let errMsg = "Lỗi không xác định!";
     try {
-      errMsg = await res.text();
-    } catch {}
+      const errorData = await res.json();
+      console.error("Batch add error:", errorData);
+      errMsg = errorData.message || errorData.title || "Thêm sinh viên thất bại";
+    } catch (error) {
+      console.error("Error parsing error response:", error);
+    }
     throw { message: errMsg };
   }
-  return res.json();
+
+  const result = await res.json();
+  console.log("Batch add success:", result);
+  return result;
 };
 
 export const updateStudentStatus = async (studentInEventId, status, token) => {

@@ -68,15 +68,34 @@ export const getStudentCheckInStatus = async (sessionId) => {
 
 // Gọi API backend cho SessionCheckIn
 export const getCheckIns = async () => {
+  console.log("Getting all check-ins...");
   const token = localStorage.getItem("authToken");
-  const res = await fetch("/api/checkin", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  if (!res.ok) throw await res.json();
-  return res.json();
+  console.log("Using auth token:", token ? "Token exists" : "No token found");
+  
+  try {
+    const res = await fetch("/api/CheckIn", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    
+    console.log("Check-ins API response status:", res.status);
+    console.log("Response headers:", Object.fromEntries(res.headers.entries()));
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      console.error("API Error:", errorData);
+      throw errorData;
+    }
+
+    const data = await res.json();
+    console.log("Check-ins data received:", data);
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch check-ins:", error);
+    throw error;
+  }
 };
 
 export const getCheckInsBySession = async (sessionId) => {
