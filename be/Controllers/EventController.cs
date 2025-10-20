@@ -8,6 +8,7 @@ namespace Student_Attendance_System.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;

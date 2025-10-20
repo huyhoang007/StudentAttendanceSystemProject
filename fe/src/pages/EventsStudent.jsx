@@ -198,7 +198,7 @@ const EventsStudent = () => {
 
     try {
       const eventId = selectedEvent.eventId || selectedEvent.EventId;
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
 
       if (!eventId) {
         throw new Error("Không tìm thấy ID sự kiện");

@@ -294,7 +294,7 @@ const StudentInEventManagement = () => {
     try {
       const token = localStorage.getItem("authToken"); // Fix: use authToken instead of token
       console.log("Token for batch add:", token ? "Token exists" : "No token");
-      
+
       await addMultipleStudentsToEvent(
         {
           EventId: selectedEventId,
@@ -353,8 +353,11 @@ const StudentInEventManagement = () => {
   const handleAddSingleStudentFromDialog = async (student) => {
     try {
       const token = localStorage.getItem("authToken"); // Fix: use authToken instead of token
-      console.log("Token for single student add:", token ? "Token exists" : "No token");
-      
+      console.log(
+        "Token for single student add:",
+        token ? "Token exists" : "No token"
+      );
+
       await addStudentToEvent(
         {
           EventId: selectedEventId,
@@ -374,7 +377,10 @@ const StudentInEventManagement = () => {
   const handleAddMultipleStudentsFromDialog = async (studentsToAdd) => {
     try {
       const token = localStorage.getItem("authToken"); // Fix: use authToken instead of token
-      console.log("Token for batch add from dialog:", token ? "Token exists" : "No token");
+      console.log(
+        "Token for batch add from dialog:",
+        token ? "Token exists" : "No token"
+      );
 
       await addMultipleStudentsToEvent(
         {
@@ -433,7 +439,7 @@ const StudentInEventManagement = () => {
     if (!window.confirm("Bạn có chắc muốn xóa sinh viên khỏi sự kiện?")) return;
 
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
       await removeStudentFromEvent(studentInEventId, token);
       fetchStudentsInEvent();
     } catch (err) {

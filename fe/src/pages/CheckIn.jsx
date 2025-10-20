@@ -95,7 +95,13 @@ const CheckIn = () => {
       try {
         // First, get student details to get the correct StudentCode
         console.log("Fetching student details for studentId:", user.studentId);
-        const studentRes = await fetch(`/api/Student/${user.studentId}`);
+        const authToken = localStorage.getItem("authToken");
+        const studentRes = await fetch(`/api/Student/${user.studentId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+          },
+        });
 
         if (!studentRes.ok) {
           throw new Error("Cannot fetch student details");
@@ -128,9 +134,14 @@ const CheckIn = () => {
         console.log("Real StudentCode from database:", studentCode);
         console.log("Sending check-in data:", checkInData);
 
+        console.log("Sending QR check-in with payload:", checkInData);
+        const authTokenForCheckIn = localStorage.getItem("authToken");
         const checkInRes = await fetch("/api/CheckIn/qr-checkin", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(authTokenForCheckIn ? { Authorization: `Bearer ${authTokenForCheckIn}` } : {}),
+          },
           body: JSON.stringify(checkInData),
         });
 

@@ -71,7 +71,7 @@ export const getCheckIns = async () => {
   console.log("Getting all check-ins...");
   const token = localStorage.getItem("authToken");
   console.log("Using auth token:", token ? "Token exists" : "No token found");
-  
+
   try {
     const res = await fetch("/api/CheckIn", {
       headers: {
@@ -79,7 +79,7 @@ export const getCheckIns = async () => {
         "Content-Type": "application/json",
       },
     });
-    
+
     console.log("Check-ins API response status:", res.status);
     console.log("Response headers:", Object.fromEntries(res.headers.entries()));
 

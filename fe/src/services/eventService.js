@@ -1,29 +1,50 @@
 // Gọi API backend cho Event
 export const getEvents = async () => {
-  const res = await fetch("/api/event");
+  const token = localStorage.getItem("authToken");
+  const res = await fetch("/api/event", {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getEventsByUniversity = async (universityId) => {
-  const res = await fetch(`/api/event/by-university/${universityId}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/event/by-university/${universityId}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getEventById = async (id) => {
-  const res = await fetch(`/api/event/${id}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/event/${id}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getEvent = async (id) => {
-  const res = await fetch(`/api/event/${id}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/event/${id}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
-export const addEvent = async (data, token) => {
+export const addEvent = async (data) => {
+  const token = localStorage.getItem("authToken");
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),

@@ -12,14 +12,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     const data = await loginService(username, password);
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("authToken", data.token);
     localStorage.setItem("app_user", JSON.stringify(data.user));
     setUser(data.user);
     return data;
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("authToken");
     localStorage.removeItem("app_user");
     setUser(null);
   };

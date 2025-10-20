@@ -17,25 +17,28 @@ export const getStudentsByEvent = async (eventId) => {
 
 export const getEventsByStudent = async (studentId) => {
   const token = localStorage.getItem("authToken");
-  console.log("Making request to:", `/api/registration/by-student/${studentId}`);
+  console.log(
+    "Making request to:",
+    `/api/registration/by-student/${studentId}`
+  );
   console.log("Using token:", token ? "Token exists" : "No token");
-  
+
   const res = await fetch(`/api/registration/by-student/${studentId}`, {
     headers: {
-      "Authorization": `Bearer ${token}`,
-      "Content-Type": "application/json"
-    }
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
   });
-  
+
   console.log("Events response status:", res.status);
   console.log("Events response ok:", res.ok);
-  
+
   if (!res.ok) {
     const error = await res.json();
     console.error("Events API Error:", error);
     throw error;
   }
-  
+
   const data = await res.json();
   console.log("Events data received:", data);
   return data;
@@ -198,17 +201,17 @@ export const addStudentToEvent = async (data) => {
 export const addMultipleStudentsToEvent = async (data, token) => {
   // Get token from localStorage if not provided
   const authToken = token || localStorage.getItem("authToken");
-  
+
   console.log("Adding multiple students to event:", {
     data,
-    hasToken: !!authToken
+    hasToken: !!authToken,
   });
 
   const res = await fetch("/api/StudentInEvent/batch", {
-    method: "POST", 
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${authToken}` // Always include token
+      Authorization: `Bearer ${authToken}`, // Always include token
     },
     body: JSON.stringify(data),
   });
@@ -220,7 +223,8 @@ export const addMultipleStudentsToEvent = async (data, token) => {
     try {
       const errorData = await res.json();
       console.error("Batch add error:", errorData);
-      errMsg = errorData.message || errorData.title || "Thêm sinh viên thất bại";
+      errMsg =
+        errorData.message || errorData.title || "Thêm sinh viên thất bại";
     } catch (error) {
       console.error("Error parsing error response:", error);
     }

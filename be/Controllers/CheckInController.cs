@@ -203,13 +203,20 @@ namespace Student_Attendance_System.Controllers
                 Console.WriteLine($"[DEBUG] Found {sessionCheckIns.Count()} check-ins for session");
                 foreach (var checkIn in sessionCheckIns)
                 {
-                    Console.WriteLine($"[DEBUG] Check-in: StudentCode={checkIn.StudentCode}, StudentInEventId={checkIn.StudentInEventId}");
+                    Console.WriteLine($"[DEBUG] Check-in DTO: StudentCode={checkIn.StudentCode}, StudentId={checkIn.StudentId}, StudentInEventId={checkIn.StudentInEventId}");
                 }
 
-                // Tìm check-in của sinh viên dựa trên StudentCode trong DTO
-                var studentCheckin = sessionCheckIns.FirstOrDefault(c =>
-                    !string.IsNullOrEmpty(c.StudentCode) &&
-                    c.StudentCode == studentId.ToString());
+                // Try to match by StudentId (preferred) or fallback to StudentCode if necessary
+                SessionCheckInDto? studentCheckin = sessionCheckIns.FirstOrDefault(c =>
+                    (c.StudentId.HasValue && c.StudentId.Value == studentId));
+
+                if (studentCheckin == null)
+                {
+                    // Fallback: some clients might pass a student identifier string in StudentCode
+                    var studentIdString = studentId.ToString();
+                    studentCheckin = sessionCheckIns.FirstOrDefault(c =>
+                        !string.IsNullOrEmpty(c.StudentCode) && c.StudentCode.Equals(studentIdString, StringComparison.OrdinalIgnoreCase));
+                }
 
                 var isCheckedIn = studentCheckin != null;
 

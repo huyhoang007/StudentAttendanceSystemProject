@@ -1,6 +1,6 @@
 // Gọi API backend cho Organizer
 export const getOrganizerByUserId = async (userId) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/organizers/user/${userId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -11,7 +11,7 @@ export const getOrganizerByUserId = async (userId) => {
 };
 
 export const getOrganizerById = async (organizerId) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/organizers/${organizerId}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -22,7 +22,7 @@ export const getOrganizerById = async (organizerId) => {
 };
 
 export const updateOrganizer = async (organizerId, updateData) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/organizers/${organizerId}`, {
     method: "PUT",
     headers: {
@@ -36,7 +36,7 @@ export const updateOrganizer = async (organizerId, updateData) => {
 };
 
 export const getOrganizers = async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch("/api/organizers", {
     headers: {
       Authorization: `Bearer ${token}`,

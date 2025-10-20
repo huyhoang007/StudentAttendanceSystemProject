@@ -48,7 +48,7 @@ export const getSessionsByEvent = async (eventId) => {
 };
 
 export const addSession = async (data) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/EventSession`, {
     method: "POST",
     headers: {
@@ -69,7 +69,7 @@ export const addSession = async (data) => {
 };
 
 export const updateSession = async (id, data) => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/EventSession/${id}`, {
     method: "PUT",
     headers: {
@@ -90,8 +90,12 @@ export const updateSession = async (id, data) => {
 };
 
 export const deleteSession = async (id) => {
+  const token = localStorage.getItem("authToken");
   const res = await fetch(`/api/EventSession/${id}`, {
     method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
   if (!res.ok && res.status !== 204) throw await res.json();
   return true;

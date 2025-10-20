@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Student_Attendance_System.DTOs;
 using Student_Attendance_System.Services;
 using Student_Attendance_System.Services.Interfaces;
@@ -7,6 +8,7 @@ namespace Student_Attendance_System.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class EventSessionController : ControllerBase
     {
         private readonly IEventSessionService _sessionService;
@@ -100,6 +102,7 @@ namespace Student_Attendance_System.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin,organizer")]
         public async Task<ActionResult<EventSessionDto>> CreateSession([FromBody] CreateEventSessionDto createDto)
         {
             try
@@ -127,6 +130,7 @@ namespace Student_Attendance_System.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "admin,organizer")]
         public async Task<ActionResult<EventSessionDto>> UpdateSession(Guid id, [FromBody] UpdateEventSessionDto updateDto)
         {
             try
@@ -154,6 +158,7 @@ namespace Student_Attendance_System.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "admin,organizer")]
         public async Task<IActionResult> DeleteSession(Guid id)
         {
             try

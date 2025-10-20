@@ -1,33 +1,57 @@
 // Gọi API backend cho Student
 
 export const getStudents = async () => {
-  const res = await fetch("/api/student");
+  const token = localStorage.getItem("authToken");
+  const res = await fetch("/api/student", {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getStudentById = async (id) => {
-  const res = await fetch(`/api/student/${id}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/student/${id}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getStudentByCode = async (studentCode) => {
-  const res = await fetch(`/api/student/by-code/${studentCode}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/student/by-code/${studentCode}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getStudentByUserId = async (userId) => {
-  const res = await fetch(`/api/student/by-user/${userId}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/student/by-user/${userId}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const addStudent = async (student) => {
+  const token = localStorage.getItem("authToken");
   const res = await fetch("/api/student", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
     body: JSON.stringify(student),
   });
   if (!res.ok) throw await res.json();
