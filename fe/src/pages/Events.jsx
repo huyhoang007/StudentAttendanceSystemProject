@@ -74,7 +74,12 @@ const Events = () => {
           setData([]);
           return;
         }
-        res = await fetch(`/api/event/by-organizer/${organizerId}`);
+        const token = localStorage.getItem("authToken");
+        res = await fetch(`/api/event/by-organizer/${organizerId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
         res = await res.json();
       } else {
@@ -171,7 +176,7 @@ const Events = () => {
       return;
     }
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
     setEventError("");
     try {
       if (editId) await updateEvent(editId, eventData, token);
@@ -189,7 +194,7 @@ const Events = () => {
 
   const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa?")) {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("authToken");
       await deleteEvent(id, token);
       fetchData();
     }

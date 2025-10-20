@@ -7,7 +7,12 @@ export const getEventSessions = async (event_id) => {
   console.log(`🔄 Calling API: /api/EventSession/by-event/${event_id}`);
 
   try {
-    const res = await fetch(`/api/EventSession/by-event/${event_id}`);
+    const token = localStorage.getItem("authToken");
+    const res = await fetch(`/api/EventSession/by-event/${event_id}`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      }
+    });
     console.log(`📡 API Response status: ${res.status}`);
 
     if (!res.ok) {
@@ -26,13 +31,23 @@ export const getEventSessions = async (event_id) => {
 };
 
 export const getSessions = async () => {
-  const res = await fetch(`/api/EventSession`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/EventSession`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
 
 export const getSession = async (id) => {
-  const res = await fetch(`/api/EventSession/${id}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/EventSession/${id}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };
@@ -42,7 +57,12 @@ export const getSessionsByEvent = async (eventId) => {
     throw new Error("Event ID is required");
   }
 
-  const res = await fetch(`/api/EventSession/by-event/${eventId}`);
+  const token = localStorage.getItem("authToken");
+  const res = await fetch(`/api/EventSession/by-event/${eventId}`, {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
   if (!res.ok) throw await res.json();
   return res.json();
 };

@@ -115,7 +115,12 @@ const Sessions = () => {
     try {
       let eventsData;
       if (role === "organizer" && organizerId) {
-        const res = await fetch(`/api/event/by-organizer/${organizerId}`);
+        const token = localStorage.getItem("authToken");
+        const res = await fetch(`/api/event/by-organizer/${organizerId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         eventsData = await res.json();
       } else {
@@ -141,8 +146,14 @@ const Sessions = () => {
       let sessions;
       if (selectedEventId) {
         // Fetch sessions by event ID
+        const token = localStorage.getItem("authToken");
         const res = await fetch(
-          `/api/EventSession/by-event/${selectedEventId}`
+          `/api/EventSession/by-event/${selectedEventId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         sessions = await res.json();
