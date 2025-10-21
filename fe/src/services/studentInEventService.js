@@ -256,20 +256,46 @@ export const updateStudentStatus = async (studentInEventId, status, token) => {
 };
 
 export const removeStudentFromEvent = async (studentInEventId, token) => {
+  console.log("🔄 Deleting student from event with ID:", studentInEventId);
+
+  if (!studentInEventId) {
+    console.error("❌ Missing studentInEventId");
+    throw { message: "ID sinh viên không hợp lệ" };
+  }
+
   const res = await fetch(`/api/StudentInEvent/${studentInEventId}`, {
     method: "DELETE",
     headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     },
   });
+
+  console.log("📡 Delete response status:", res.status);
+
   if (!res.ok) {
     let errMsg = "Lỗi không xác định!";
     try {
-      errMsg = await res.text();
-    } catch {}
+      const errorText = await res.text();
+      console.error("❌ Delete error response:", errorText);
+      errMsg = errorText || "Không thể xóa sinh viên khỏi sự kiện";
+    } catch (error) {
+      console.error("❌ Error parsing error response:", error);
+    }
     throw { message: errMsg };
   }
-  return res.json();
+
+  // Nếu xóa thành công và không có response body (status 204)
+  if (res.status === 204) {
+    return { success: true };
+  }
+
+  // Nếu có response body
+  try {
+    return await res.json();
+  } catch {
+    return { success: true };
+  }
 };
 
 export const importStudentsFromCsv = async (eventId, csvFile, token) => {

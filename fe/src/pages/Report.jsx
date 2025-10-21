@@ -56,28 +56,55 @@ const Report = () => {
   // LOGIC ĐƯỢC GIỮ NGUYÊN (CHỈ XÓA MOCK DATA)
   // =================================================================
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       console.log("Fetching check-ins data for report...");
       const res = await getCheckIns();
-      // Luôn cập nhật state với dữ liệu từ API (hoặc mảng rỗng)
-      setData(Array.isArray(res) ? [...res] : []);
+
+      // Lọc dữ liệu theo organizerId và universityId của organizer hiện tại
+      let filteredData = Array.isArray(res) ? [...res] : [];
+
+      if (role === "organizer" && user?.organizerId) {
+        // Lọc dữ liệu dựa trên organizerId hiện tại
+        filteredData = filteredData.filter((item) => {
+          // Kiểm tra nếu item có organizerId phù hợp với user hiện tại
+          return item.organizerId === user.organizerId;
+        });
+      }
+
+      setData(filteredData);
     } catch (error) {
       console.error("Error fetching check-ins:", error);
-      // Nếu lỗi, set data thành mảng rỗng
       setData([]);
     }
-  };
+  }, [role, user]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
-      const res = await getEvents();
+      let res;
+      if (role === "organizer" && user?.organizerId) {
+        // Nếu là organizer, chỉ lấy sự kiện của họ
+        const token = localStorage.getItem("authToken");
+        const response = await fetch(
+          `/api/event/by-organizer/${user.organizerId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        res = await response.json();
+      } else {
+        // Nếu là admin, lấy tất cả sự kiện
+        res = await getEvents();
+      }
       setEvents(Array.isArray(res) ? [...res] : []);
     } catch (error) {
       console.error("Error fetching events:", error);
       setEvents([]);
     }
-  };
+  }, [role, user]);
 
   const fetchUniversities = useCallback(async () => {
     try {
@@ -106,7 +133,7 @@ const Report = () => {
     fetchData();
     fetchEvents();
     fetchUniversities();
-  }, [role, user, fetchUniversities]);
+  }, [role, user, fetchUniversities, fetchData, fetchEvents]);
 
   // LOGIC LỌC VÀ TÍNH TOÁN CỦA BẠN ĐƯỢC GIỮ NGUYÊN
   const filteredData = data.filter((item) => {

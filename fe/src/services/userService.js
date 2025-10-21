@@ -1,16 +1,16 @@
 // User Service for Admin Management
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
+  const token = localStorage.getItem("authToken");
   return {
-    'Content-Type': 'application/json',
-    ...(token && { Authorization: `Bearer ${token}` })
+    "Content-Type": "application/json",
+    ...(token && { Authorization: `Bearer ${token}` }),
   };
 };
 
 export const getAllUsers = async () => {
   const res = await fetch("/api/users", {
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
   if (!res.ok) throw new Error("Failed to fetch users");
   return res.json();
@@ -45,7 +45,7 @@ export const updateUser = async (userId, userData) => {
 export const deleteUser = async (userId) => {
   const res = await fetch(`/api/users/${userId}`, {
     method: "DELETE",
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
   if (!res.ok) {
     const error = await res.json();

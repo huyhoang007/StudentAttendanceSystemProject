@@ -27,6 +27,9 @@ import {
   ListItemText,
   List,
   ListItem,
+  Divider,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 // ListItemText đã được import ở trên, không import lại
 import {
@@ -39,6 +42,10 @@ import {
   Person as PersonIcon,
   People as PeopleIcon,
   MoreVert as MoreVertIcon,
+  AccessTime as AccessTimeIcon,
+  EventNote as EventNoteIcon,
+  CheckCircle as CheckCircleIcon,
+  PlaylistAddCheck as PlaylistAddCheckIcon,
 } from "@mui/icons-material";
 import { useSearchParams } from "react-router-dom";
 import {
@@ -49,9 +56,10 @@ import {
   removeStudentFromEvent,
   importStudentsFromCsv,
 } from "../services/studentInEventService";
-import { getEvents } from "../services/eventService";
+import { getEvents, getEventsByUniversity } from "../services/eventService";
 import { getStudents } from "../services/studentService";
 import { getSessionsByEvent } from "../services/eventSessionService";
+import { getUniversities } from "../services/universityService";
 import {
   addCheckIn,
   getCheckInsBySession,
@@ -68,6 +76,8 @@ const StudentInEventManagement = () => {
   const [students, setStudents] = useState([]);
   const [selectedEventId, setSelectedEventId] = useState(initialEventId || "");
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [universities, setUniversities] = useState([]);
+  const [selectedUniversity, setSelectedUniversity] = useState("");
 
   // Dialog states
   const [openAddDialog, setOpenAddDialog] = useState(false);
@@ -99,10 +109,22 @@ const StudentInEventManagement = () => {
         const res = await fetch(`/api/event/by-organizer/${organizerId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Content-Type": "application/json",
+          },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        eventsData = await res.json();
+      } else if (role === "admin" && selectedUniversity) {
+        const token = localStorage.getItem("authToken");
+        const res = await fetch(
+          `/api/event/by-university/${selectedUniversity}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
         eventsData = await res.json();
       } else {
         eventsData = await getEvents();
@@ -157,8 +179,19 @@ const StudentInEventManagement = () => {
   useEffect(() => {
     fetchEvents();
     fetchStudents();
+    if (role === "admin") {
+      getUniversities().then(setUniversities).catch(console.error);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role, organizerId]);
+
+  // Re-fetch events when selected university changes
+  useEffect(() => {
+    if (role === "admin") {
+      fetchEvents();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUniversity]);
 
   useEffect(() => {
     if (selectedEventId) {
@@ -188,6 +221,17 @@ const StudentInEventManagement = () => {
   const [manualCheckInStatus, setManualCheckInStatus] = useState({}); // { sessionId: true/false }
   const [manualCheckInStudentId, setManualCheckInStudentId] = useState(null);
   const [manualCheckInLoading, setManualCheckInLoading] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  // Hàm đóng snackbar
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   // Hàm mở dialog chọn phiên khi check-in thủ công
   const handleManualCheckIn = async (studentInEventId) => {
@@ -243,7 +287,11 @@ const StudentInEventManagement = () => {
       await handleManualCheckIn(studentInEventId);
       fetchStudentsInEvent();
       setError("");
-      alert("Check-in thủ công thành công cho phiên đã chọn!");
+      setSnackbar({
+        open: true,
+        message: "Check-in thủ công thành công cho phiên đã chọn!",
+        severity: "success",
+      });
     } catch (error) {
       // Nếu đã điểm danh rồi thì chỉ cảnh báo, không setError
       if (
@@ -251,15 +299,21 @@ const StudentInEventManagement = () => {
         error.message &&
         error.message.includes("already checked in")
       ) {
-        alert("Sinh viên đã được điểm danh cho phiên này!");
+        setSnackbar({
+          open: true,
+          message: "Sinh viên đã được điểm danh cho phiên này!",
+          severity: "warning",
+        });
         setError("");
       } else {
-        setError(
-          "Lỗi khi check-in thủ công: " + (error?.message || "Không xác định")
-        );
-        alert(
-          "Lỗi khi check-in thủ công: " + (error?.message || "Không xác định")
-        );
+        const errorMessage =
+          "Lỗi khi check-in thủ công: " + (error?.message || "Không xác định");
+        setError(errorMessage);
+        setSnackbar({
+          open: true,
+          message: errorMessage,
+          severity: "error",
+        });
       }
       console.error("[ERROR] Manual check-in:", error);
     } finally {
@@ -445,11 +499,34 @@ const StudentInEventManagement = () => {
     if (!window.confirm("Bạn có chắc muốn xóa sinh viên khỏi sự kiện?")) return;
 
     try {
+      console.log(
+        "🔄 Starting remove student process for ID:",
+        studentInEventId
+      );
       const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("Không tìm thấy token xác thực");
+      }
+
       await removeStudentFromEvent(studentInEventId, token);
+      console.log("✅ Successfully removed student from event");
       fetchStudentsInEvent();
+      setError(""); // Clear any existing errors
+      setSnackbar({
+        open: true,
+        message: "Đã xóa sinh viên khỏi sự kiện thành công",
+        severity: "success",
+      });
     } catch (err) {
-      setError("Lỗi khi xóa sinh viên: " + (err.message || "Không xác định"));
+      console.error("❌ Error removing student:", err);
+      const errorMessage =
+        "Lỗi khi xóa sinh viên: " + (err.message || "Không xác định");
+      setError(errorMessage);
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: "error",
+      });
     }
   };
 
@@ -491,6 +568,55 @@ const StudentInEventManagement = () => {
                 Tạo sự kiện mới
               </Button>
             )}
+          </Box>
+        )}
+
+        {role === "admin" && (
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="subtitle1"
+              fontWeight={600}
+              sx={{ mb: 1, color: "#1976d2" }}
+            >
+              🏫 Chọn trường để xem sự kiện
+            </Typography>
+            <FormControl fullWidth size="medium">
+              <Select
+                value={selectedUniversity}
+                onChange={(e) => {
+                  setSelectedUniversity(e.target.value);
+                  setSelectedEventId("");
+                  setSelectedEvent(null);
+                }}
+                displayEmpty
+                sx={{
+                  bgcolor: "white",
+                  minHeight: "56px",
+                }}
+                renderValue={(selected) => {
+                  if (!selected) {
+                    return (
+                      <span style={{ color: "#9e9e9e" }}>
+                        -- Chọn trường --
+                      </span>
+                    );
+                  }
+                  const uni = universities.find(
+                    (u) => u.universityId === selected
+                  );
+                  return uni ? uni.name : "";
+                }}
+              >
+                <MenuItem value="">
+                  <em>-- Tất cả trường --</em>
+                </MenuItem>
+                {universities.map((uni) => (
+                  <MenuItem key={uni.universityId} value={uni.universityId}>
+                    {uni.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Box>
         )}
 
@@ -749,89 +875,14 @@ const StudentInEventManagement = () => {
                         color="primary"
                         onClick={() =>
                           handleManualCheckIn(
-                            item.StudentInEventId || item.studentInEventId
+                            item.StudentInEventId || item.studentInEventId,
+                            item
                           )
                         }
                       >
                         Check-in
                       </Button>
                     </TableCell>
-                    {/* Dialog chọn phiên khi check-in thủ công */}
-                    <Dialog
-                      open={manualCheckInDialogOpen}
-                      onClose={() => setManualCheckInDialogOpen(false)}
-                    >
-                      <DialogTitle>Chọn phiên để check-in thủ công</DialogTitle>
-                      <DialogContent>
-                        {manualCheckInLoading ? (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              minHeight: 100,
-                            }}
-                          >
-                            <CircularProgress />
-                          </Box>
-                        ) : manualCheckInSessions.length === 0 ? (
-                          <Typography>
-                            Không có phiên nào cho sự kiện này.
-                          </Typography>
-                        ) : (
-                          <List>
-                            {manualCheckInSessions.map((session) => {
-                              const sessionId =
-                                session.sessionId || session.SessionId;
-                              const checkedIn = manualCheckInStatus[sessionId];
-                              return (
-                                <ListItem key={sessionId}>
-                                  <ListItemText
-                                    primary={session.title || session.Title}
-                                    secondary={`⏰ ${
-                                      session.startTime || session.StartTime
-                                    } - ${session.endTime || session.EndTime}`}
-                                  />
-                                  {checkedIn ? (
-                                    <Chip
-                                      label="Đã check-in"
-                                      color="success"
-                                      size="small"
-                                    />
-                                  ) : (
-                                    <Button
-                                      variant="outlined"
-                                      size="small"
-                                      color="primary"
-                                      onClick={() =>
-                                        handleManualCheckInSession(session)
-                                      }
-                                      disabled={
-                                        manualCheckInLoading || checkedIn
-                                      }
-                                      title={
-                                        checkedIn
-                                          ? "Sinh viên đã check-in phiên này (QR hoặc thủ công)"
-                                          : ""
-                                      }
-                                    >
-                                      Check-in
-                                    </Button>
-                                  )}
-                                </ListItem>
-                              );
-                            })}
-                          </List>
-                        )}
-                      </DialogContent>
-                      <DialogActions>
-                        <Button
-                          onClick={() => setManualCheckInDialogOpen(false)}
-                        >
-                          Đóng
-                        </Button>
-                      </DialogActions>
-                    </Dialog>
                     <TableCell align="right">
                       <IconButton
                         color="error"
@@ -1049,6 +1100,222 @@ const StudentInEventManagement = () => {
         eventId={selectedEventId}
         excludeRegistered={true}
       />
+
+      {/* Dialog chọn phiên khi check-in thủ công */}
+      <Dialog
+        open={manualCheckInDialogOpen}
+        onClose={() => setManualCheckInDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            minWidth: "400px",
+            maxWidth: "600px",
+            borderRadius: "12px",
+            boxShadow: "0 8px 32px rgba(0, 0, 0, 0.08)",
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            pb: 2,
+            borderBottom: "1px solid",
+            borderColor: "divider",
+            bgcolor: "#f8f9fa",
+          }}
+        >
+          <PlaylistAddCheckIcon color="primary" />
+          <Box>
+            <Typography variant="h6" sx={{ color: "#1976d2", fontWeight: 600 }}>
+              Check-in thủ công
+            </Typography>
+            {selectedStudent && (
+              <Typography
+                variant="subtitle2"
+                sx={{ color: "text.secondary", mt: 0.5 }}
+              >
+                {selectedStudent.StudentName || selectedStudent.studentName} (
+                {selectedStudent.StudentCode || selectedStudent.studentCode})
+              </Typography>
+            )}
+          </Box>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0 }}>
+          {manualCheckInLoading ? (
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+                p: 3,
+              }}
+            >
+              <CircularProgress size={40} />
+              <Typography sx={{ mt: 2 }} color="text.secondary">
+                Đang tải danh sách phiên...
+              </Typography>
+            </Box>
+          ) : manualCheckInSessions.length === 0 ? (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                minHeight: 200,
+                p: 3,
+              }}
+            >
+              <Typography color="text.secondary">
+                Không có phiên nào cho sự kiện này
+              </Typography>
+            </Box>
+          ) : (
+            <List sx={{ py: 0, maxHeight: "60vh", overflowY: "auto" }}>
+              {manualCheckInSessions.map((session, index) => {
+                const sessionId = session.sessionId || session.SessionId;
+                const checkedIn = manualCheckInStatus[sessionId];
+
+                return (
+                  <React.Fragment key={sessionId}>
+                    <ListItem
+                      sx={{
+                        px: 3,
+                        py: 2.5,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        bgcolor: checkedIn ? "success.soft" : "transparent",
+                        transition: "background-color 0.2s",
+                        "&:hover": {
+                          bgcolor: checkedIn ? "success.soft" : "action.hover",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          width: "100%",
+                          mb: 1.5,
+                        }}
+                      >
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: 500,
+                            color: checkedIn ? "success.main" : "text.primary",
+                          }}
+                        >
+                          {session.title || session.Title}
+                        </Typography>
+
+                        {checkedIn ? (
+                          <Chip
+                            label="Đã check-in"
+                            color="success"
+                            size="small"
+                            icon={<CheckCircleIcon />}
+                            sx={{ fontWeight: 500 }}
+                          />
+                        ) : (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="primary"
+                            onClick={() => handleManualCheckInSession(session)}
+                            disabled={manualCheckInLoading}
+                            sx={{
+                              borderRadius: "20px",
+                              px: 2,
+                              "&:hover": {
+                                bgcolor: "primary.dark",
+                              },
+                            }}
+                          >
+                            Check-in
+                          </Button>
+                        )}
+                      </Box>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          color: "text.secondary",
+                          mt: 1,
+                        }}
+                      >
+                        <AccessTimeIcon sx={{ fontSize: 18, mr: 1 }} />
+                        <Typography variant="body2">
+                          {new Date(
+                            session.startTime || session.StartTime
+                          ).toLocaleString("vi-VN")}{" "}
+                          -{" "}
+                          {new Date(
+                            session.endTime || session.EndTime
+                          ).toLocaleString("vi-VN")}
+                        </Typography>
+                      </Box>
+                    </ListItem>
+                    {index < manualCheckInSessions.length - 1 && (
+                      <Divider component="li" sx={{ my: 1 }} />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </List>
+          )}
+        </DialogContent>
+
+        <DialogActions
+          sx={{
+            borderTop: "1px solid",
+            borderColor: "divider",
+            px: 3,
+            py: 2,
+            bgcolor: "#f8f9fa",
+          }}
+        >
+          <Button
+            onClick={() => setManualCheckInDialogOpen(false)}
+            variant="outlined"
+            color="primary"
+            sx={{
+              borderRadius: "20px",
+              px: 3,
+              "&:hover": {
+                bgcolor: "rgba(25, 118, 210, 0.04)",
+              },
+            }}
+          >
+            Đóng
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

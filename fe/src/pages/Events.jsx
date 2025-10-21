@@ -77,8 +77,8 @@ const Events = () => {
         const token = localStorage.getItem("authToken");
         res = await fetch(`/api/event/by-organizer/${organizerId}`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text()}`);
         res = await res.json();
@@ -232,7 +232,12 @@ const Events = () => {
         alignItems="center"
         mb={2}
       >
-        <Typography variant="h5" fontWeight={600}>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          color="primary"
+          sx={{ opacity: 1 }}
+        >
           Danh sách sự kiện
         </Typography>
         <Button
