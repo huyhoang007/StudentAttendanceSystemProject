@@ -204,10 +204,20 @@ const AdminUserManagement = () => {
   const handleDelete = async (userId) => {
     // Find the user to check permissions
     const targetUser = users.find(u => u.userId === userId);
+    
     if (!canModifyUser(targetUser)) {
       setSnackbar({
         open: true,
-        message: "Bạn không có quyền xóa Quản trị viên khác!",
+        message: "Bạn không có quyền xóa người dùng này!",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!canDeleteUser(targetUser)) {
+      setSnackbar({
+        open: true,
+        message: "Không thể xóa tài khoản Quản trị viên!",
         severity: "error",
       });
       return;
@@ -279,8 +289,17 @@ const AdminUserManagement = () => {
 
   // Check if current user can edit/delete another user
   const canModifyUser = (targetUser) => {
-    // Admin cannot modify other admins (except themselves for profile updates)
+    // Không thể sửa/xóa tài khoản admin khác
     if (targetUser.role === "admin" && targetUser.userId !== currentUser?.userId) {
+      return false;
+    }
+    return true;
+  };
+
+  // Kiểm tra xem có được phép xóa user không
+  const canDeleteUser = (targetUser) => {
+    // Không cho phép xóa bất kỳ tài khoản admin nào
+    if (targetUser.role === "admin") {
       return false;
     }
     return true;
@@ -447,7 +466,7 @@ const AdminUserManagement = () => {
                           <Refresh />
                         </IconButton>
                       )}
-                      {canModifyUser(user) && (
+                      {canModifyUser(user) && canDeleteUser(user) && (
                         <IconButton
                           onClick={() => handleDelete(user.userId)}
                           sx={{ color: "#e74c3c" }}
@@ -505,7 +524,6 @@ const AdminUserManagement = () => {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 sx={{ borderRadius: 2, background: "#f8fafc" }}
               >
-                <MenuItem value="admin">Quản Trị Viên</MenuItem>
                 <MenuItem value="organizer">Người Tổ Chức</MenuItem>
                 <MenuItem value="student">Sinh Viên</MenuItem>
               </Select>

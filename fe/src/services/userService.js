@@ -48,10 +48,23 @@ export const deleteUser = async (userId) => {
     headers: getAuthHeaders(),
   });
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.message || "Failed to delete user");
+    try {
+      const error = await res.json();
+      throw new Error(error.message || "Failed to delete user");
+    } catch {
+      throw new Error("Failed to delete user");
+    }
   }
-  return res.json();
+  // Delete thành công thường trả về 204 No Content
+  if (res.status === 204) {
+    return { success: true };
+  }
+  // Nếu API trả về data thì parse JSON
+  try {
+    return await res.json();
+  } catch {
+    return { success: true };
+  }
 };
 
 export const resetPassword = async (userId) => {
