@@ -46,11 +46,17 @@ const MainLayout = () => {
     { to: "/report", label: "Báo cáo" },
   ];
 
+  if (role === "organizer") {
+    adminOrgNav.push({ to: "/organizer-profile", label: "Hồ sơ" });
+  }
+
   // compose final nav array for non-student roles, inserting admin-only items when role === 'admin'
   let nonStudentNav = [...adminOrgNav];
   if (role === "admin") {
     // insert admin-specific links after Trang chủ (index 0)
-    nonStudentNav.splice(1, 0,
+    nonStudentNav.splice(
+      1,
+      0,
       { to: "/universities", label: "Trường" },
       { to: "/students", label: "Sinh viên" },
       { to: "/admin-users", label: "Người dùng" }
@@ -60,40 +66,69 @@ const MainLayout = () => {
   const navItems = role === "student" ? studentNav : nonStudentNav;
 
   return (
-    <Box>
+    <Box sx={{ bgcolor: "#f8fafc" }}>
       <AppBar
         position="static"
         color="primary"
         sx={{
-          boxShadow: 3,
           background: "linear-gradient(90deg,#74ebd5,#ACB6E5)",
+          boxShadow: "none",
+          borderBottom: "1px solid rgba(0,0,0,0.1)",
         }}
       >
-        <Toolbar sx={{ minHeight: 64 }}>
-          <Box sx={{ display: "flex", alignItems: "center", flexGrow: 1 }}>
+        <Toolbar
+          sx={{
+            minHeight: { xs: 56, sm: 64 },
+            flexWrap: "wrap",
+            padding: { xs: 1, sm: 2 },
+            gap: 1,
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              flexGrow: 1,
+              minWidth: { xs: "100%", sm: "auto" },
+              mb: { xs: 1, sm: 0 },
+            }}
+          >
             <Avatar
               sx={{
-                width: 40,
-                height: 40,
-                mr: 2,
+                width: { xs: 32, sm: 40 },
+                height: { xs: 32, sm: 40 },
+                mr: 1,
                 bgcolor: "#fff",
-                boxShadow: 2
+                boxShadow: 2,
               }}
             >
               <img
                 src="https://img.icons8.com/fluency/64/000000/student-center.png"
                 alt="logo"
-                style={{ width: 32, height: 32 }}
+                style={{ width: "80%", height: "80%" }}
               />
             </Avatar>
             <Typography
               variant="h6"
-              sx={{ fontWeight: 700, letterSpacing: 1 }}
+              sx={{
+                fontWeight: 700,
+                letterSpacing: 1,
+                fontSize: { xs: "1rem", sm: "1.25rem" },
+              }}
             >
               Student Attendance System
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+          <Box
+            sx={{
+              display: "flex",
+              gap: 0.5,
+              alignItems: "center",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              width: { xs: "100%", sm: "auto" },
+            }}
+          >
             {navItems.map((item) => {
               const active = isActive(item.to);
               return (
@@ -105,10 +140,11 @@ const MainLayout = () => {
                   sx={{
                     fontWeight: 600,
                     textTransform: "none",
-                    px: 2,
+                    px: { xs: 1, sm: 2 },
                     py: 0.75,
                     borderRadius: 2,
-                    gap: 1,
+                    gap: 0.5,
+                    fontSize: { xs: "0.875rem", sm: "1rem" },
                     // hover effect
                     "&:hover": {
                       background: "rgba(255,255,255,0.08)",
@@ -118,7 +154,9 @@ const MainLayout = () => {
                     // active state styling
                     bgcolor: active ? "rgba(255,255,255,0.12)" : "transparent",
                     // subtle underline for active using boxShadow inset
-                    boxShadow: active ? "inset 0 -3px 0 rgba(255,255,255,0.18)" : "none",
+                    boxShadow: active
+                      ? "inset 0 -3px 0 rgba(255,255,255,0.18)"
+                      : "none",
                     // ensure text alignment
                     display: "flex",
                     alignItems: "center",
@@ -131,7 +169,16 @@ const MainLayout = () => {
             })}
           </Box>
           {user && (
-            <Box sx={{ display: "flex", alignItems: "center", ml: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                ml: { xs: 0, sm: 2 },
+                width: { xs: "100%", sm: "auto" },
+                justifyContent: { xs: "center", sm: "flex-start" },
+                mt: { xs: 1, sm: 0 },
+              }}
+            >
               <Tooltip title={user.username}>
                 <Avatar
                   sx={{
@@ -139,13 +186,22 @@ const MainLayout = () => {
                     color: "#fff",
                     fontWeight: 700,
                     mr: 1,
+                    width: { xs: 32, sm: 40 },
+                    height: { xs: 32, sm: 40 },
                   }}
                 >
                   {user.username.charAt(0).toUpperCase()}
                 </Avatar>
               </Tooltip>
-              <IconButton color="error" onClick={handleLogout} sx={{ ml: 1 }}>
-                <span style={{ fontWeight: 700, fontSize: 16 }}>Đăng xuất</span>
+              <IconButton
+                color="error"
+                onClick={handleLogout}
+                sx={{
+                  ml: 1,
+                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                }}
+              >
+                <span style={{ fontWeight: 700 }}>Đăng xuất</span>
               </IconButton>
             </Box>
           )}
@@ -153,12 +209,10 @@ const MainLayout = () => {
       </AppBar>
       <Box
         sx={{
-          mt: 2,
+          mt: 0,
           background: "linear-gradient(135deg, #f8fafc 0%, #e0eafc 100%)",
           minHeight: "calc(100vh - 64px)",
-          p: 2,
-          borderRadius: 2,
-          boxShadow: 1,
+          p: { xs: 1, sm: 2 },
         }}
       >
         <Outlet />

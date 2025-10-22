@@ -71,15 +71,18 @@ const Login = () => {
         alignItems: "center",
         justifyContent: "center",
         background: "linear-gradient(135deg, #74ebd5 0%, #ACB6E5 100%)",
+        p: 0,
+        overflow: "hidden",
       }}
     >
       <Card
         elevation={12}
         sx={{
-          p: 5,
+          p: { xs: 3, sm: 5 },
           borderRadius: 6,
-          minWidth: 370,
+          width: "90%",
           maxWidth: 400,
+          m: 2,
           boxShadow: "0 8px 32px rgba(0,0,0,0.18)",
         }}
       >

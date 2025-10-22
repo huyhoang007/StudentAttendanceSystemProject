@@ -28,6 +28,7 @@ import RoleDashboard from "./pages/RoleDashboard";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import OrganizerProfile from "./pages/OrganizerProfile";
 
 // Component wrapper để sử dụng token check
 function AppWithTokenCheck() {
@@ -123,6 +124,14 @@ function AppWithTokenCheck() {
           element={
             <ProtectedRoute allowedRoles={["student"]}>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="organizer-profile"
+          element={
+            <ProtectedRoute allowedRoles={["organizer"]}>
+              <OrganizerProfile />
             </ProtectedRoute>
           }
         />

@@ -11,5 +11,6 @@ namespace Student_Attendance_System.Services.Interfaces
         Task<OrganizerDto> CreateOrganizerAsync(CreateOrganizerDto createDto);
         Task<OrganizerDto?> UpdateOrganizerAsync(Guid organizerId, UpdateOrganizerDto updateDto);
         Task<bool> DeleteOrganizerAsync(Guid organizerId);
+        Task<OrganizerDto?> UpdateOrganizerProfileAsync(Guid organizerId, UpdateOrganizerProfileDto profileDto);
     }
 }

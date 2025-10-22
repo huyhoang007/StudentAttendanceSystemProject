@@ -81,6 +81,24 @@ namespace Student_Attendance_System.Services
             return true;
         }
 
+        public async Task<OrganizerDto?> UpdateOrganizerProfileAsync(Guid organizerId, UpdateOrganizerProfileDto profileDto)
+        {
+            var organizer = await _organizerRepository.GetByIdAsync(organizerId);
+            if (organizer == null) return null;
+
+            // Update organizer information
+            organizer.OrganizerName = profileDto.OrganizerName;
+            organizer.Organization = profileDto.Organization;
+            organizer.Phone = profileDto.Phone;
+            // UniversityId is not updated as it should be fixed
+
+            await _organizerRepository.UpdateAsync(organizer);
+
+            // Get updated organizer with related data
+            organizer = await _organizerRepository.GetByIdAsync(organizerId);
+            return organizer != null ? MapToDto(organizer) : null;
+        }
+
         private static OrganizerDto MapToDto(Organizer organizer)
         {
             return new OrganizerDto

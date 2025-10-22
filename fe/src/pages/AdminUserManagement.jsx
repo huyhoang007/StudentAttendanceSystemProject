@@ -154,7 +154,10 @@ const AdminUserManagement = () => {
   const handleSave = async () => {
     try {
       // Validation
-      if ((form.role === "organizer" || form.role === "student") && !form.universityId) {
+      if (
+        (form.role === "organizer" || form.role === "student") &&
+        !form.universityId
+      ) {
         setSnackbar({
           open: true,
           message: "Vui lòng chọn trường đại học cho Người Tổ Chức/Sinh Viên!",
@@ -162,7 +165,7 @@ const AdminUserManagement = () => {
         });
         return;
       }
-      
+
       // Additional validation for student
       if (form.role === "student") {
         if (!form.name || !form.studentCode) {
@@ -174,7 +177,7 @@ const AdminUserManagement = () => {
           return;
         }
       }
-      
+
       if (editId) {
         await updateUser(editId, form);
         setSnackbar({
@@ -203,8 +206,8 @@ const AdminUserManagement = () => {
 
   const handleDelete = async (userId) => {
     // Find the user to check permissions
-    const targetUser = users.find(u => u.userId === userId);
-    
+    const targetUser = users.find((u) => u.userId === userId);
+
     if (!canModifyUser(targetUser)) {
       setSnackbar({
         open: true,
@@ -243,7 +246,9 @@ const AdminUserManagement = () => {
   };
 
   const handleResetPassword = async (userId) => {
-    if (window.confirm("Bạn có chắc muốn đặt lại mật khẩu của người dùng này?")) {
+    if (
+      window.confirm("Bạn có chắc muốn đặt lại mật khẩu của người dùng này?")
+    ) {
       try {
         const result = await resetPassword(userId);
         setSnackbar({
@@ -290,7 +295,10 @@ const AdminUserManagement = () => {
   // Check if current user can edit/delete another user
   const canModifyUser = (targetUser) => {
     // Không thể sửa/xóa tài khoản admin khác
-    if (targetUser.role === "admin" && targetUser.userId !== currentUser?.userId) {
+    if (
+      targetUser.role === "admin" &&
+      targetUser.userId !== currentUser?.userId
+    ) {
       return false;
     }
     return true;
@@ -443,9 +451,7 @@ const AdminUserManagement = () => {
                         size="small"
                       />
                     </TableCell>
-                    <TableCell>
-                      {user.universityName || "N/A"}
-                    </TableCell>
+                    <TableCell>{user.universityName || "N/A"}</TableCell>
                     <TableCell>
                       {new Date(user.createdAt).toLocaleDateString("vi-VN")}
                     </TableCell>
@@ -528,7 +534,7 @@ const AdminUserManagement = () => {
                 <MenuItem value="student">Sinh Viên</MenuItem>
               </Select>
             </FormControl>
-            
+
             {/* University selection - only show for organizer and student */}
             {(form.role === "organizer" || form.role === "student") && (
               <FormControl fullWidth margin="normal">
@@ -536,11 +542,16 @@ const AdminUserManagement = () => {
                 <Select
                   value={form.universityId}
                   label="Trường đại học"
-                  onChange={(e) => setForm({ ...form, universityId: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, universityId: e.target.value })
+                  }
                   sx={{ borderRadius: 2, background: "#f8fafc" }}
                 >
                   {universities.map((university) => (
-                    <MenuItem key={university.universityId} value={university.universityId}>
+                    <MenuItem
+                      key={university.universityId}
+                      value={university.universityId}
+                    >
                       {university.name}
                     </MenuItem>
                   ))}
@@ -566,7 +577,9 @@ const AdminUserManagement = () => {
                   label="Mã sinh viên"
                   required
                   value={form.studentCode}
-                  onChange={(e) => setForm({ ...form, studentCode: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, studentCode: e.target.value })
+                  }
                   sx={{ borderRadius: 2, background: "#f8fafc" }}
                 />
                 <TextField

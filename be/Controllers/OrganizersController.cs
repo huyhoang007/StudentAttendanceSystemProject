@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Student_Attendance_System.DTOs;
 using Student_Attendance_System.Services.Interfaces;
+using System.Security.Claims;
 
 namespace Student_Attendance_System.Controllers
 {
@@ -124,6 +125,45 @@ namespace Student_Attendance_System.Controllers
                     return NotFound("Organizer not found");
                 }
                 return NoContent();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+            }
+        }
+
+        [HttpPut("me/profile")]
+        [Consumes("application/json")]
+        public async Task<ActionResult<OrganizerDto>> UpdateProfile([FromBody] UpdateOrganizerProfileDto profileDto)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || string.IsNullOrEmpty(userIdClaim.Value))
+                {
+                    return BadRequest(new { message = "User ID not found in token" });
+                }
+
+                if (!Guid.TryParse(userIdClaim.Value, out Guid userId))
+                {
+                    return BadRequest(new { message = "Invalid user ID format" });
+                }
+
+                Console.WriteLine($"Found user ID in token: {userId}");
+
+                var organizer = await _organizerService.GetOrganizerByUserIdAsync(userId);
+                if (organizer == null)
+                {
+                    return NotFound(new { message = "Organizer profile not found" });
+                }
+
+                if (string.IsNullOrWhiteSpace(profileDto.OrganizerName))
+                {
+                    return BadRequest(new { message = "Organizer Name is required" });
+                }
+
+                var updatedOrganizer = await _organizerService.UpdateOrganizerProfileAsync(organizer.OrganizerId, profileDto);
+                return Ok(updatedOrganizer);
             }
             catch (Exception ex)
             {
