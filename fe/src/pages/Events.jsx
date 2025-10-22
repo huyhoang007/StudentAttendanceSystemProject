@@ -20,6 +20,7 @@ import {
   CardContent,
   CircularProgress,
   Tooltip,
+  MenuItem,
 } from "@mui/material";
 import {
   Add,
@@ -36,6 +37,7 @@ import {
   addEvent,
   updateEvent,
   deleteEvent,
+  getEventsByUniversity,
 } from "../services/eventService";
 import { getOrganizerById, getOrganizers } from "../services/organizerService";
 import { getUniversities } from "../services/universityService";
@@ -46,8 +48,9 @@ const Events = () => {
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
-  const { user, role, organizerId } = useAuth();
+  const { role, organizerId } = useAuth();
   const [organizerInfo, setOrganizerInfo] = useState(null);
+  const [selectedUniversity, setSelectedUniversity] = useState("");
   const [form, setForm] = useState({
     Title: "",
     Description: "",
@@ -226,6 +229,61 @@ const Events = () => {
         </CardContent>
       </Card>
 
+      {role === "admin" && (
+        <Box sx={{ mb: 2 }}>
+          <Typography
+            variant="subtitle1"
+            fontWeight={600}
+            sx={{ mb: 1, color: "#1976d2" }}
+          >
+            🏫 Chọn trường để xem sự kiện
+          </Typography>
+          <Card sx={{ p: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
+            <TextField
+              select
+              fullWidth
+              size="small"
+              value={selectedUniversity || ""}
+              onChange={(e) => {
+                setSelectedUniversity(e.target.value);
+                if (e.target.value) {
+                  getEventsByUniversity(e.target.value)
+                    .then(setData)
+                    .catch((error) => {
+                      console.error("Error fetching events by university:", error);
+                      setEventError("Không thể tải danh sách sự kiện: " + error.message);
+                    });
+                } else {
+                  // If no university selected, fetch all events
+                  fetchData();
+                }
+              }}
+              sx={{ 
+                '& .MuiOutlinedInput-root': {
+                  backgroundColor: "#fff",
+                  '& fieldset': {
+                    borderColor: '#e0e0e0',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#1976d2',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1976d2',
+                  }
+                }
+              }}
+            >
+              <MenuItem value="">-- Tất cả các trường --</MenuItem>
+              {universities.map((univ) => (
+                <MenuItem key={univ.universityId} value={univ.universityId}>
+                  {univ.name}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Card>
+        </Box>
+      )}
+
       <Box
         display="flex"
         justifyContent="space-between"
@@ -266,6 +324,8 @@ const Events = () => {
           sx={{
             borderRadius: 3,
             boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
+            backgroundColor: "white",
+            width: "100%"
           }}
         >
           <Table>
@@ -276,7 +336,6 @@ const Events = () => {
                 <TableCell>Đơn vị tổ chức</TableCell>
                 <TableCell>Ngày bắt đầu</TableCell>
                 <TableCell>Ngày kết thúc</TableCell>
-                {role === "admin" && <TableCell>Phân quyền</TableCell>}
                 <TableCell align="center">Thao tác</TableCell>
               </TableRow>
             </TableHead>
@@ -342,25 +401,6 @@ const Events = () => {
                     <TableCell>
                       {new Date(e.endDate || e.EndDate).toLocaleDateString()}
                     </TableCell>
-                    {role === "admin" && (
-                      <TableCell>
-                        <Chip
-                          label={
-                            e.organizerId === organizerId ||
-                            e.OrganizerId === organizerId
-                              ? "Admin Override"
-                              : "Organizer Event"
-                          }
-                          color={
-                            e.organizerId === organizerId ||
-                            e.OrganizerId === organizerId
-                              ? "error"
-                              : "info"
-                          }
-                          size="small"
-                        />
-                      </TableCell>
-                    )}
                     <TableCell align="center">
                       <Box display="flex" justifyContent="center" gap={0.8}>
                         <Tooltip title="Quản lý phiên">

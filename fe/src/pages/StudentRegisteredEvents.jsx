@@ -214,11 +214,6 @@ const StudentRegisteredEvents = () => {
     }
   };
 
-  // =================================================================
-  //
-  //            BẮT ĐẦU PHẦN GIAO DIỆN (JSX) ĐÃ UPDATE
-  //
-  // =================================================================
 
   if (loading) {
     return (
@@ -467,11 +462,7 @@ const StudentRegisteredEvents = () => {
                         />
                       )}
                     </TableCell>
-                    {/* <TableCell>{"Đã đăng ký"}</TableCell> // <-- ĐÃ XÓA */}
-
-                    {/* =================================================
-                        BẮT ĐẦU CỘT THAO TÁC (GIỮ NGUYÊN NHƯ LẦN TRƯỚC)
-                    ==================================================== */}
+                
                     <TableCell align="center">
                       <Box
                         sx={{
