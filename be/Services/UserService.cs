@@ -9,10 +9,17 @@ namespace Student_Attendance_System.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IStudentRepository _studentRepository;
+        private readonly IOrganizerRepository _organizerRepository;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(
+            IUserRepository userRepository,
+            IStudentRepository studentRepository,
+            IOrganizerRepository organizerRepository)
         {
             _userRepository = userRepository;
+            _studentRepository = studentRepository;
+            _organizerRepository = organizerRepository;
         }
 
         public async Task<UserDto?> GetUserByIdAsync(Guid userId)
@@ -35,6 +42,16 @@ namespace Student_Attendance_System.Services
 
         public async Task<UserDto> CreateUserAsync(RegisterDto registerDto)
         {
+            if (await _userRepository.EmailExistsAsync(registerDto.Email))
+            {
+                throw new InvalidOperationException("Email đã được sử dụng");
+            }
+
+            if (await _userRepository.UsernameExistsAsync(registerDto.Username))
+            {
+                throw new InvalidOperationException("Username đã được sử dụng");
+            }
+
             var user = new User
             {
                 Username = registerDto.Username,
@@ -46,7 +63,44 @@ namespace Student_Attendance_System.Services
 
             await _userRepository.AddAsync(user);
 
-            return MapToDto(user);
+            try
+            {
+                if (registerDto.Role == "student")
+                {
+                    var student = new Student
+                    {
+                        Name = string.IsNullOrWhiteSpace(registerDto.Name) ? registerDto.Username : registerDto.Name!,
+                        StudentCode = string.IsNullOrWhiteSpace(registerDto.StudentCode) ? registerDto.Username : registerDto.StudentCode!,
+                        Email = registerDto.Email,
+                        Phone = registerDto.Phone,
+                        UniversityId = registerDto.UniversityId,
+                        UserId = user.UserId
+                    };
+
+                    await _studentRepository.AddAsync(student);
+                }
+                else if (registerDto.Role == "organizer")
+                {
+                    var organizer = new Organizer
+                    {
+                        UserId = user.UserId,
+                        OrganizerName = string.IsNullOrWhiteSpace(registerDto.Name) ? registerDto.Username : registerDto.Name!,
+                        Organization = null,
+                        Phone = registerDto.Phone,
+                        UniversityId = registerDto.UniversityId
+                    };
+
+                    await _organizerRepository.AddAsync(organizer);
+                }
+            }
+            catch
+            {
+                await _userRepository.DeleteAsync(user);
+                throw;
+            }
+
+            var createdUser = await _userRepository.GetByEmailAsync(user.Email) ?? user;
+            return MapToDto(createdUser);
         }
 
         public async Task<UserDto?> UpdateUserAsync(Guid userId, UpdateProfileDto updateDto)
