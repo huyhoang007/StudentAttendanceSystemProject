@@ -52,6 +52,8 @@ import { useAuth } from "../contexts/AuthContext";
 const AdminUserManagement = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(0);
+  const rowsPerPage = 5;
   const [universities, setUniversities] = useState([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -74,6 +76,7 @@ const AdminUserManagement = () => {
     try {
       const data = await getAllUsers();
       setUsers(data);
+      setPage(0); // Reset page when reload
     } catch (error) {
       setSnackbar({
         open: true,
@@ -322,6 +325,13 @@ const AdminUserManagement = () => {
     active: users.filter((u) => u.isActive).length,
   };
 
+  // Pagination logic
+  const paginatedUsers = users.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+  const totalPages = Math.ceil(users.length / rowsPerPage);
+
   return (
     <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
       <Box sx={{ width: "100%", maxWidth: 1200 }}>
@@ -427,64 +437,98 @@ const AdminUserManagement = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell sx={{ fontWeight: 700 }}>Username</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Trường</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Ngày tạo</TableCell>
-                  <TableCell sx={{ fontWeight: 700 }}>Hành động</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {users.map((user) => (
-                  <TableRow key={user.userId}>
-                    <TableCell>{user.username}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Chip
-                        icon={getRoleIcon(user.role)}
-                        label={user.role}
-                        color={getRoleColor(user.role)}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{user.universityName || "N/A"}</TableCell>
-                    <TableCell>
-                      {new Date(user.createdAt).toLocaleDateString("vi-VN")}
-                    </TableCell>
-                    <TableCell>
-                      {canModifyUser(user) && (
-                        <IconButton
-                          onClick={() => handleOpen(user)}
-                          sx={{ color: "#74ebd5" }}
-                        >
-                          <Edit />
-                        </IconButton>
-                      )}
-                      {canModifyUser(user) && (
-                        <IconButton
-                          onClick={() => handleResetPassword(user.userId)}
-                          sx={{ color: "#f39c12" }}
-                        >
-                          <Refresh />
-                        </IconButton>
-                      )}
-                      {canModifyUser(user) && canDeleteUser(user) && (
-                        <IconButton
-                          onClick={() => handleDelete(user.userId)}
-                          sx={{ color: "#e74c3c" }}
-                        >
-                          <Delete />
-                        </IconButton>
-                      )}
-                    </TableCell>
+            <>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell sx={{ fontWeight: 700 }}>Username</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Trường</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Ngày tạo</TableCell>
+                    <TableCell sx={{ fontWeight: 700 }}>Hành động</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.userId}>
+                      <TableCell>{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Chip
+                          icon={getRoleIcon(user.role)}
+                          label={user.role}
+                          color={getRoleColor(user.role)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>{user.universityName || "N/A"}</TableCell>
+                      <TableCell>
+                        {new Date(user.createdAt).toLocaleDateString("vi-VN")}
+                      </TableCell>
+                      <TableCell>
+                        {canModifyUser(user) && (
+                          <IconButton
+                            onClick={() => handleOpen(user)}
+                            sx={{ color: "#74ebd5" }}
+                          >
+                            <Edit />
+                          </IconButton>
+                        )}
+                        {canModifyUser(user) && (
+                          <IconButton
+                            onClick={() => handleResetPassword(user.userId)}
+                            sx={{ color: "#f39c12" }}
+                          >
+                            <Refresh />
+                          </IconButton>
+                        )}
+                        {canModifyUser(user) && canDeleteUser(user) && (
+                          <IconButton
+                            onClick={() => handleDelete(user.userId)}
+                            sx={{ color: "#e74c3c" }}
+                          >
+                            <Delete />
+                          </IconButton>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {/* Pagination controls */}
+              {users.length > rowsPerPage && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    mt: 2,
+                    gap: 2,
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                    disabled={page === 0}
+                  >
+                    Trước
+                  </Button>
+                  <Typography>
+                    Trang {page + 1} / {totalPages}
+                  </Typography>
+                  <Button
+                    variant="outlined"
+                    onClick={() =>
+                      setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                    }
+                    disabled={page >= totalPages - 1}
+                  >
+                    Tiếp
+                  </Button>
+                </Box>
+              )}
+            </>
           )}
         </Box>
 
