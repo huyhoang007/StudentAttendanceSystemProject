@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Box, Paper, Typography, TextField, Button } from "@mui/material";
 import { keyframes } from "@emotion/react";
 import { login } from "../services/authService";
+import Logo from "../assets/Logo.png";
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(-20px);}

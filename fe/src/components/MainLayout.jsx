@@ -10,6 +10,7 @@ import {
   Tooltip,
   IconButton,
 } from "@mui/material";
+import Logo from "../assets/Logo.png";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -100,12 +101,13 @@ const MainLayout = () => {
                 mr: 1,
                 bgcolor: "#fff",
                 boxShadow: 2,
+                padding: "6px",
               }}
             >
               <img
-                src="https://img.icons8.com/fluency/64/000000/student-center.png"
+                src={Logo}
                 alt="logo"
-                style={{ width: "80%", height: "80%" }}
+                style={{ width: "100%", height: "100%", objectFit: "contain" }}
               />
             </Avatar>
             <Typography

@@ -12,6 +12,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { login as loginService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import Logo from "../assets/Logo.png";
 
 const Login = () => {
   const { login } = useAuth();
@@ -94,11 +95,24 @@ const Login = () => {
             mb: 2,
           }}
         >
-          <Avatar sx={{ bgcolor: "#74ebd5", width: 64, height: 64, mb: 1 }}>
+          <Avatar
+            sx={{
+              bgcolor: "#fff",
+              width: 64,
+              height: 64,
+              mb: 1,
+              p: 1,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            }}
+          >
             <img
-              src="https://img.icons8.com/fluency/48/000000/student-male.png"
-              alt="avatar"
-              style={{ width: 48, height: 48 }}
+              src={Logo}
+              alt="Student Attendance System Logo"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+              }}
             />
           </Avatar>
           <Typography
