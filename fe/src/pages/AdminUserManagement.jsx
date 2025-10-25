@@ -38,6 +38,8 @@ import {
   AdminPanelSettings,
   People,
   PersonAdd,
+  ChevronLeft,
+  ChevronRight,
 } from "@mui/icons-material";
 import {
   getAllUsers,
@@ -76,7 +78,7 @@ const AdminUserManagement = () => {
     try {
       const data = await getAllUsers();
       setUsers(data);
-      setPage(0); // Reset page when reload
+      setPage(0); // Reset page when reload (0-based)
     } catch (error) {
       setSnackbar({
         open: true,
@@ -330,7 +332,7 @@ const AdminUserManagement = () => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
-  const totalPages = Math.ceil(users.length / rowsPerPage);
+  const totalPages = Math.max(1, Math.ceil(users.length / rowsPerPage));
 
   return (
     <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
@@ -501,31 +503,43 @@ const AdminUserManagement = () => {
                 <Box
                   sx={{
                     display: "flex",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
                     alignItems: "center",
                     mt: 2,
                     gap: 2,
                   }}
                 >
-                  <Button
-                    variant="outlined"
-                    onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                    disabled={page === 0}
-                  >
-                    Trước
-                  </Button>
-                  <Typography>
-                    Trang {page + 1} / {totalPages}
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    onClick={() =>
-                      setPage((prev) => Math.min(prev + 1, totalPages - 1))
-                    }
-                    disabled={page >= totalPages - 1}
-                  >
-                    Tiếp
-                  </Button>
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
+                      disabled={page === 0}
+                      startIcon={<ChevronLeft />}
+                    >
+                      Trước
+                    </Button>
+                  </Box>
+
+                  <Box sx={{ textAlign: "center" }}>
+                    <Typography variant="body2" color="#6b7280">
+                      Hiển thị {users.length === 0 ? 0 : page * rowsPerPage + 1}
+                      -{Math.min((page + 1) * rowsPerPage, users.length)} trên {users.length} người dùng
+                    </Typography>
+                    <Typography sx={{ mt: 0.5 }}>
+                      Trang {page + 1} / {totalPages}
+                    </Typography>
+                  </Box>
+
+                  <Box>
+                    <Button
+                      variant="outlined"
+                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                      disabled={page >= totalPages - 1}
+                      endIcon={<ChevronRight />}
+                    >
+                      Tiếp
+                    </Button>
+                  </Box>
                 </Box>
               )}
             </>
