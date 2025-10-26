@@ -38,8 +38,7 @@ import {
   AdminPanelSettings,
   People,
   PersonAdd,
-  ChevronLeft,
-  ChevronRight,
+  Group,
 } from "@mui/icons-material";
 import {
   getAllUsers,
@@ -54,8 +53,6 @@ import { useAuth } from "../contexts/AuthContext";
 const AdminUserManagement = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(0);
-  const rowsPerPage = 5;
   const [universities, setUniversities] = useState([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -78,7 +75,6 @@ const AdminUserManagement = () => {
     try {
       const data = await getAllUsers();
       setUsers(data);
-      setPage(0); // Reset page when reload (0-based)
     } catch (error) {
       setSnackbar({
         open: true,
@@ -274,26 +270,26 @@ const AdminUserManagement = () => {
   const getRoleColor = (role) => {
     switch (role) {
       case "admin":
-        return "error";
+        return "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)";
       case "organizer":
-        return "warning";
+        return "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)";
       case "student":
-        return "info";
+        return "linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)";
       default:
-        return "default";
+        return "#F5F5F5";
     }
   };
 
   const getRoleIcon = (role) => {
     switch (role) {
       case "admin":
-        return <AdminPanelSettings />;
+        return <AdminPanelSettings sx={{ color: "#FFFFFF" }} />;
       case "organizer":
-        return <People />;
+        return <People sx={{ color: "#FFFFFF" }} />;
       case "student":
-        return <PersonAdd />;
+        return <PersonAdd sx={{ color: "#6C63FF" }} />;
       default:
-        return <People />;
+        return <People sx={{ color: "#6B7280" }} />;
     }
   };
 
@@ -318,6 +314,9 @@ const AdminUserManagement = () => {
     return true;
   };
 
+  // Lọc danh sách người dùng, không hiển thị tài khoản đang đăng nhập
+  const filteredUsers = users.filter(user => user.userId !== currentUser?.userId);
+
   // Stats calculation
   const stats = {
     total: users.length,
@@ -327,241 +326,664 @@ const AdminUserManagement = () => {
     active: users.filter((u) => u.isActive).length,
   };
 
-  // Pagination logic
-  const paginatedUsers = users.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-  const totalPages = Math.max(1, Math.ceil(users.length / rowsPerPage));
-
   return (
-    <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
-      <Box sx={{ width: "100%", maxWidth: 1200 }}>
-        <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
-          <AdminPanelSettings sx={{ fontSize: 40, color: "#74ebd5" }} />
-          <Typography variant="h5" fontWeight={700} color="#3a3a3a">
-            Quản lý Người dùng
-          </Typography>
+    <Box sx={{ 
+      p: 3, 
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%)",
+      fontFamily: "'Inter', 'Open Sans', sans-serif",
+      position: "relative",
+      overflow: "hidden"
+    }}>
+      {/* Animated Wave Blobs Background */}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+        }}
+      >
+        {/* Blob 1 */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "-10%",
+            left: "-5%",
+            width: "500px",
+            height: "500px",
+            background: "radial-gradient(circle, rgba(108, 99, 255, 0.08) 0%, rgba(139, 92, 246, 0.03) 70%, transparent 100%)",
+            borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%",
+            animation: "blob1 20s ease-in-out infinite",
+            "@keyframes blob1": {
+              "0%, 100%": {
+                transform: "translate(0, 0) scale(1) rotate(0deg)",
+                borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%",
+              },
+              "33%": {
+                transform: "translate(30px, -50px) scale(1.1) rotate(120deg)",
+                borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+              },
+              "66%": {
+                transform: "translate(-20px, 20px) scale(0.9) rotate(240deg)",
+                borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
+              },
+            },
+          }}
+        />
+
+        {/* Blob 2 */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "20%",
+            right: "-8%",
+            width: "600px",
+            height: "600px",
+            background: "radial-gradient(circle, rgba(167, 139, 250, 0.07) 0%, rgba(196, 181, 253, 0.03) 70%, transparent 100%)",
+            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+            animation: "blob2 25s ease-in-out infinite",
+            "@keyframes blob2": {
+              "0%, 100%": {
+                transform: "translate(0, 0) scale(1) rotate(0deg)",
+                borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
+              },
+              "33%": {
+                transform: "translate(-40px, 30px) scale(1.15) rotate(-120deg)",
+                borderRadius: "30% 70% 60% 40% / 40% 60% 50% 60%",
+              },
+              "66%": {
+                transform: "translate(20px, -40px) scale(0.95) rotate(-240deg)",
+                borderRadius: "70% 30% 40% 60% / 30% 70% 60% 40%",
+              },
+            },
+          }}
+        />
+
+        {/* Blob 3 */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "-15%",
+            left: "30%",
+            width: "450px",
+            height: "450px",
+            background: "radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(196, 181, 253, 0.02) 70%, transparent 100%)",
+            borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
+            animation: "blob3 22s ease-in-out infinite",
+            "@keyframes blob3": {
+              "0%, 100%": {
+                transform: "translate(0, 0) scale(1) rotate(0deg)",
+                borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
+              },
+              "50%": {
+                transform: "translate(50px, -30px) scale(1.2) rotate(180deg)",
+                borderRadius: "70% 30% 40% 60% / 40% 50% 60% 50%",
+              },
+            },
+          }}
+        />
+
+        {/* Blob 4 */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: "10%",
+            right: "15%",
+            width: "350px",
+            height: "350px",
+            background: "radial-gradient(circle, rgba(196, 181, 253, 0.08) 0%, rgba(221, 214, 254, 0.03) 70%, transparent 100%)",
+            borderRadius: "50% 50% 50% 50% / 60% 40% 60% 40%",
+            animation: "blob4 18s ease-in-out infinite",
+            "@keyframes blob4": {
+              "0%, 100%": {
+                transform: "translate(0, 0) scale(1) rotate(0deg)",
+                borderRadius: "50% 50% 50% 50% / 60% 40% 60% 40%",
+              },
+              "50%": {
+                transform: "translate(-30px, 40px) scale(0.85) rotate(-180deg)",
+                borderRadius: "40% 60% 70% 30% / 50% 50% 50% 50%",
+              },
+            },
+          }}
+        />
+
+        {/* Wave effect */}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: "200px",
+            background: "linear-gradient(180deg, transparent 0%, rgba(196, 181, 253, 0.05) 100%)",
+            animation: "wave 15s ease-in-out infinite",
+            "@keyframes wave": {
+              "0%, 100%": {
+                transform: "translateX(0) scaleY(1)",
+              },
+              "50%": {
+                transform: "translateX(-25px) scaleY(1.1)",
+              },
+            },
+          }}
+        />
+      </Box>
+
+      <Box sx={{ maxWidth: 1400, margin: "0 auto", position: "relative", zIndex: 1 }}>
+        {/* Header Section */}
+        <Box sx={{ 
+          mb: 4, 
+          display: "flex", 
+          alignItems: "center", 
+          justifyContent: "space-between",
+          gap: 2.5,
+          background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
+          p: 3.5,
+          borderRadius: "16px",
+          boxShadow: "0 8px 24px rgba(108, 99, 255, 0.25)",
+          transition: "all 0.3s ease",
+          flexWrap: "wrap",
+          "&:hover": {
+            transform: "translateY(-2px)",
+            boxShadow: "0 12px 32px rgba(108, 99, 255, 0.35)",
+          }
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
+            <Box sx={{
+              background: "rgba(255, 255, 255, 0.15)",
+              backdropFilter: "blur(10px)",
+              borderRadius: "12px",
+              p: 2,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center"
+            }}>
+              <AdminPanelSettings sx={{ fontSize: 44, color: "#FFFFFF" }} />
+            </Box>
+            <Box>
+              <Typography 
+                variant="h4" 
+                fontWeight={700} 
+                sx={{ 
+                  fontFamily: "'Poppins', sans-serif",
+                  mb: 0.5,
+                  color: "#FFFFFF",
+                  letterSpacing: "-0.5px"
+                }}
+              >
+                 Quản lý Người dùng
+              </Typography>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: "rgba(255, 255, 255, 0.9)",
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: 500
+                }}
+              >
+                Tri thức & Uy tín — Nền tảng học thuật hiện đại
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Action Buttons in Header */}
+          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              sx={{
+                fontWeight: 600,
+                background: "rgba(255, 255, 255, 0.2)",
+                backdropFilter: "blur(10px)",
+                color: "#FFFFFF",
+                fontFamily: "'Inter', sans-serif",
+                borderRadius: "12px",
+                px: 3.5,
+                py: 1.3,
+                fontSize: "0.95rem",
+                border: "2px solid rgba(255, 255, 255, 0.3)",
+                boxShadow: "0 4px 16px rgba(255, 255, 255, 0.1)",
+                textTransform: "none",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  background: "rgba(255, 255, 255, 0.3)",
+                  border: "2px solid rgba(255, 255, 255, 0.5)",
+                  transform: "translateY(-2px)",
+                  boxShadow: "0 6px 20px rgba(255, 255, 255, 0.2)",
+                }
+              }}
+              onClick={() => handleOpen()}
+            >
+              Tạo Người dùng Mới
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              sx={{
+                fontWeight: 600,
+                color: "#FFFFFF",
+                borderColor: "rgba(255, 255, 255, 0.5)",
+                borderWidth: 2,
+                fontFamily: "'Inter', sans-serif",
+                borderRadius: "12px",
+                px: 3.5,
+                py: 1.3,
+                fontSize: "0.95rem",
+                textTransform: "none",
+                transition: "all 0.3s ease",
+                "&:hover": { 
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  borderColor: "rgba(255, 255, 255, 0.8)",
+                  borderWidth: 2,
+                  transform: "translateY(-2px)",
+                },
+                "&.Mui-disabled": {
+                  color: "rgba(255, 255, 255, 0.5)",
+                  borderColor: "rgba(255, 255, 255, 0.3)",
+                }
+              }}
+              onClick={fetchUsers}
+              disabled={loading}
+            >
+              Làm mới
+            </Button>
+          </Box>
         </Box>
 
         {/* Stats Cards */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          <Grid item xs={12} sm={6} md={2.4}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(108, 99, 255, 0.2)",
+                transition: "all 0.3s ease",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                "&:hover": { 
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 8px 24px rgba(108, 99, 255, 0.3)",
+                },
               }}
             >
-              <CardContent sx={{ color: "white", textAlign: "center" }}>
-                <Typography variant="h4" fontWeight={700}>
+              <CardContent sx={{ 
+                textAlign: "center", 
+                p: 3,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+                <Box sx={{
+                  background: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "12px",
+                  p: 1.5,
+                  display: "inline-flex",
+                  mb: 1.5
+                }}>
+                  <Group sx={{ fontSize: 40, color: "#FFFFFF" }} />
+                </Box>
+                <Typography variant="h3" fontWeight={800} sx={{ 
+                  fontFamily: "'Poppins', sans-serif", 
+                  mb: 0.5,
+                  color: "#FFFFFF"
+                }}>
                   {stats.total}
                 </Typography>
-                <Typography variant="body2">Tổng Người dùng</Typography>
+                <Typography variant="body2" sx={{ 
+                  fontFamily: "'Inter', sans-serif", 
+                  fontWeight: 600,
+                  color: "rgba(255, 255, 255, 0.9)"
+                }}>
+                  Tổng Người dùng
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                background: "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(139, 92, 246, 0.2)",
+                transition: "all 0.3s ease",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                "&:hover": { 
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 8px 24px rgba(139, 92, 246, 0.3)",
+                },
               }}
             >
-              <CardContent sx={{ color: "white", textAlign: "center" }}>
-                <Typography variant="h4" fontWeight={700}>
+              <CardContent sx={{ 
+                textAlign: "center", 
+                p: 3,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+                <Box sx={{
+                  background: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "12px",
+                  p: 1.5,
+                  display: "inline-flex",
+                  mb: 1.5
+                }}>
+                  <AdminPanelSettings sx={{ fontSize: 40, color: "#FFFFFF" }} />
+                </Box>
+                <Typography variant="h3" fontWeight={800} sx={{ 
+                  fontFamily: "'Poppins', sans-serif", 
+                  mb: 0.5,
+                  color: "#FFFFFF"
+                }}>
                   {stats.admins}
                 </Typography>
-                <Typography variant="body2">Quản Trị Viên</Typography>
+                <Typography variant="body2" sx={{ 
+                  fontFamily: "'Inter', sans-serif", 
+                  fontWeight: 600,
+                  color: "rgba(255, 255, 255, 0.9)"
+                }}>
+                  Quản Trị Viên
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
+                background: "linear-gradient(135deg, #A78BFA 0%, #C4B5FD 100%)",
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(167, 139, 250, 0.2)",
+                transition: "all 0.3s ease",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                "&:hover": { 
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 8px 24px rgba(167, 139, 250, 0.3)",
+                },
               }}
             >
-              <CardContent sx={{ color: "white", textAlign: "center" }}>
-                <Typography variant="h4" fontWeight={700}>
+              <CardContent sx={{ 
+                textAlign: "center", 
+                p: 3,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+                <Box sx={{
+                  background: "rgba(255, 255, 255, 0.1)",
+                  borderRadius: "12px",
+                  p: 1.5,
+                  display: "inline-flex",
+                  mb: 1.5
+                }}>
+                  <People sx={{ fontSize: 40, color: "#FFFFFF" }} />
+                </Box>
+                <Typography variant="h3" fontWeight={800} sx={{ 
+                  fontFamily: "'Poppins', sans-serif", 
+                  mb: 0.5,
+                  color: "#FFFFFF"
+                }}>
                   {stats.organizers}
                 </Typography>
-                <Typography variant="body2">Người Tổ Chức</Typography>
+                <Typography variant="body2" sx={{ 
+                  fontFamily: "'Inter', sans-serif", 
+                  fontWeight: 600,
+                  color: "rgba(255, 255, 255, 0.9)"
+                }}>
+                  Người Tổ Chức
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={12} sm={6} md={2.4}>
+          <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+                background: "linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)",
+                borderRadius: "16px",
+                boxShadow: "0 4px 16px rgba(196, 181, 253, 0.2)",
+                transition: "all 0.3s ease",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                "&:hover": { 
+                  transform: "translateY(-6px)",
+                  boxShadow: "0 8px 24px rgba(196, 181, 253, 0.3)",
+                },
               }}
             >
-              <CardContent sx={{ color: "white", textAlign: "center" }}>
-                <Typography variant="h4" fontWeight={700}>
+              <CardContent sx={{ 
+                textAlign: "center", 
+                p: 3,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center"
+              }}>
+                <Box sx={{
+                  background: "rgba(108, 99, 255, 0.1)",
+                  borderRadius: "12px",
+                  p: 1.5,
+                  display: "inline-flex",
+                  mb: 1.5
+                }}>
+                  <PersonAdd sx={{ fontSize: 40, color: "#6C63FF" }} />
+                </Box>
+                <Typography variant="h3" fontWeight={800} sx={{ 
+                  fontFamily: "'Poppins', sans-serif", 
+                  mb: 0.5,
+                  color: "#6C63FF"
+                }}>
                   {stats.students}
                 </Typography>
-                <Typography variant="body2">Sinh Viên</Typography>
+                <Typography variant="body2" sx={{ 
+                  fontFamily: "'Inter', sans-serif", 
+                  fontWeight: 600,
+                  color: "#8B5CF6"
+                }}>
+                  Sinh Viên
+                </Typography>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
 
-        {/* Action Buttons */}
-        <Box sx={{ mb: 2, display: "flex", gap: 2 }}>
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            sx={{
-              fontWeight: 600,
-              background: "linear-gradient(90deg,#74ebd5,#ACB6E5)",
-            }}
-            onClick={() => handleOpen()}
-          >
-            Tạo Người dùng Mới
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<Refresh />}
-            sx={{
-              fontWeight: 600,
-              color: "#74ebd5",
-              borderColor: "#74ebd5",
-            }}
-            onClick={fetchUsers}
-            disabled={loading}
-          >
-            Làm mới
-          </Button>
-        </Box>
-
         {/* Users Table */}
-        <Box sx={{ background: "#fff", borderRadius: 3, boxShadow: 2, p: 2 }}>
+        <Box sx={{ 
+          background: "#FFFFFF", 
+          borderRadius: "16px", 
+          boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)", 
+          p: 2.5,
+          overflow: "hidden"
+        }}>
           {loading ? (
             <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-              <CircularProgress />
+              <CircularProgress sx={{ color: "#6C63FF" }} size={48} />
             </Box>
           ) : (
-            <>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ fontWeight: 700 }}>Username</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Email</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Role</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Trường</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Ngày tạo</TableCell>
-                    <TableCell sx={{ fontWeight: 700 }}>Hành động</TableCell>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ background: "linear-gradient(135deg, #F5F5F5 0%, #E5E7EB 100%)" }}>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Username</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Email</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Role</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Trường</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Ngày tạo</TableCell>
+                  <TableCell sx={{ fontWeight: 700, fontSize: "0.95rem", color: "#374151", fontFamily: "'Inter', sans-serif", py: 2.5 }}>Hành động</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredUsers.map((user, index) => (
+                  <TableRow 
+                    key={user.userId} 
+                    sx={{ 
+                      backgroundColor: index % 2 === 0 ? "#FAFAFA" : "#FFFFFF",
+                      transition: "all 0.2s ease",
+                      "&:hover": { 
+                        background: "linear-gradient(90deg, rgba(108, 99, 255, 0.05), rgba(139, 92, 246, 0.05))",
+                        transform: "scale(1.005)",
+                      }, 
+                    }}
+                  >
+                    <TableCell sx={{ fontFamily: "'Inter', sans-serif", color: "#1F2937", py: 2.5, fontWeight: 500 }}>{user.username}</TableCell>
+                    <TableCell sx={{ fontFamily: "'Inter', sans-serif", color: "#1F2937", py: 2.5 }}>{user.email}</TableCell>
+                    <TableCell>
+                      <Chip
+                        icon={getRoleIcon(user.role)}
+                        label={user.role}
+                        size="small"
+                        sx={{ 
+                          borderRadius: "10px", 
+                          fontFamily: "'Inter', sans-serif",
+                          background: getRoleColor(user.role),
+                          color: user.role === "student" ? "#6C63FF" : "#FFFFFF",
+                          fontWeight: 700,
+                          px: 1.5,
+                          border: "none",
+                          boxShadow: user.role === "admin" 
+                            ? "0 2px 8px rgba(108, 99, 255, 0.3)"
+                            : user.role === "organizer"
+                            ? "0 2px 8px rgba(139, 92, 246, 0.3)"
+                            : "0 2px 8px rgba(196, 181, 253, 0.3)",
+                        }}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ fontFamily: "'Inter', sans-serif", color: "#1F2937", py: 2.5 }}>
+                      {user.universityName || "N/A"}
+                    </TableCell>
+                    <TableCell sx={{ fontFamily: "'Inter', sans-serif", color: "#1F2937", py: 2.5 }}>
+                      {new Date(user.createdAt).toLocaleDateString("vi-VN")}
+                    </TableCell>
+                    <TableCell>
+                      {canModifyUser(user) && (
+                        <IconButton
+                          onClick={() => handleOpen(user)}
+                          sx={{ 
+                            color: "#6C63FF",
+                            transition: "all 0.3s ease",
+                            "&:hover": { 
+                              color: "#8B5CF6",
+                              background: "rgba(108, 99, 255, 0.1)",
+                              transform: "scale(1.15)",
+                            } 
+                          }}
+                        >
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      )}
+                      {canModifyUser(user) && (
+                        <IconButton
+                          onClick={() => handleResetPassword(user.userId)}
+                          sx={{ 
+                            color: "#8B5CF6",
+                            transition: "all 0.3s ease",
+                            "&:hover": { 
+                              color: "#A78BFA",
+                              background: "rgba(139, 92, 246, 0.1)",
+                              transform: "scale(1.15)",
+                            } 
+                          }}
+                        >
+                          <Refresh fontSize="small" />
+                        </IconButton>
+                      )}
+                      {canModifyUser(user) && canDeleteUser(user) && (
+                        <IconButton
+                          onClick={() => handleDelete(user.userId)}
+                          sx={{ 
+                            color: "#EF4444",
+                            transition: "all 0.3s ease",
+                            "&:hover": { 
+                              color: "#DC2626",
+                              background: "rgba(239, 68, 68, 0.1)",
+                              transform: "scale(1.15)",
+                            } 
+                          }}
+                        >
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      )}
+                    </TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedUsers.map((user) => (
-                    <TableRow key={user.userId}>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Chip
-                          icon={getRoleIcon(user.role)}
-                          label={user.role}
-                          color={getRoleColor(user.role)}
-                          size="small"
-                        />
-                      </TableCell>
-                      <TableCell>{user.universityName || "N/A"}</TableCell>
-                      <TableCell>
-                        {new Date(user.createdAt).toLocaleDateString("vi-VN")}
-                      </TableCell>
-                      <TableCell>
-                        {canModifyUser(user) && (
-                          <IconButton
-                            onClick={() => handleOpen(user)}
-                            sx={{ color: "#74ebd5" }}
-                          >
-                            <Edit />
-                          </IconButton>
-                        )}
-                        {canModifyUser(user) && (
-                          <IconButton
-                            onClick={() => handleResetPassword(user.userId)}
-                            sx={{ color: "#f39c12" }}
-                          >
-                            <Refresh />
-                          </IconButton>
-                        )}
-                        {canModifyUser(user) && canDeleteUser(user) && (
-                          <IconButton
-                            onClick={() => handleDelete(user.userId)}
-                            sx={{ color: "#e74c3c" }}
-                          >
-                            <Delete />
-                          </IconButton>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {/* Pagination controls */}
-              {users.length > rowsPerPage && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mt: 2,
-                    gap: 2,
-                  }}
-                >
-                  <Box>
-                    <Button
-                      variant="outlined"
-                      onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                      disabled={page === 0}
-                      startIcon={<ChevronLeft />}
-                    >
-                      Trước
-                    </Button>
-                  </Box>
-
-                  <Box sx={{ textAlign: "center" }}>
-                    <Typography variant="body2" color="#6b7280">
-                      Hiển thị {users.length === 0 ? 0 : page * rowsPerPage + 1}
-                      -{Math.min((page + 1) * rowsPerPage, users.length)} trên{" "}
-                      {users.length} người dùng
-                    </Typography>
-                    <Typography sx={{ mt: 0.5 }}>
-                      Trang {page + 1} / {totalPages}
-                    </Typography>
-                  </Box>
-
-                  <Box>
-                    <Button
-                      variant="outlined"
-                      onClick={() =>
-                        setPage((prev) => Math.min(prev + 1, totalPages - 1))
-                      }
-                      disabled={page >= totalPages - 1}
-                      endIcon={<ChevronRight />}
-                    >
-                      Tiếp
-                    </Button>
-                  </Box>
-                </Box>
-              )}
-            </>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </Box>
 
         {/* Create/Edit User Dialog */}
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-          <DialogTitle>
-            {editId ? "Chỉnh sửa User" : "Tạo User Mới"}
+        <Dialog 
+          open={open} 
+          onClose={handleClose} 
+          maxWidth="sm" 
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: "16px",
+              background: "#FFFFFF",
+              boxShadow: "0 8px 32px rgba(108, 99, 255, 0.2)",
+            }
+          }}
+        >
+          <DialogTitle sx={{ 
+            fontFamily: "'Poppins', sans-serif", 
+            fontWeight: 700, 
+            color: "#1F2937",
+            fontSize: "1.5rem",
+            pt: 3,
+            background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
+            color: "#FFFFFF",
+            borderRadius: "16px 16px 0 0"
+          }}>
+            {editId ? "✏️ Chỉnh sửa User" : "✨ Tạo User Mới"}
           </DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ pt: 3 }}>
             <TextField
               label="Username"
               fullWidth
               margin="normal"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              sx={{ borderRadius: 2, background: "#f8fafc" }}
+              sx={{ 
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  background: "#F9FAFB",
+                  fontFamily: "'Inter', sans-serif",
+                  "& fieldset": {
+                    borderColor: "rgba(108, 99, 255, 0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#6C63FF",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#6C63FF",
+                    borderWidth: 2,
+                  }
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#6B7280",
+                  fontFamily: "'Inter', sans-serif",
+                  "&.Mui-focused": {
+                    color: "#6C63FF",
+                    fontWeight: 600,
+                  }
+                }
+              }}
             />
             <TextField
               label="Email"
@@ -570,7 +992,31 @@ const AdminUserManagement = () => {
               margin="normal"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              sx={{ borderRadius: 2, background: "#f8fafc" }}
+              sx={{ 
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  background: "#F9FAFB",
+                  fontFamily: "'Inter', sans-serif",
+                  "& fieldset": {
+                    borderColor: "rgba(108, 99, 255, 0.2)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#6C63FF",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#6C63FF",
+                    borderWidth: 2,
+                  }
+                },
+                "& .MuiInputLabel-root": {
+                  color: "#6B7280",
+                  fontFamily: "'Inter', sans-serif",
+                  "&.Mui-focused": {
+                    color: "#6C63FF",
+                    fontWeight: 600,
+                  }
+                }
+              }}
             />
             {!editId && (
               <TextField
@@ -580,39 +1026,99 @@ const AdminUserManagement = () => {
                 margin="normal"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                sx={{ borderRadius: 2, background: "#f8fafc" }}
+                sx={{ 
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "12px",
+                    background: "#F9FAFB",
+                    fontFamily: "'Inter', sans-serif",
+                    "& fieldset": {
+                      borderColor: "rgba(108, 99, 255, 0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#6C63FF",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#6C63FF",
+                      borderWidth: 2,
+                    }
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "#6B7280",
+                    fontFamily: "'Inter', sans-serif",
+                    "&.Mui-focused": {
+                      color: "#6C63FF",
+                      fontWeight: 600,
+                    }
+                  }
+                }}
               />
             )}
             <FormControl fullWidth margin="normal">
-              <InputLabel>Role</InputLabel>
+              <InputLabel sx={{ 
+                fontFamily: "'Inter', sans-serif",
+                color: "#6B7280",
+                "&.Mui-focused": {
+                  color: "#6C63FF",
+                  fontWeight: 600,
+                }
+              }}>Role</InputLabel>
               <Select
                 value={form.role}
                 label="Role"
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
-                sx={{ borderRadius: 2, background: "#f8fafc" }}
+                sx={{ 
+                  borderRadius: "12px",
+                  background: "#F9FAFB",
+                  fontFamily: "'Inter', sans-serif",
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(108, 99, 255, 0.2)",
+                  },
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#6C63FF",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#6C63FF",
+                    borderWidth: 2,
+                  }
+                }}
               >
-                <MenuItem value="organizer">Người Tổ Chức</MenuItem>
-                <MenuItem value="student">Sinh Viên</MenuItem>
+                <MenuItem value="organizer" sx={{ fontFamily: "'Inter', sans-serif" }}>Người Tổ Chức</MenuItem>
+                <MenuItem value="student" sx={{ fontFamily: "'Inter', sans-serif" }}>Sinh Viên</MenuItem>
               </Select>
             </FormControl>
-
-            {/* University selection - only show for organizer and student */}
+            
             {(form.role === "organizer" || form.role === "student") && (
               <FormControl fullWidth margin="normal">
-                <InputLabel>Trường đại học</InputLabel>
+                <InputLabel sx={{ 
+                  fontFamily: "'Inter', sans-serif",
+                  color: "#6B7280",
+                  "&.Mui-focused": {
+                    color: "#6C63FF",
+                    fontWeight: 600,
+                  }
+                }}>Trường đại học</InputLabel>
                 <Select
                   value={form.universityId}
                   label="Trường đại học"
-                  onChange={(e) =>
-                    setForm({ ...form, universityId: e.target.value })
-                  }
-                  sx={{ borderRadius: 2, background: "#f8fafc" }}
+                  onChange={(e) => setForm({ ...form, universityId: e.target.value })}
+                  sx={{ 
+                    borderRadius: "12px",
+                    background: "#F9FAFB",
+                    fontFamily: "'Inter', sans-serif",
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "rgba(108, 99, 255, 0.2)",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#6C63FF",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#6C63FF",
+                      borderWidth: 2,
+                    }
+                  }}
                 >
                   {universities.map((university) => (
-                    <MenuItem
-                      key={university.universityId}
-                      value={university.universityId}
-                    >
+                    <MenuItem key={university.universityId} value={university.universityId} sx={{ fontFamily: "'Inter', sans-serif" }}>
                       {university.name}
                     </MenuItem>
                   ))}
@@ -620,7 +1126,6 @@ const AdminUserManagement = () => {
               </FormControl>
             )}
 
-            {/* Additional fields for student */}
             {form.role === "student" && (
               <>
                 <TextField
@@ -630,7 +1135,31 @@ const AdminUserManagement = () => {
                   required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  sx={{ borderRadius: 2, background: "#f8fafc" }}
+                  sx={{ 
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      background: "#F9FAFB",
+                      fontFamily: "'Inter', sans-serif",
+                      "& fieldset": {
+                        borderColor: "rgba(108, 99, 255, 0.2)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#6C63FF",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#6C63FF",
+                        borderWidth: 2,
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6B7280",
+                      fontFamily: "'Inter', sans-serif",
+                      "&.Mui-focused": {
+                        color: "#6C63FF",
+                        fontWeight: 600,
+                      }
+                    }
+                  }}
                 />
                 <TextField
                   fullWidth
@@ -638,10 +1167,32 @@ const AdminUserManagement = () => {
                   label="Mã sinh viên"
                   required
                   value={form.studentCode}
-                  onChange={(e) =>
-                    setForm({ ...form, studentCode: e.target.value })
-                  }
-                  sx={{ borderRadius: 2, background: "#f8fafc" }}
+                  onChange={(e) => setForm({ ...form, studentCode: e.target.value })}
+                  sx={{ 
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      background: "#F9FAFB",
+                      fontFamily: "'Inter', sans-serif",
+                      "& fieldset": {
+                        borderColor: "rgba(108, 99, 255, 0.2)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#6C63FF",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#6C63FF",
+                        borderWidth: 2,
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6B7280",
+                      fontFamily: "'Inter', sans-serif",
+                      "&.Mui-focused": {
+                        color: "#6C63FF",
+                        fontWeight: 600,
+                      }
+                    }
+                  }}
                 />
                 <TextField
                   fullWidth
@@ -649,22 +1200,74 @@ const AdminUserManagement = () => {
                   label="Số điện thoại"
                   value={form.phone}
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                  sx={{ borderRadius: 2, background: "#f8fafc" }}
+                  sx={{ 
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                      background: "#F9FAFB",
+                      fontFamily: "'Inter', sans-serif",
+                      "& fieldset": {
+                        borderColor: "rgba(108, 99, 255, 0.2)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "#6C63FF",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#6C63FF",
+                        borderWidth: 2,
+                      }
+                    },
+                    "& .MuiInputLabel-root": {
+                      color: "#6B7280",
+                      fontFamily: "'Inter', sans-serif",
+                      "&.Mui-focused": {
+                        color: "#6C63FF",
+                        fontWeight: 600,
+                      }
+                    }
+                  }}
                 />
               </>
             )}
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose}>Hủy</Button>
+          <DialogActions sx={{ p: 3, gap: 1.5 }}>
+            <Button 
+              onClick={handleClose} 
+              sx={{ 
+                fontFamily: "'Inter', sans-serif",
+                color: "#6B7280",
+                borderRadius: "10px",
+                px: 3,
+                py: 1,
+                fontWeight: 600,
+                textTransform: "none",
+                "&:hover": {
+                  background: "rgba(107, 114, 128, 0.1)",
+                }
+              }}
+            >
+              Hủy
+            </Button>
             <Button
               onClick={handleSave}
               variant="contained"
               sx={{
                 fontWeight: 600,
-                background: "linear-gradient(90deg,#74ebd5,#ACB6E5)",
+                background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
+                color: "#FFFFFF",
+                fontFamily: "'Inter', sans-serif",
+                borderRadius: "10px",
+                px: 4,
+                py: 1,
+                textTransform: "none",
+                boxShadow: "0 4px 12px rgba(108, 99, 255, 0.3)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #8B5CF6 0%, #6C63FF 100%)",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 6px 16px rgba(108, 99, 255, 0.4)",
+                }
               }}
             >
-              {editId ? "Cập nhật" : "Tạo"}
+              {editId ? "Cập nhật" : "Tạo mới"}
             </Button>
           </DialogActions>
         </Dialog>
@@ -678,6 +1281,12 @@ const AdminUserManagement = () => {
           <Alert
             onClose={() => setSnackbar({ ...snackbar, open: false })}
             severity={snackbar.severity}
+            sx={{ 
+              fontFamily: "'Inter', sans-serif",
+              borderRadius: "12px",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
+              fontWeight: 500,
+            }}
           >
             {snackbar.message}
           </Alert>
