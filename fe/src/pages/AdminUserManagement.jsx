@@ -523,7 +523,8 @@ const AdminUserManagement = () => {
                   <Box sx={{ textAlign: "center" }}>
                     <Typography variant="body2" color="#6b7280">
                       Hiển thị {users.length === 0 ? 0 : page * rowsPerPage + 1}
-                      -{Math.min((page + 1) * rowsPerPage, users.length)} trên {users.length} người dùng
+                      -{Math.min((page + 1) * rowsPerPage, users.length)} trên{" "}
+                      {users.length} người dùng
                     </Typography>
                     <Typography sx={{ mt: 0.5 }}>
                       Trang {page + 1} / {totalPages}
@@ -533,7 +534,9 @@ const AdminUserManagement = () => {
                   <Box>
                     <Button
                       variant="outlined"
-                      onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
+                      onClick={() =>
+                        setPage((prev) => Math.min(prev + 1, totalPages - 1))
+                      }
                       disabled={page >= totalPages - 1}
                       endIcon={<ChevronRight />}
                     >
