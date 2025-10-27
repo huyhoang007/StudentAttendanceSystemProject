@@ -30,6 +30,7 @@ import {
   Divider,
   Snackbar,
   Alert,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 // ListItemText đã được import ở trên, không import lại
 import {
@@ -79,7 +80,12 @@ const StudentInEventManagement = () => {
   const [universities, setUniversities] = useState([]);
   const [selectedUniversity, setSelectedUniversity] = useState("");
 
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   // Dialog states
+  // ... (Giữ nguyên các state dialog khác)
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openBatchDialog, setOpenBatchDialog] = useState(false);
   const [openImportDialog, setOpenImportDialog] = useState(false);
@@ -87,6 +93,7 @@ const StudentInEventManagement = () => {
   const [isMultiSelect, setIsMultiSelect] = useState(false);
 
   // Form states
+  // ... (Giữ nguyên các state form khác)
   const [selectedStudentId, setSelectedStudentId] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [csvFile, setCsvFile] = useState(null);
@@ -94,6 +101,7 @@ const StudentInEventManagement = () => {
   const [studentSearchText, setStudentSearchText] = useState(""); // Tìm kiếm sinh viên
 
   // Menu state
+  // ... (Giữ nguyên)
   const [anchorEl, setAnchorEl] = useState(null);
 
   const { user, role, organizerId } = useAuth();
@@ -102,6 +110,7 @@ const StudentInEventManagement = () => {
 
   // Fetch events
   const fetchEvents = async () => {
+    // ... (Giữ nguyên logic)
     try {
       let eventsData;
       if (role === "organizer" && organizerId) {
@@ -145,6 +154,7 @@ const StudentInEventManagement = () => {
 
   // Fetch students
   const fetchStudents = async () => {
+    // ... (Giữ nguyên logic)
     try {
       const studentsData = await getStudents();
       setStudents(studentsData);
@@ -168,6 +178,7 @@ const StudentInEventManagement = () => {
       console.log("✅ Students in event received:", studentsInEvent);
       console.log("📊 Number of students:", studentsInEvent?.length);
       setData(studentsInEvent || []);
+      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
     } catch (error) {
       console.error("❌ Error fetching students in event:", error);
       setError("Không thể tải danh sách sinh viên trong sự kiện.");
@@ -204,8 +215,19 @@ const StudentInEventManagement = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEventId, events]);
 
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên
+  };
+
   // Filter data dựa trên tìm kiếm
   const filteredData = data.filter((item) => {
+    // ... (Giữ nguyên logic filter)
     if (!studentSearchText) return true;
     const studentCode = (
       item.StudentCode ||
@@ -216,6 +238,7 @@ const StudentInEventManagement = () => {
   });
 
   // State cho check-in thủ công theo phiên
+  // ... (Giữ nguyên các state check-in)
   const [manualCheckInDialogOpen, setManualCheckInDialogOpen] = useState(false);
   const [manualCheckInSessions, setManualCheckInSessions] = useState([]);
   const [manualCheckInStatus, setManualCheckInStatus] = useState({}); // { sessionId: true/false }
@@ -230,11 +253,13 @@ const StudentInEventManagement = () => {
 
   // Hàm đóng snackbar
   const handleCloseSnackbar = () => {
+    // ... (Giữ nguyên)
     setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   // Hàm mở dialog chọn phiên khi check-in thủ công
   const handleManualCheckIn = async (studentInEventId) => {
+    // ... (Giữ nguyên logic)
     try {
       setManualCheckInStudentId(studentInEventId);
       setManualCheckInLoading(true);
@@ -267,6 +292,7 @@ const StudentInEventManagement = () => {
 
   // Hàm thực hiện check-in thủ công cho phiên đã chọn
   const handleManualCheckInSession = async (session) => {
+    // ... (Giữ nguyên logic)
     try {
       setManualCheckInLoading(true);
       const sessionId = session.sessionId || session.SessionId;
@@ -323,6 +349,7 @@ const StudentInEventManagement = () => {
 
   // Handle add single student
   const handleAddStudent = async () => {
+    // ... (Giữ nguyên logic)
     if (!selectedStudentId || !selectedEventId) {
       setError("Vui lòng chọn sinh viên và sự kiện.");
       return;
@@ -337,7 +364,7 @@ const StudentInEventManagement = () => {
 
       setOpenAddDialog(false);
       setSelectedStudentId("");
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError("");
     } catch (err) {
       setError("Lỗi khi thêm sinh viên: " + (err.message || "Không xác định"));
@@ -346,6 +373,7 @@ const StudentInEventManagement = () => {
 
   // Handle add multiple students
   const handleAddMultipleStudents = async () => {
+    // ... (Giữ nguyên logic)
     if (selectedStudentIds.length === 0 || !selectedEventId) {
       setError("Vui lòng chọn ít nhất một sinh viên và sự kiện.");
       return;
@@ -366,7 +394,7 @@ const StudentInEventManagement = () => {
 
       setOpenBatchDialog(false);
       setSelectedStudentIds([]);
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError("");
     } catch (err) {
       setError(
@@ -377,6 +405,7 @@ const StudentInEventManagement = () => {
 
   // Handle import CSV
   const handleImportCsv = async () => {
+    // ... (Giữ nguyên logic)
     if (!csvFile || !selectedEventId) {
       setError("Vui lòng chọn file CSV và sự kiện.");
       return;
@@ -392,7 +421,7 @@ const StudentInEventManagement = () => {
 
       setImportResult(result);
       setCsvFile(null);
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError("");
     } catch (err) {
       setError("Lỗi khi import CSV: " + (err.message || "Không xác định"));
@@ -401,6 +430,7 @@ const StudentInEventManagement = () => {
 
   // Handle add students from dialog
   const handleAddStudents = (studentsToAdd) => {
+    // ... (Giữ nguyên logic)
     if (Array.isArray(studentsToAdd)) {
       // Multiple students
       handleAddMultipleStudentsFromDialog(studentsToAdd);
@@ -411,6 +441,7 @@ const StudentInEventManagement = () => {
   };
 
   const handleAddSingleStudentFromDialog = async (student) => {
+    // ... (Giữ nguyên logic)
     try {
       const token = localStorage.getItem("authToken"); // Fix: use authToken instead of token
       console.log(
@@ -427,7 +458,7 @@ const StudentInEventManagement = () => {
         token
       );
 
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError("");
     } catch (err) {
       setError("Lỗi khi thêm sinh viên: " + (err.message || "Không xác định"));
@@ -435,6 +466,7 @@ const StudentInEventManagement = () => {
   };
 
   const handleAddMultipleStudentsFromDialog = async (studentsToAdd) => {
+    // ... (Giữ nguyên logic)
     try {
       const token = localStorage.getItem("authToken"); // Fix: use authToken instead of token
       console.log(
@@ -451,7 +483,7 @@ const StudentInEventManagement = () => {
         token
       );
 
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError("");
     } catch (err) {
       setError(
@@ -461,6 +493,7 @@ const StudentInEventManagement = () => {
   };
 
   // Menu handlers
+  // ... (Giữ nguyên logic menu)
   const openAddMenu = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -483,10 +516,11 @@ const StudentInEventManagement = () => {
 
   // Handle status change
   const handleStatusChange = async (studentInEventId, newStatus) => {
+    // ... (Giữ nguyên logic)
     try {
       const token = localStorage.getItem("token");
       await updateStudentStatus(studentInEventId, newStatus, token);
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
     } catch (err) {
       setError(
         "Lỗi khi cập nhật trạng thái: " + (err.message || "Không xác định")
@@ -496,6 +530,7 @@ const StudentInEventManagement = () => {
 
   // Handle remove student
   const handleRemoveStudent = async (studentInEventId) => {
+    // ... (Giữ nguyên logic)
     if (!window.confirm("Bạn có chắc muốn xóa sinh viên khỏi sự kiện?")) return;
 
     try {
@@ -510,7 +545,7 @@ const StudentInEventManagement = () => {
 
       await removeStudentFromEvent(studentInEventId, token);
       console.log("✅ Successfully removed student from event");
-      fetchStudentsInEvent();
+      fetchStudentsInEvent(); // <-- fetch đã có setPage(0)
       setError(""); // Clear any existing errors
       setSnackbar({
         open: true,
@@ -532,6 +567,7 @@ const StudentInEventManagement = () => {
 
   return (
     <Box sx={{ p: 2 }}>
+      {/* ... (Giữ nguyên Header và Event Selection) */}
       {error && <Box sx={{ color: "red", mb: 2 }}>{error}</Box>}
 
       <Typography
@@ -758,6 +794,7 @@ const StudentInEventManagement = () => {
       </Paper>
 
       {/* Action Buttons */}
+      {/* ... (Giữ nguyên Action Buttons) */}
       {selectedEventId && (
         <Box sx={{ mb: 2 }}>
           <Button
@@ -785,6 +822,7 @@ const StudentInEventManagement = () => {
       {selectedEventId && (
         <>
           {/* Search Box */}
+          {/* ... (Giữ nguyên Search Box) */}
           <Box sx={{ mb: 2 }}>
             <TextField
               label="Tìm kiếm theo mã sinh viên"
@@ -811,98 +849,132 @@ const StudentInEventManagement = () => {
             )}
           </Box>
 
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Mã sinh viên</TableCell>
-                <TableCell>Tên sinh viên</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Trạng thái</TableCell>
-                <TableCell align="center">Check-in thủ công</TableCell>
-                <TableCell align="right">Thao tác</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {loading ? (
+          <Paper sx={{ overflow: "hidden" }}>
+            {" "}
+            {/* Bọc Table bằng Paper */}
+            <Table>
+              <TableHead>
+                {/* ... (Giữ nguyên TableHead) */}
                 <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    Đang tải...
-                  </TableCell>
+                  <TableCell>Mã sinh viên</TableCell>
+                  <TableCell>Tên sinh viên</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell align="center">Check-in thủ công</TableCell>
+                  <TableCell align="right">Thao tác</TableCell>
                 </TableRow>
-              ) : filteredData.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    {studentSearchText
-                      ? "Không tìm thấy sinh viên nào"
-                      : "Chưa có sinh viên nào trong sự kiện"}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredData.map((item) => (
-                  <TableRow
-                    key={item.StudentInEventId || item.studentInEventId}
-                  >
-                    <TableCell>
-                      {item.StudentCode || item.studentCode}
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      Đang tải...
                     </TableCell>
-                    <TableCell>
-                      {item.StudentName || item.studentName}
+                  </TableRow>
+                ) : filteredData.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} align="center">
+                      {studentSearchText
+                        ? "Không tìm thấy sinh viên nào"
+                        : "Chưa có sinh viên nào trong sự kiện"}
                     </TableCell>
-                    <TableCell>
-                      {item.StudentEmail || item.studentEmail}
-                    </TableCell>
-                    <TableCell>
-                      <FormControl size="small" sx={{ minWidth: 120 }}>
-                        <Select
-                          value={item.Status || item.status || "registered"}
-                          onChange={(e) =>
-                            handleStatusChange(
+                  </TableRow>
+                ) : (
+                  // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
+                  (rowsPerPage > 0
+                    ? filteredData.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                    : filteredData
+                  ).map((item) => (
+                    <TableRow
+                      key={item.StudentInEventId || item.studentInEventId}
+                    >
+                      <TableCell>
+                        {item.StudentCode || item.studentCode}
+                      </TableCell>
+                      <TableCell>
+                        {item.StudentName || item.studentName}
+                      </TableCell>
+                      <TableCell>
+                        {item.StudentEmail || item.studentEmail}
+                      </TableCell>
+                      <TableCell>
+                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                          <Select
+                            value={item.Status || item.status || "registered"}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                item.StudentInEventId || item.studentInEventId,
+                                e.target.value
+                              )
+                            }
+                          >
+                            <MenuItem value="registered">Đã đăng ký</MenuItem>
+                            <MenuItem value="attended">Đã tham dự</MenuItem>
+                            <MenuItem value="cancelled">Đã hủy</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          color="primary"
+                          onClick={() =>
+                            handleManualCheckIn(
                               item.StudentInEventId || item.studentInEventId,
-                              e.target.value
+                              item
                             )
                           }
                         >
-                          <MenuItem value="registered">Đã đăng ký</MenuItem>
-                          <MenuItem value="attended">Đã tham dự</MenuItem>
-                          <MenuItem value="cancelled">Đã hủy</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        color="primary"
-                        onClick={() =>
-                          handleManualCheckIn(
-                            item.StudentInEventId || item.studentInEventId,
-                            item
-                          )
-                        }
-                      >
-                        Check-in
-                      </Button>
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        color="error"
-                        onClick={() =>
-                          handleRemoveStudent(
-                            item.StudentInEventId || item.studentInEventId
-                          )
-                        }
-                      >
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+                          Check-in
+                        </Button>
+                      </TableCell>
+                      <TableCell align="right">
+                        <IconButton
+                          color="error"
+                          onClick={() =>
+                            handleRemoveStudent(
+                              item.StudentInEventId || item.studentInEventId
+                            )
+                          }
+                        >
+                          <Delete />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+            {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]} // Thêm tùy chọn Tất cả
+              component="div"
+              count={filteredData.length} // Tổng số sinh viên đã lọc
+              rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+              page={page} // Trang hiện tại
+              onPageChange={handleChangePage} // Hàm khi đổi trang
+              onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
+              // Thêm label tiếng Việt
+              labelRowsPerPage="Số hàng mỗi trang:"
+              labelDisplayedRows={({ from, to, count }) => {
+                if (count === -1) return "Tất cả"; // Xử lý khi chọn "Tất cả"
+                return `${from}–${to} trong số ${count}`;
+              }}
+              SelectProps={{
+                inputProps: { "aria-label": "Số hàng mỗi trang" },
+                native: true, // Sử dụng native select cho tùy chọn "Tất cả"
+              }}
+            />
+          </Paper>
         </>
       )}
 
+      {/* Dialogs */}
+      {/* ... (Giữ nguyên toàn bộ các Dialog và Menu) */}
       {/* Add Single Student Dialog */}
       <Dialog
         open={openAddDialog}
@@ -1301,6 +1373,7 @@ const StudentInEventManagement = () => {
       </Dialog>
 
       {/* Snackbar for notifications */}
+      {/* ... (Giữ nguyên) */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

@@ -14,6 +14,7 @@ import {
   // ========== THÊM CÁC COMPONENT GIAO DIỆN ==========
   Card,
   CircularProgress,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
   // ========== THÊM CÁC ICON MỚI ==========
@@ -35,13 +36,17 @@ import { useAuth } from "../contexts/AuthContext";
 const StudentRegisteredEvents = () => {
   // =================================================================
   //
-  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
+  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
   //
   // =================================================================
   const [registrations, setRegistrations] = useState([]);
   const [sessionInfo, setSessionInfo] = useState({}); // Store session info for each event
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // <-- Đặt mặc định là 5
 
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,6 +78,7 @@ const StudentRegisteredEvents = () => {
       console.log("Received registration data:", data);
 
       setRegistrations(data || []);
+      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN KHI TẢI DỮ LIỆU
 
       // Load session info for each event
       const sessionData = {};
@@ -138,6 +144,7 @@ const StudentRegisteredEvents = () => {
   }, [user]);
 
   const handleCancelRegistration = async (registrationId, eventTitle) => {
+    // ... (Logic của bạn giữ nguyên)
     if (
       !window.confirm(`Bạn có chắc muốn hủy đăng ký sự kiện "${eventTitle}"?`)
     ) {
@@ -166,6 +173,7 @@ const StudentRegisteredEvents = () => {
   };
 
   const handleViewSessionDetails = (sessionId) => {
+    // ... (Logic của bạn giữ nguyên)
     // Chuyển đến trang chi tiết phiên
     navigate(`/session-details/${sessionId}`);
   };
@@ -176,12 +184,14 @@ const StudentRegisteredEvents = () => {
 
   // Hàm để refresh data từ bên ngoài
   const refreshData = useCallback(() => {
+    // ... (Logic của bạn giữ nguyên)
     setLoading(true);
     loadRegisteredEvents();
   }, [loadRegisteredEvents]);
 
   // Expose refresh function to window for debugging
   useEffect(() => {
+    // ... (Logic của bạn giữ nguyên)
     window.refreshStudentEvents = refreshData;
     return () => {
       delete window.refreshStudentEvents;
@@ -189,6 +199,7 @@ const StudentRegisteredEvents = () => {
   }, [refreshData]);
 
   const getStatusColor = (status) => {
+    // ... (Logic của bạn giữ nguyên)
     switch (status?.toLowerCase()) {
       case "registered":
         return "success";
@@ -202,6 +213,7 @@ const StudentRegisteredEvents = () => {
   };
 
   const getStatusText = (status) => {
+    // ... (Logic của bạn giữ nguyên)
     switch (status?.toLowerCase()) {
       case "registered":
         return "Đã đăng ký";
@@ -214,6 +226,15 @@ const StudentRegisteredEvents = () => {
     }
   };
 
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên khi thay đổi số hàng mỗi trang
+  };
 
   if (loading) {
     return (
@@ -311,8 +332,8 @@ const StudentRegisteredEvents = () => {
         >
           <Table>
             {/* ====================================================
-                BẮT ĐẦU PHẦN TABLEHEAD (ĐÃ XÓA CỘT NGÀY ĐĂNG KÝ)
-            ======================================================= */}
+                BẮT ĐẦU PHẦN TABLEHEAD (GIỮ NGUYÊN)
+            ======================================================= */}
             <TableHead sx={{ backgroundColor: "grey.100" }}>
               <TableRow>
                 <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
@@ -342,9 +363,6 @@ const StudentRegisteredEvents = () => {
                 >
                   Trạng thái phiên
                 </TableCell>
-                {/* <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
-                  Ngày đăng ký // <-- ĐÃ XÓA DÒNG NÀY
-                </TableCell> */}
                 <TableCell
                   align="center"
                   sx={{ fontWeight: 600, color: "text.secondary" }}
@@ -354,12 +372,19 @@ const StudentRegisteredEvents = () => {
               </TableRow>
             </TableHead>
             {/* ====================================================
-                KẾT THÚC PHẦN TABLEHEAD
-            ======================================================= */}
+                KẾT THÚC PHẦN TABLEHEAD
+            ======================================================= */}
 
-            {/* ========== TABLEBODY (GIỮ NGUYÊN LOGIC) ========== */}
+            {/* ========== TABLEBODY (CẬP NHẬT LOGIC SLICE) ========== */}
             <TableBody>
-              {registrations.map((registration) => {
+              {/* --- CẬP NHẬT LOGIC RENDER VỚI SLICE --- */}
+              {(rowsPerPage > 0
+                ? registrations.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : registrations
+              ).map((registration) => {
                 // *** TOÀN BỘ LOGIC CỦA BẠN DƯỚI ĐÂY ĐƯỢC GIỮ NGUYÊN ***
                 const event =
                   registration.event || registration.Event || registration;
@@ -462,7 +487,7 @@ const StudentRegisteredEvents = () => {
                         />
                       )}
                     </TableCell>
-                
+
                     <TableCell align="center">
                       <Box
                         sx={{
@@ -542,13 +567,29 @@ const StudentRegisteredEvents = () => {
                       </Box>
                     </TableCell>
                     {/* =================================================
-                        KẾT THÚC CỘT THAO TÁC
-                    ==================================================== */}
+                        KẾT THÚC CỘT THAO TÁC
+                    ==================================================== */}
                   </TableRow>
                 );
               })}
             </TableBody>
           </Table>
+
+          {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+            component="div"
+            count={registrations.length} // Tổng số đăng ký
+            rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+            page={page} // Trang hiện tại
+            onPageChange={handleChangePage} // Hàm khi đổi trang
+            onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng mỗi trang
+            // Thêm label tiếng Việt cho thân thiện
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} trong số ${count}`
+            }
+          />
         </Card>
       )}
     </Box>

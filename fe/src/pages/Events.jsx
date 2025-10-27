@@ -21,6 +21,7 @@ import {
   CircularProgress,
   Tooltip,
   MenuItem,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
   Add,
@@ -46,6 +47,10 @@ import { useAuth } from "../contexts/AuthContext";
 const Events = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  // ---------------------------------
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const { role, organizerId } = useAuth();
@@ -89,6 +94,7 @@ const Events = () => {
         res = await getEvents();
       }
       setData(Array.isArray(res) ? res : []);
+      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
     } catch (error) {
       console.error("Error fetching events:", error);
       setEventError("Không thể tải danh sách sự kiện: " + error.message);
@@ -99,6 +105,7 @@ const Events = () => {
   }, [role, organizerId]);
 
   const loadOrganizerInfo = useCallback(async () => {
+    // ... (Giữ nguyên logic)
     if (!organizerId) return;
     try {
       const orgData = await getOrganizerById(organizerId);
@@ -122,6 +129,7 @@ const Events = () => {
   }, [fetchData, role, organizerId, loadOrganizerInfo]);
 
   const handleOpen = (item = null) => {
+    // ... (Giữ nguyên logic)
     setEditId(item ? item.eventId || item.EventId : null);
     setForm(
       item
@@ -155,6 +163,7 @@ const Events = () => {
     );
 
   const handleSave = async () => {
+    // ... (Giữ nguyên logic)
     let eventData = { ...form };
     if (role === "organizer" && isGuid(organizerId)) {
       eventData.OrganizerId = organizerId;
@@ -185,7 +194,7 @@ const Events = () => {
       if (editId) await updateEvent(editId, eventData, token);
       else await addEvent(eventData, token);
       setOpen(false);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     } catch (err) {
       setEventError(
         err && err.message
@@ -196,15 +205,27 @@ const Events = () => {
   };
 
   const handleDelete = async (id) => {
+    // ... (Giữ nguyên logic)
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       const token = localStorage.getItem("authToken");
       await deleteEvent(id, token);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     }
+  };
+
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên
   };
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
+      {/* ... (Giữ nguyên Header Card) */}
       <Card
         sx={{
           mb: 3,
@@ -248,29 +269,38 @@ const Events = () => {
                 setSelectedUniversity(e.target.value);
                 if (e.target.value) {
                   getEventsByUniversity(e.target.value)
-                    .then(setData)
+                    .then((eventsData) => {
+                      // <-- Cập nhật
+                      setData(eventsData);
+                      setPage(0); // <-- RESET TRANG KHI LỌC
+                    })
                     .catch((error) => {
-                      console.error("Error fetching events by university:", error);
-                      setEventError("Không thể tải danh sách sự kiện: " + error.message);
+                      console.error(
+                        "Error fetching events by university:",
+                        error
+                      );
+                      setEventError(
+                        "Không thể tải danh sách sự kiện: " + error.message
+                      );
                     });
                 } else {
                   // If no university selected, fetch all events
-                  fetchData();
+                  fetchData(); // <-- fetchData đã có setPage(0)
                 }
               }}
-              sx={{ 
-                '& .MuiOutlinedInput-root': {
+              sx={{
+                "& .MuiOutlinedInput-root": {
                   backgroundColor: "#fff",
-                  '& fieldset': {
-                    borderColor: '#e0e0e0',
+                  "& fieldset": {
+                    borderColor: "#e0e0e0",
                   },
-                  '&:hover fieldset': {
-                    borderColor: '#1976d2',
+                  "&:hover fieldset": {
+                    borderColor: "#1976d2",
                   },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#1976d2',
-                  }
-                }
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#1976d2",
+                  },
+                },
               }}
             >
               <MenuItem value="">-- Tất cả các trường --</MenuItem>
@@ -284,6 +314,7 @@ const Events = () => {
         </Box>
       )}
 
+      {/* ... (Giữ nguyên Box Button "Thêm sự kiện") */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -325,11 +356,12 @@ const Events = () => {
             borderRadius: 3,
             boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
             backgroundColor: "white",
-            width: "100%"
+            width: "100%",
           }}
         >
           <Table>
             <TableHead sx={{ backgroundColor: "#e3f2fd" }}>
+              {/* ... (Giữ nguyên TableHead) */}
               <TableRow>
                 <TableCell>Tiêu đề</TableCell>
                 <TableCell>Mô tả</TableCell>
@@ -351,7 +383,14 @@ const Events = () => {
                   </TableCell>
                 </TableRow>
               ) : (
-                data.map((e) => (
+                // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
+                (rowsPerPage > 0
+                  ? data.slice(
+                      page * rowsPerPage,
+                      page * rowsPerPage + rowsPerPage
+                    )
+                  : data
+                ).map((e) => (
                   <TableRow
                     key={e.eventId || e.EventId}
                     hover
@@ -473,9 +512,26 @@ const Events = () => {
               )}
             </TableBody>
           </Table>
+
+          {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+            component="div"
+            count={data.length} // Tổng số sự kiện
+            rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+            page={page} // Trang hiện tại
+            onPageChange={handleChangePage} // Hàm khi đổi trang
+            onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
+            // Thêm label tiếng Việt
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} trong số ${count}`
+            }
+          />
         </Card>
       )}
 
+      {/* ... (Giữ nguyên Dialog) */}
       <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
         <DialogTitle
           sx={{

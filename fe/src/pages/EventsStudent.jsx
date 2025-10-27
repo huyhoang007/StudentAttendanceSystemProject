@@ -1,4 +1,4 @@
-// src/pages/EventsStudent.jsx (Phiên bản UI nâng cấp)
+// src/pages/EventsStudent.jsx (Phiên bản UI nâng cấp + Phân trang)
 
 import React, { useEffect, useState, useCallback } from "react";
 import {
@@ -17,16 +17,17 @@ import {
   Alert,
   CircularProgress,
   Chip,
-  TableContainer, // Thêm TableContainer
-  Paper, // Thêm Paper
-  Tooltip, // Thêm Tooltip
+  TableContainer,
+  Paper,
+  Tooltip,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
-  Event, // Icon cho tiêu đề
-  AssignmentTurnedIn, // Icon cho đã đăng ký
-  CalendarToday, // Icon cho ngày tháng
-  LocationOn, // Icon cho địa điểm
-  HowToReg, // Icon cho nút đăng ký
+  Event,
+  AssignmentTurnedIn,
+  CalendarToday,
+  LocationOn,
+  HowToReg,
 } from "@mui/icons-material";
 
 // Import các service (GIỮ NGUYÊN)
@@ -39,7 +40,7 @@ import {
 import { getStudentByUserId } from "../services/studentService";
 import { useAuth } from "../contexts/AuthContext";
 
-// --- Helper Functions cho UI ---
+// --- Helper Functions cho UI (GIỮ NGUYÊN) ---
 
 const formatDate = (dateString, includeTime = false) => {
   if (!dateString) return "---";
@@ -68,6 +69,10 @@ const EventsStudent = () => {
   const [success, setSuccess] = useState("");
   const [registeredEvents, setRegisteredEvents] = useState(new Set());
   const [currentStudentCode, setCurrentStudentCode] = useState(null);
+
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // <-- Đặt mặc định là 5 theo yêu cầu
 
   const { user } = useAuth();
 
@@ -133,6 +138,7 @@ const EventsStudent = () => {
       }
 
       setEvents(eventsData);
+      setPage(0); // <-- Reset về trang đầu tiên khi tải lại dữ liệu
 
       if (studentCode && eventsData.length > 0) {
         const registeredEventIds = new Set();
@@ -173,6 +179,7 @@ const EventsStudent = () => {
   }, [user, loadEvents]);
 
   const handleRegisterEvent = (event) => {
+    // ... (Giữ nguyên)
     setSelectedEvent(event);
     setError("");
     setSuccess("");
@@ -263,7 +270,17 @@ const EventsStudent = () => {
     }
   };
 
-  // --- RENDERING UI (PHIÊN BẢN NÂNG CẤP) ---
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên khi thay đổi số hàng mỗi trang
+  };
+
+  // --- RENDERING UI (CẬP NHẬT PHÂN TRANG) ---
 
   return (
     <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -326,7 +343,14 @@ const EventsStudent = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              events.map((e) => {
+              // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
+              (rowsPerPage > 0
+                ? events.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : events
+              ).map((e) => {
                 const eventId = e.eventId || e.EventId;
                 const isRegistered = registeredEvents.has(eventId);
 
@@ -432,9 +456,25 @@ const EventsStudent = () => {
             )}
           </TableBody>
         </Table>
+
+        {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+          component="div"
+          count={events.length} // Tổng số sự kiện
+          rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+          page={page} // Trang hiện tại
+          onPageChange={handleChangePage} // Hàm khi đổi trang
+          onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng mỗi trang
+          // Thêm label tiếng Việt cho thân thiện
+          labelRowsPerPage="Số sự kiện mỗi trang:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} trong số ${count}`
+          }
+        />
       </TableContainer>
 
-      {/* Registration Confirmation Dialog */}
+      {/* Registration Confirmation Dialog (GIỮ NGUYÊN) */}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
@@ -491,7 +531,7 @@ const EventsStudent = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Sessions Dialog */}
+      {/* Sessions Dialog (GIỮ NGUYÊN) */}
       <Dialog
         open={openSession}
         onClose={() => setOpenSession(false)}

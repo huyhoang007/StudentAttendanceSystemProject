@@ -21,6 +21,7 @@ import {
   Chip,
   Paper,
   Stack,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
   FileDownload,
@@ -52,11 +53,16 @@ const Report = () => {
     universityId: "",
   });
 
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   // =================================================================
   // LOGIC ĐƯỢC GIỮ NGUYÊN (CHỈ XÓA MOCK DATA)
   // =================================================================
 
   const fetchData = useCallback(async () => {
+    // ... (Giữ nguyên logic fetchData)
     try {
       console.log("Fetching check-ins data for report...");
       const res = await getCheckIns();
@@ -73,6 +79,7 @@ const Report = () => {
       }
 
       setData(filteredData);
+      setPage(0); // Reset page khi tải lại dữ liệu gốc
     } catch (error) {
       console.error("Error fetching check-ins:", error);
       setData([]);
@@ -80,6 +87,7 @@ const Report = () => {
   }, [role, user]);
 
   const fetchEvents = useCallback(async () => {
+    // ... (Giữ nguyên logic fetchEvents)
     try {
       let res;
       if (role === "organizer" && user?.organizerId) {
@@ -107,6 +115,7 @@ const Report = () => {
   }, [role, user]);
 
   const fetchUniversities = useCallback(async () => {
+    // ... (Giữ nguyên logic fetchUniversities)
     try {
       const res = await getUniversities();
       if (!Array.isArray(res)) {
@@ -137,6 +146,7 @@ const Report = () => {
 
   // LOGIC LỌC VÀ TÍNH TOÁN CỦA BẠN ĐƯỢC GIỮ NGUYÊN
   const filteredData = data.filter((item) => {
+    // ... (Giữ nguyên logic filter)
     const checkinTime = item.checkinTime || item.checkin_time;
     if (!checkinTime) return false;
 
@@ -149,10 +159,11 @@ const Report = () => {
         (e) =>
           (Array.isArray(e.sessions) &&
             e.sessions.some((s) => s.sessionId === item.sessionId)) ||
-          e.eventId === item.sessionId
+          e.eventId === item.sessionId // Assuming sessionId might sometimes match eventId if structure is inconsistent
       );
       if (!event || event.eventId !== filters.eventId) return false;
     }
+
 
     if (
       filters.universityId &&
@@ -164,13 +175,30 @@ const Report = () => {
     return true;
   });
 
+  // --- THÊM useEffect ĐỂ RESET TRANG KHI BỘ LỌC THAY ĐỔI ---
+  useEffect(() => {
+    setPage(0);
+  }, [filters.startDate, filters.endDate, filters.eventId, filters.universityId]);
+
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên
+  };
+
+
   const analytics = {
+    // ... (Giữ nguyên logic analytics)
     totalCheckIns: filteredData.length,
     uniqueStudents: new Set(
       filteredData.map((d) => d.studentId || d.student_id)
     ).size,
     uniqueEvents: new Set(
-      filteredData.map((d) => d.eventId || d.event_id || d.sessionId)
+      filteredData.map((d) => d.eventId || d.event_id || d.sessionId) // Consider sessionId as well for uniqueness
     ).size,
     averageCheckInsPerEvent:
       filteredData.length > 0 &&
@@ -208,6 +236,7 @@ const Report = () => {
   return (
     <Box sx={{ p: 3, backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
       {/* Header */}
+      {/* ... (Giữ nguyên Header) */}
       <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 4 }}>
         <Assessment sx={{ fontSize: 40, color: "primary.main" }} />
         <Box>
@@ -225,6 +254,7 @@ const Report = () => {
         <Grid item xs={12} lg={8}>
           <Stack spacing={3}>
             {/* Analytics Cards */}
+            {/* ... (Giữ nguyên Analytics Cards) */}
             <Grid container spacing={3}>
               {[
                 {
@@ -280,6 +310,7 @@ const Report = () => {
               </Typography>
               <Table>
                 <TableHead sx={{ backgroundColor: "#f9fafb" }}>
+                  {/* ... (Giữ nguyên TableHead) */}
                   <TableRow>
                     <TableCell sx={{ fontWeight: "bold" }}>Sự kiện</TableCell>
                     <TableCell sx={{ fontWeight: "bold" }}>Sinh viên</TableCell>
@@ -293,7 +324,14 @@ const Report = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {filteredData.map((c) => {
+                  {/* --- CẬP NHẬT LOGIC RENDER VỚI SLICE --- */}
+                  {(rowsPerPage > 0
+                    ? filteredData.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                    : filteredData
+                  ).map((c) => {
                     const formatDate = (dateString) => {
                       if (!dateString) return "N/A";
                       try {
@@ -352,6 +390,25 @@ const Report = () => {
                   })}
                 </TableBody>
               </Table>
+              {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+              <TablePagination
+                rowsPerPageOptions={[5, 10, 25, { label: 'Tất cả', value: -1 }]}
+                component="div"
+                count={filteredData.length} // Tổng số bản ghi đã lọc
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+                labelRowsPerPage="Số hàng mỗi trang:"
+                labelDisplayedRows={({ from, to, count }) => {
+                   if (count === -1) return 'Tất cả';
+                   return `${from}–${to} trong số ${count !== -1 ? count : `hơn ${to}`}`; // Adjust label for "All"
+                }}
+                 SelectProps={{
+                   inputProps: { 'aria-label': 'Số hàng mỗi trang' },
+                   native: true, // Use native select for "All" option compatibility
+                 }}
+              />
             </Paper>
           </Stack>
         </Grid>
@@ -360,6 +417,7 @@ const Report = () => {
         <Grid item xs={12} lg={4}>
           <Stack spacing={3}>
             {/* Filters */}
+            {/* ... (Giữ nguyên Filters Card) */}
             <Card sx={{ borderRadius: "16px" }}>
               <CardContent>
                 <Stack
@@ -432,6 +490,7 @@ const Report = () => {
             </Card>
 
             {/* Method Breakdown */}
+            {/* ... (Giữ nguyên Method Breakdown Card) */}
             <Card sx={{ borderRadius: "16px" }}>
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 2 }}>
@@ -507,6 +566,7 @@ const Report = () => {
             </Card>
 
             {/* Export Buttons */}
+            {/* ... (Giữ nguyên Export Buttons Card) */}
             <Card sx={{ borderRadius: "16px" }}>
               <CardContent>
                 <Typography variant="h6" sx={{ mb: 2 }}>
@@ -530,6 +590,7 @@ const Report = () => {
                 </Stack>
               </CardContent>
             </Card>
+
           </Stack>
         </Grid>
       </Grid>

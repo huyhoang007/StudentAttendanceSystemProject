@@ -23,6 +23,7 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
   Add,
@@ -67,10 +68,15 @@ const Students = () => {
     severity: "success",
   });
 
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5); // <-- Đặt mặc định là 5
+
   const fetchData = async () => {
     const res = await getStudents();
     console.log("Students data:", res); // Debug log
     setData([...res]);
+    setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
   };
 
   const fetchUniversities = async () => {
@@ -84,6 +90,7 @@ const Students = () => {
   }, []);
 
   const handleOpen = (item = null) => {
+    // ... (Giữ nguyên logic)
     setEditId(item ? item.student_id : null);
     setForm(
       item
@@ -116,6 +123,7 @@ const Students = () => {
   };
 
   const handleSave = async () => {
+    // ... (Giữ nguyên logic)
     try {
       let universityId = form.university_id;
 
@@ -157,7 +165,7 @@ const Students = () => {
       }
 
       setOpen(false);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
 
       setSnackbar({
         open: true,
@@ -174,17 +182,20 @@ const Students = () => {
     }
   };
   const handleDelete = async (id) => {
+    // ... (Giữ nguyên logic)
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       await deleteStudent(id);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     }
   };
 
   const handleFileSelect = (event) => {
+    // ... (Giữ nguyên logic)
     setSelectedFile(event.target.files[0]);
   };
 
   const handleFileUpload = async () => {
+    // ... (Giữ nguyên logic)
     if (!selectedFile) {
       setSnackbar({
         open: true,
@@ -204,7 +215,7 @@ const Students = () => {
       });
       setSelectedFile(null);
       setUploadOpen(false);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     } catch (error) {
       setSnackbar({
         open: true,
@@ -216,10 +227,21 @@ const Students = () => {
     }
   };
 
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên
+  };
+
   return (
     <Box sx={{ p: 2, display: "flex", justifyContent: "center" }}>
       <Box sx={{ width: "100%", maxWidth: 900 }}>
         {/* Header: icon + prominent title */}
+        {/* ... (Giữ nguyên Header) */}
         <Box
           sx={{
             mb: 2,
@@ -244,6 +266,7 @@ const Students = () => {
         </Box>
 
         {/* Action buttons */}
+        {/* ... (Giữ nguyên Action buttons) */}
         <Box sx={{ mb: 2, display: "flex", gap: 2, alignItems: "center" }}>
           <Button
             variant="contained"
@@ -298,30 +321,59 @@ const Students = () => {
         >
           <Table>
             <TableHead>
+              {/* ... (Giữ nguyên TableHead) */}
               <TableRow>
-                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                <TableCell
+                  sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}
+                >
                   Tên
                 </TableCell>
-                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "center" }}>
+                <TableCell
+                  sx={{
+                    fontWeight: 800,
+                    color: "#2d3748",
+                    textAlign: "center",
+                  }}
+                >
                   Mã SV
                 </TableCell>
-                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                <TableCell
+                  sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}
+                >
                   Email
                 </TableCell>
-                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "center" }}>
+                <TableCell
+                  sx={{
+                    fontWeight: 800,
+                    color: "#2d3748",
+                    textAlign: "center",
+                  }}
+                >
                   Điện thoại
                 </TableCell>
-                <TableCell sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}>
+                <TableCell
+                  sx={{ fontWeight: 800, color: "#2d3748", textAlign: "left" }}
+                >
                   Trường
                 </TableCell>
-                <TableCell align="right" sx={{ fontWeight: 800, color: "#2d3748" }}>
+                <TableCell
+                  align="right"
+                  sx={{ fontWeight: 800, color: "#2d3748" }}
+                >
                   Thao tác
                 </TableCell>
               </TableRow>
             </TableHead>
 
             <TableBody>
-              {data.map((s, idx) => (
+              {/* --- CẬP NHẬT LOGIC RENDER VỚI SLICE --- */}
+              {(rowsPerPage > 0
+                ? data.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : data
+              ).map((s, idx) => (
                 <TableRow
                   key={s.student_id}
                   sx={{
@@ -335,7 +387,9 @@ const Students = () => {
                 >
                   <TableCell sx={{ textAlign: "left" }}>{s.name}</TableCell>
 
-                  <TableCell sx={{ textAlign: "center" }}>{s.student_code}</TableCell>
+                  <TableCell sx={{ textAlign: "center" }}>
+                    {s.student_code}
+                  </TableCell>
 
                   <TableCell sx={{ textAlign: "left" }}>{s.email}</TableCell>
 
@@ -366,7 +420,26 @@ const Students = () => {
               ))}
             </TableBody>
           </Table>
+
+          {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+            component="div"
+            count={data.length} // Tổng số sinh viên
+            rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+            page={page} // Trang hiện tại
+            onPageChange={handleChangePage} // Hàm khi đổi trang
+            onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
+            // Thêm label tiếng Việt
+            labelRowsPerPage="Số hàng mỗi trang:"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}–${to} trong số ${count}`
+            }
+          />
         </Box>
+
+        {/* Create/Edit Dialog */}
+        {/* ... (Giữ nguyên Dialog) */}
         <Dialog open={open} onClose={handleClose}>
           <DialogTitle sx={{ fontWeight: 700 }}>
             {editId ? "Sửa sinh viên" : "Thêm sinh viên"}
@@ -514,6 +587,7 @@ const Students = () => {
         </Dialog>
 
         {/* Upload Dialog */}
+        {/* ... (Giữ nguyên Upload Dialog) */}
         <Dialog
           open={uploadOpen}
           onClose={() => setUploadOpen(false)}
@@ -572,6 +646,7 @@ const Students = () => {
         </Dialog>
 
         {/* Snackbar for notifications */}
+        {/* ... (Giữ nguyên Snackbar) */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}

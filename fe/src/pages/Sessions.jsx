@@ -29,6 +29,7 @@ import {
   AlertTitle,
   Grid, // Vẫn import Gridเผื่อ dùng, nhưng sẽ dùng Table
   Tooltip, // Thêm Tooltip
+  TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
   Add,
@@ -58,7 +59,7 @@ import {
 const Sessions = () => {
   // =================================================================
   //
-  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
+  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
   //
   // =================================================================
 
@@ -80,6 +81,10 @@ const Sessions = () => {
     severity: "success",
   });
 
+  // --- THÊM STATE CHO PHÂN TRANG ---
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+
   const [form, setForm] = useState({
     event_id: "",
     title: "",
@@ -91,6 +96,7 @@ const Sessions = () => {
   });
 
   const resetForm = () => {
+    // ... (Giữ nguyên logic)
     // Set default time to current time
     const now = new Date();
     const defaultStartTime = formatDateTimeLocal(now);
@@ -112,14 +118,15 @@ const Sessions = () => {
 
   // Fetch events
   const fetchEvents = useCallback(async () => {
+    // ... (Giữ nguyên logic)
     try {
       let eventsData;
       if (role === "organizer" && organizerId) {
         const token = localStorage.getItem("authToken");
         const res = await fetch(`/api/event/by-organizer/${organizerId}`, {
           headers: {
-            Authorization: `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         eventsData = await res.json();
@@ -151,8 +158,8 @@ const Sessions = () => {
           `/api/EventSession/by-event/${selectedEventId}`,
           {
             headers: {
-              Authorization: `Bearer ${token}`
-            }
+              Authorization: `Bearer ${token}`,
+            },
           }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -162,6 +169,7 @@ const Sessions = () => {
         sessions = await getSessions();
       }
       setData(Array.isArray(sessions) ? sessions : []);
+      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
       setError("");
     } catch (error) {
       console.error("Error fetching sessions:", error);
@@ -184,6 +192,7 @@ const Sessions = () => {
   }, [selectedEventId, events, fetchData]);
 
   const handleOpen = (item = null) => {
+    // ... (Giữ nguyên logic)
     if (item) {
       setEditId(item.session_id || item.SessionId);
       setForm({
@@ -207,11 +216,13 @@ const Sessions = () => {
     setOpen(true);
   };
   const handleClose = () => {
+    // ... (Giữ nguyên logic)
     setOpen(false);
     resetForm();
   };
 
   const handleSave = async () => {
+    // ... (Giữ nguyên logic)
     try {
       // Validate required fields
       const title = form.title?.trim();
@@ -297,7 +308,7 @@ const Sessions = () => {
       }
 
       setOpen(false);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     } catch (error) {
       console.error("Error saving session:", error);
       setSnackbar({
@@ -308,21 +319,33 @@ const Sessions = () => {
     }
   };
   const handleDelete = async (id) => {
+    // ... (Giữ nguyên logic)
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       await deleteSession(id);
-      fetchData();
+      fetchData(); // <-- fetchData đã có setPage(0)
     }
+  };
+
+  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0); // Quay về trang đầu tiên
   };
 
   // =================================================================
   //
-  //            BẮT ĐẦU PHẦN GIAO DIỆN (JSX) ĐÃ UPDATE
+  //            BẮT ĐẦU PHẦN GIAO DIỆN (JSX) ĐÃ UPDATE
   //
   // =================================================================
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
       {/* ========== HEADER ĐÃ UPDATE ========== */}
+      {/* ... (Giữ nguyên Header) */}
       {error && (
         <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
           {error}
@@ -382,6 +405,7 @@ const Sessions = () => {
       </Box>
 
       {/* ========== KHUNG CHỌN SỰ KIỆN ĐÃ UPDATE ========== */}
+      {/* ... (Giữ nguyên) */}
       {!initialEventId && (
         <Card
           sx={{
@@ -417,6 +441,7 @@ const Sessions = () => {
       )}
 
       {/* ========== KHUNG THÔNG TIN SỰ KIỆN ĐÃ UPDATE ========== */}
+      {/* ... (Giữ nguyên) */}
       {selectedEvent && (
         <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
           {/* Giữ nguyên 100% logic hiển thị thông tin của bạn */}
@@ -441,10 +466,10 @@ const Sessions = () => {
       {/* Nút "Thêm phiên mới" gốc của bạn đã được chuyển lên Header */}
 
       {/* ==================================================================
-          BẢNG (TABLE) ĐƯỢC BỌC LẠI VÀ STYLED
-          NHƯNG NỘI DUNG BÊN TRONG GIỮ NGUYÊN 100%
-        ==================================================================
-      */}
+          BẢNG (TABLE) ĐƯỢC BỌC LẠI VÀ STYLED
+          NHƯNG NỘI DUNG BÊN TRONG GIỮ NGUYÊN 100%
+        ==================================================================
+      */}
       <Card
         sx={{
           borderRadius: 4,
@@ -454,7 +479,7 @@ const Sessions = () => {
       >
         <Table>
           <TableHead sx={{ backgroundColor: "grey.100" }}>
-            {/* Giữ nguyên 100% các TableCell header của bạn */}
+            {/* ... (Giữ nguyên TableHead) */}
             <TableRow>
               <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                 Tiêu đề phiên
@@ -485,7 +510,7 @@ const Sessions = () => {
             {data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                  {/* Cập nhật giao diện Trạng thái rỗng */}
+                  {/* ... (Giữ nguyên) */}
                   <Box
                     display="flex"
                     flexDirection="column"
@@ -503,8 +528,14 @@ const Sessions = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              // *** BẮT ĐẦU PHẦN GIỮ NGUYÊN 100% LOGIC HIỂN THỊ CỦA BẠN ***
-              data.map((s) => (
+              // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
+              (rowsPerPage > 0
+                ? data.slice(
+                    page * rowsPerPage,
+                    page * rowsPerPage + rowsPerPage
+                  )
+                : data
+              ).map((s) => (
                 <TableRow
                   key={s.sessionId || s.SessionId || s.session_id}
                   hover
@@ -610,12 +641,29 @@ const Sessions = () => {
             )}
           </TableBody>
         </Table>
+
+        {/* --- THÊM COMPONENT PHÂN TRANG --- */}
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+          component="div"
+          count={data.length} // Tổng số phiên
+          rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
+          page={page} // Trang hiện tại
+          onPageChange={handleChangePage} // Hàm khi đổi trang
+          onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
+          // Thêm label tiếng Việt
+          labelRowsPerPage="Số hàng mỗi trang:"
+          labelDisplayedRows={({ from, to, count }) =>
+            `${from}–${to} trong số ${count}`
+          }
+        />
       </Card>
 
       {/* ==================================================================
-          DIALOG FORM (GIỮ NGUYÊN 100% THEO YÊU CẦU)
-        ==================================================================
-      */}
+          DIALOG FORM (GIỮ NGUYÊN 100% THEO YÊU CẦU)
+        ==================================================================
+      */}
+      {/* ... (Giữ nguyên Dialog) */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle
           sx={{
@@ -789,9 +837,9 @@ const Sessions = () => {
         </DialogActions>
       </Dialog>
       {/* ==================================================================
-          HẾT PHẦN FORM DIALOG
-        ==================================================================
-      */}
+          HẾT PHẦN FORM DIALOG
+        ==================================================================
+      */}
 
       {/* SNACKBAR (GIỮ NGUYÊN 100%) */}
       <Snackbar
