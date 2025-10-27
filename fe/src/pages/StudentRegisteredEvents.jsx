@@ -24,7 +24,6 @@ import {
   Close,
   QrCodeScanner,
   EventAvailable,
-  CalendarToday 
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -261,44 +260,18 @@ const StudentRegisteredEvents = () => {
     <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
       {/* ========== HEADER ĐÃ UPDATE ========== */}
       <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 4,
-          background: "linear-gradient(145deg, #ffffff, #f5f8fb)",
-          p: 3,
-          borderRadius: 3,
-          boxShadow: "0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)",
-          border: "1px solid rgba(25, 118, 210, 0.12)"
-        }}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={4}
       >
         <Box display="flex" alignItems="center" gap={2}>
-          <EventAvailable 
-            sx={{ 
-              fontSize: 40,
-              color: "#1976d2"
-            }} 
-          />
+          <EventAvailable color="primary" sx={{ fontSize: 40 }} />
           <Box>
-            <Typography 
-              variant="h4" 
-              sx={{
-                fontWeight: 800,
-                color: "#1e293b",
-                letterSpacing: "0.5px",
-                mb: 0.5
-              }}
-            >
+            <Typography variant="h4" fontWeight={700} color="text.primary">
               Sự kiện đã đăng ký
             </Typography>
-            <Typography 
-              variant="body1" 
-              sx={{
-                color: "#64748b",
-                fontWeight: 500
-              }}
-            >
+            <Typography variant="body1" color="text.secondary">
               Theo dõi các sự kiện và phiên bạn đã tham gia.
             </Typography>
           </Box>
@@ -353,52 +326,46 @@ const StudentRegisteredEvents = () => {
         <Card
           sx={{
             borderRadius: 4,
-            boxShadow: "0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
             overflow: "hidden",
           }}
         >
           <Table>
             {/* ====================================================
-<<<<<<< HEAD
                 BẮT ĐẦU PHẦN TABLEHEAD (GIỮ NGUYÊN)
             ======================================================= */}
             <TableHead sx={{ backgroundColor: "grey.100" }}>
-=======
-                BẮT ĐẦU PHẦN TABLEHEAD (ĐÃ XÓA CỘT NGÀY ĐĂNG KÝ)
-            ======================================================= */}
-            <TableHead sx={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e0e7ff' }}>
->>>>>>> 985b621f5d4ab8ccf7d7e52cc95f9deb4c959c60
               <TableRow>
-                <TableCell sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}>
+                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                   Tên sự kiện
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}>
+                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                   Mô tả
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}>
+                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                   Tổ chức
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}>
+                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                   Ngày bắt đầu
                 </TableCell>
-                <TableCell sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}>
+                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
                   Ngày kết thúc
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}
+                  sx={{ fontWeight: 600, color: "text.secondary" }}
                 >
                   Trạng thái đăng ký
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}
+                  sx={{ fontWeight: 600, color: "text.secondary" }}
                 >
                   Trạng thái phiên
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 700, color: '#1e293b', fontSize: '0.875rem', py: 2, borderBottom: 'none' }}
+                  sx={{ fontWeight: 600, color: "text.secondary" }}
                 >
                   Thao tác
                 </TableCell>
@@ -452,12 +419,12 @@ const StudentRegisteredEvents = () => {
                   >
                     {/* Giữ nguyên 100% các TableCell của bạn */}
                     <TableCell>
-                      <Typography variant="body1" fontWeight={600}>
+                      <Typography variant="body1" fontWeight={500}>
                         {eventTitle}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2">
+                      <Typography variant="body2" color="textSecondary">
                         {registration.eventDescription ||
                           registration.EventDescription ||
                           event?.description ||
@@ -473,85 +440,32 @@ const StudentRegisteredEvents = () => {
                         "Chưa xác định"}
                     </TableCell>
                     <TableCell>
-                    <Box
-                      sx={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          bgcolor: '#e3f2fd',
-                          px: 1.5,
-                          py: 0.75,
-                          borderRadius: 2,
-                          border: '1px solid #90caf9'
-                        }}
-                      >
-                        <CalendarToday 
-                          sx={{ 
-                            fontSize: '0.875rem',
-                            color: '#1976d2',
-                            mr: 1 
-                          }}
-                        />
-                        <Typography
-                          sx={{
-                            fontSize: '0.875rem',
-                            color: '#1976d2',
-                            fontWeight: 500
-                          }}
-                        >
-                          {registration.eventStartDate || registration.EventStartDate || event?.startDate || event?.StartDate
-                            ? new Date(registration.eventStartDate || registration.EventStartDate || event?.startDate || event?.StartDate).toLocaleDateString("vi-VN")
-                            : "Chưa xác định"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TableCell>
+                      {registration.eventStartDate ||
+                      registration.EventStartDate ||
+                      event?.startDate ||
+                      event?.StartDate
+                        ? new Date(
+                            registration.eventStartDate ||
+                              registration.EventStartDate ||
+                              event?.startDate ||
+                              event?.StartDate
+                          ).toLocaleDateString("vi-VN")
+                        : "Chưa xác định"}
+                    </TableCell>
                     <TableCell>
-                      <Box
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            bgcolor: '#fff5f5',
-                            px: 1.5,
-                            py: 0.75,
-                            borderRadius: 2,
-                            border: '1px solid #ffcdd2'
-                          }}
-                        >
-                          <CalendarToday 
-                            sx={{ 
-                              fontSize: '0.875rem',
-                              color: '#d32f2f',
-                              mr: 1
-                            }}
-                          />
-                          <Typography
-                            sx={{
-                              fontSize: '0.875rem',
-                              color: '#d32f2f',
-                              fontWeight: 500
-                            }}
-                          >
-                            {registration.eventEndDate || registration.EventEndDate || event?.endDate || event?.EndDate
-                              ? new Date(registration.eventEndDate || registration.EventEndDate || event?.endDate || event?.EndDate).toLocaleDateString("vi-VN")
-                              : "Chưa xác định"}
-                          </Typography>
-                        </Box>
-                      </Box>
+                      {registration.eventEndDate ||
+                      registration.EventEndDate ||
+                      event?.endDate ||
+                      event?.EndDate
+                        ? new Date(
+                            registration.eventEndDate ||
+                              registration.EventEndDate ||
+                              event?.endDate ||
+                              event?.EndDate
+                          ).toLocaleDateString("vi-VN")
+                        : "Chưa xác định"}
                     </TableCell>
                     <TableCell align="center">
-<<<<<<< HEAD
                       <Chip
                         label={getStatusText(status)}
                         color={getStatusColor(status)}
@@ -560,178 +474,117 @@ const StudentRegisteredEvents = () => {
                     </TableCell>
                     <TableCell align="center">
                       {hasActiveSessions ? (
-                        <Chip
-                          label={`${eventSessions.length} phiên`}
-                          color="success"
-                          size="small"
-                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <Chip
+                            label={`Có ${eventSessions.length} ${eventSessions.length > 1 ? 'phiên' : 'phiên'}`}
+                            color="success"
+                            size="small"
+                            sx={{
+                              fontWeight: 500,
+                              backgroundColor: '#e8f5e9',
+                              color: '#2e7d32',
+                              '& .MuiChip-label': {
+                                px: 2
+                              }
+                            }}
+                          />
+                        </Box>
                       ) : (
-                        <Chip
-                          label="Chưa có phiên"
-                          color="warning"
-                          size="small"
-                        />
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                          <Chip
+                            label="Chưa có phiên"
+                            size="small"
+                            sx={{
+                              fontWeight: 500,
+                              backgroundColor: '#fff3e0',
+                              color: '#ed6c02',
+                              '& .MuiChip-label': {
+                                px: 2
+                              }
+                            }}
+                          />
+                        </Box>
                       )}
                     </TableCell>
 
                     <TableCell align="center">
-=======
->>>>>>> 985b621f5d4ab8ccf7d7e52cc95f9deb4c959c60
                       <Box
                         sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          bgcolor: status?.toLowerCase() === 'registered' ? '#e8f5e9' 
-                            : status?.toLowerCase() === 'attended' ? '#e3f2fd'
-                            : '#ffebee',
-                          px: 2,
-                          py: 0.75,
-                          borderRadius: 2,
-                          border: `1px solid ${
-                            status?.toLowerCase() === 'registered' ? '#a5d6a7'
-                            : status?.toLowerCase() === 'attended' ? '#90caf9'
-                            : '#ffcdd2'
-                          }`
+                          display: "flex",
+                          flexDirection: "row",
+                          gap: 1,
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
-                        <Typography
-                          sx={{
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            color: status?.toLowerCase() === 'registered' ? '#2e7d32'
-                              : status?.toLowerCase() === 'attended' ? '#1976d2'
-                              : '#d32f2f'
-                          }}
-                        >
-                          {getStatusText(status)}
-                        </Typography>
+                        {/* Nút xem chi tiết phiên - GIỮ NGUYÊN LOGIC */}
+                        {hasActiveSessions && (
+                          <Button
+                            variant="outlined"
+                            color="info"
+                            size="small"
+                            startIcon={<Visibility />}
+                            onClick={() => {
+                              navigate(`/event-sessions/${eventId}`);
+                            }}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                              borderRadius: 2,
+                            }}
+                          >
+                            Xem danh sách phiên{" "}
+                            {eventSessions.length > 0
+                              ? `(${eventSessions.length})`
+                              : ""}
+                          </Button>
+                        )}
+
+                        {/* Nút hủy đăng ký - GIỮ NGUYÊN LOGIC */}
+                        {status?.toLowerCase() !== "attended" && (
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            size="small"
+                            startIcon={<Close />}
+                            onClick={() =>
+                              handleCancelRegistration(
+                                registration.studentInEventId ||
+                                  registration.StudentInEventId,
+                                eventTitle
+                              )
+                            }
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                              borderRadius: 2,
+                            }}
+                          >
+                            Hủy đăng ký
+                          </Button>
+                        )}
+
+                        {/* Nút điểm danh - GIỮ NGUYÊN LOGIC */}
+                        {hasActiveSessions && (
+                          <Button
+                            variant="contained"
+                            color="success"
+                            size="small"
+                            startIcon={<QrCodeScanner />}
+                            onClick={() => {
+                              navigate(`/checkin?eventId=${eventId}`);
+                            }}
+                            sx={{
+                              textTransform: "none",
+                              fontWeight: 600,
+                              borderRadius: 2,
+                            }}
+                          >
+                            Điểm danh
+                          </Button>
+                        )}
                       </Box>
                     </TableCell>
-                    <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          bgcolor: hasActiveSessions ? '#e8f5e9' : '#fff3e0',
-                          px: 2,
-                          py: 0.75,
-                          borderRadius: 2,
-                          border: `1px solid ${hasActiveSessions ? '#a5d6a7' : '#ffe0b2'}`
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize: '0.875rem',
-                            fontWeight: 600,
-                            color: hasActiveSessions ? '#2e7d32' : '#ed6c02'
-                          }}
-                        >
-                          {hasActiveSessions ? `${eventSessions.length} phiên` : 'Chưa có phiên'}
-                        </Typography>
-                      </Box>
-                    </TableCell>
-                
-                    <TableCell align="center">
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "row",
-      gap: 1.5,
-      alignItems: "center",
-      justifyContent: "center",
-      '& .MuiButton-root': {
-        minWidth: 'auto',
-        px: 2,
-        py: 0.75,
-        boxShadow: 'none',
-        fontSize: '0.813rem'
-      }
-    }}
-  >
-    {/* Nút xem chi tiết phiên - GIỮ NGUYÊN LOGIC */}
-    {hasActiveSessions && (
-      <Button
-        variant="outlined"
-        color="info"
-        size="small"
-        startIcon={<Visibility sx={{ fontSize: '1.1rem' }} />}
-        onClick={() => {
-          navigate(`/event-sessions/${eventId}`);
-        }}
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 2,
-          color: '#0288d1',
-          borderColor: '#4fc3f7',
-          bgcolor: '#e1f5fe',
-          '&:hover': {
-            bgcolor: '#b3e5fc',
-            borderColor: '#29b6f6'
-          }
-        }}
-      >
-        Xem danh sách phiên{" "}
-        {eventSessions.length > 0 ? `(${eventSessions.length})` : ""}
-      </Button>
-    )}
-
-    {/* Nút hủy đăng ký - GIỮ NGUYÊN LOGIC */}
-    {status?.toLowerCase() !== "attended" && (
-      <Button
-        variant="outlined"
-        color="error"
-        size="small"
-        startIcon={<Close sx={{ fontSize: '1.1rem' }} />}
-        onClick={() =>
-          handleCancelRegistration(
-            registration.studentInEventId ||
-            registration.StudentInEventId,
-            eventTitle
-          )
-        }
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 2,
-          color: '#d32f2f',
-          borderColor: '#ef9a9a',
-          bgcolor: '#ffebee',
-          '&:hover': {
-            bgcolor: '#ffcdd2',
-            borderColor: '#e57373'
-          }
-        }}
-      >
-        Hủy đăng ký
-      </Button>
-    )}
-
-    {/* Nút điểm danh - GIỮ NGUYÊN LOGIC */}
-    {hasActiveSessions && (
-      <Button
-        variant="contained"
-        color="success"
-        size="small"
-        startIcon={<QrCodeScanner sx={{ fontSize: '1.1rem' }} />}
-        onClick={() => {
-          navigate(`/checkin?eventId=${eventId}`);
-        }}
-        sx={{
-          textTransform: "none",
-          fontWeight: 600,
-          borderRadius: 2,
-          bgcolor: '#4caf50',
-          '&:hover': {
-            bgcolor: '#20a026ff'
-          }
-        }}
-      >
-        Điểm danh
-      </Button>
-    )}
-  </Box>
-</TableCell>
                     {/* =================================================
                         KẾT THÚC CỘT THAO TÁC
                     ==================================================== */}
