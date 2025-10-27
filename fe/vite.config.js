@@ -13,7 +13,11 @@ export default defineConfig({
       cert: fs.readFileSync("./localhost+2.pem"),
     },
     proxy: {
+<<<<<<< HEAD
       "/api": "http://192.168.1.7:5231",
+=======
+      "/api": "http://192.168.100.136:5231",
+>>>>>>> 985b621f5d4ab8ccf7d7e52cc95f9deb4c959c60
     },
   },
 });

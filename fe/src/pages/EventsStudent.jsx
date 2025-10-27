@@ -23,11 +23,20 @@ import {
   TablePagination, // <-- THÊM IMPORT NÀY
 } from "@mui/material";
 import {
+<<<<<<< HEAD
   Event,
   AssignmentTurnedIn,
   CalendarToday,
   LocationOn,
   HowToReg,
+=======
+  Event, // Icon cho tiêu đề
+  AssignmentTurnedIn, // Icon cho đã đăng ký
+  CalendarToday, // Icon cho ngày tháng
+  LocationOn, // Icon cho địa điểm
+  HowToReg, // Icon cho nút đăng ký
+  CircleOutlined
+>>>>>>> 985b621f5d4ab8ccf7d7e52cc95f9deb4c959c60
 } from "@mui/icons-material";
 
 // Import các service (GIỮ NGUYÊN)
@@ -289,13 +298,30 @@ const EventsStudent = () => {
         sx={{
           display: "flex",
           alignItems: "center",
-          borderBottom: "2px solid #e0e0e0",
-          pb: 1,
+          background: "linear-gradient(145deg, #ffffff, #f5f8fb)",
+          p: 3,
+          borderRadius: 3,
           mb: 3,
+          boxShadow: "0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12)",
+          border: "1px solid rgba(25, 118, 210, 0.12)",
+          position: "relative"
         }}
       >
-        <Event sx={{ fontSize: 36, color: "#1976d2", mr: 1 }} />
-        <Typography variant="h4" fontWeight={700} color="#1976d2">
+        <Event 
+          sx={{ 
+            fontSize: 40,
+            color: "#1976d2",
+            mr: 2
+          }} 
+        />
+        <Typography 
+          variant="h4" 
+          sx={{
+            fontWeight: 800,
+            color: "#1976d2",
+            letterSpacing: "0.5px"
+          }}
+        >
           Danh sách tất cả sự kiện
         </Typography>
       </Box>
@@ -361,7 +387,7 @@ const EventsStudent = () => {
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
                     <TableCell>
-                      <Typography variant="body1" fontWeight={600}>
+                      <Typography variant="body1" fontWeight={600} >
                         {e.title || e.Title}
                       </Typography>
                     </TableCell>
@@ -392,38 +418,114 @@ const EventsStudent = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        icon={<CalendarToday />}
-                        label={formatDate(e.startDate || e.StartDate)}
-                        size="small"
-                        variant="outlined"
-                        color="default"
-                      />
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          bgcolor: '#e3f2fd',
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 2,
+                          border: '1px solid #90caf9'
+                        }}
+                      >
+                        <CalendarToday 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: '#1976d2',
+                            mr: 1
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            fontSize: '0.875rem',
+                            color: '#1976d2',
+                            fontWeight: 500
+                          }}
+                        >
+                          {formatDate(e.startDate || e.StartDate)}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        icon={<CalendarToday />}
-                        label={formatDate(e.endDate || e.EndDate)}
-                        size="small"
-                        variant="outlined"
-                        color="default"
-                      />
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          bgcolor: '#fff3e0', 
+                          px: 1.5,
+                          py: 0.75,
+                          borderRadius: 2,
+                          border: '1px solid #ffb74d'
+                        }}
+                      >
+                        <CalendarToday 
+                          sx={{ 
+                            fontSize: '0.875rem',
+                            color: '#ed6c02',
+                            mr: 1
+                          }}
+                        />
+                        <Typography
+                          sx={{
+                            fontSize: '0.875rem',
+                            color: '#ed6c02',
+                            fontWeight: 500
+                          }}
+                        >
+                          {formatDate(e.endDate || e.EndDate)}
+                        </Typography>
+                      </Box>
                     </TableCell>
                     <TableCell align="center">
                       {isRegistered ? (
-                        <Chip
-                          label="Đã đăng ký"
-                          color="success"
-                          size="small"
-                          icon={<AssignmentTurnedIn />}
-                        />
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            bgcolor: '#e8f5e9',
+                            color: '#2e7d32',
+                            py: 0.75,
+                            px: 1.5,
+                            borderRadius: 2,
+                            border: '1px solid #a5d6a7',
+                          }}
+                        >
+                          <AssignmentTurnedIn sx={{ fontSize: '1rem' }} />
+                          <Typography
+                            sx={{
+                              fontSize: '0.875rem',
+                              fontWeight: 600,
+                            }}
+                          >
+                            Đã đăng ký
+                          </Typography>
+                        </Box>
                       ) : (
-                        <Chip
-                          label="Chưa đăng ký"
-                          color="default"
-                          size="small"
-                          variant="outlined"
-                        />
+                        <Box
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            bgcolor: '#f5f5f5',
+                            color: '#757575',
+                            py: 0.75,
+                            px: 1.5,
+                            borderRadius: 2,
+                            border: '1px solid #e0e0e0',
+                          }}
+                        >
+                          <CircleOutlined sx={{ fontSize: '0.875rem' }} />
+                          <Typography
+                            sx={{
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                            }}
+                          >
+                            Chưa đăng ký
+                          </Typography>
+                        </Box>
                       )}
                     </TableCell>
                     <TableCell align="center">
