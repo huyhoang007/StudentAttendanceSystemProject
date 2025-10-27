@@ -11,19 +11,24 @@ import {
   Chip,
   Button,
   Paper,
-  // ========== THÊM CÁC COMPONENT GIAO DIỆN ==========
   Card,
   CircularProgress,
-  TablePagination, // <-- THÊM IMPORT NÀY
+  TablePagination,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Snackbar,
 } from "@mui/material";
 import {
-  // ========== THÊM CÁC ICON MỚI ==========
   EventBusy,
   ArrowForward,
   Visibility,
   Close,
   QrCodeScanner,
   EventAvailable,
+  Warning,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -143,32 +148,45 @@ const StudentRegisteredEvents = () => {
     }
   }, [user]);
 
+    // State for dialog
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedRegistration, setSelectedRegistration] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
+
   const handleCancelRegistration = async (registrationId, eventTitle) => {
-    // ... (Logic của bạn giữ nguyên)
-    if (
-      !window.confirm(`Bạn có chắc muốn hủy đăng ký sự kiện "${eventTitle}"?`)
-    ) {
-      return;
-    }
+    setSelectedRegistration({ id: registrationId, title: eventTitle });
+    setDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    if (!selectedRegistration) return;
 
     try {
       const token = localStorage.getItem("authToken");
-      await cancelRegistration(registrationId, token);
-      alert("Hủy đăng ký thành công!");
-
-      // Remove the canceled registration from current state instead of reloading all
+      await cancelRegistration(selectedRegistration.id, token);
+      
       setRegistrations((prevRegistrations) =>
         prevRegistrations.filter((reg) => {
-          const regId =
-            reg.studentInEventId || reg.StudentInEventId || reg.id || reg.Id;
-          return regId !== registrationId;
+          const regId = reg.studentInEventId || reg.StudentInEventId || reg.id || reg.Id;
+          return regId !== selectedRegistration.id;
         })
       );
 
-      console.log("Removed registration from state:", registrationId);
+      setSnackbarMessage("Hủy đăng ký thành công!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+
+      console.log("Removed registration from state:", selectedRegistration.id);
     } catch (error) {
       console.error("Error canceling registration:", error);
-      alert("Lỗi khi hủy đăng ký: " + (error.message || "Không xác định"));
+      setSnackbarMessage("Lỗi khi hủy đăng ký: " + (error.message || "Không xác định"));
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    } finally {
+      setDialogOpen(false);
+      setSelectedRegistration(null);
     }
   };
 
@@ -198,22 +216,24 @@ const StudentRegisteredEvents = () => {
     };
   }, [refreshData]);
 
-  const getStatusColor = (status) => {
-    // ... (Logic của bạn giữ nguyên)
+    const getStatusColor = (status) => {
+    // Map status to colors with consistent branding
     switch (status?.toLowerCase()) {
       case "registered":
-        return "success";
+        return "success"; // Green
       case "attended":
-        return "primary";
+        return "primary"; // Blue
       case "cancelled":
-        return "error";
+        return "error"; // Red
+      case "absent":
+        return "warning"; // Orange
       default:
-        return "default";
+        return "default"; // Gray
     }
   };
 
   const getStatusText = (status) => {
-    // ... (Logic của bạn giữ nguyên)
+    // Map status to user-friendly Vietnamese text
     switch (status?.toLowerCase()) {
       case "registered":
         return "Đã đăng ký";
@@ -221,6 +241,8 @@ const StudentRegisteredEvents = () => {
         return "Đã tham dự";
       case "cancelled":
         return "Đã hủy";
+      case "absent":
+        return "Vắng mặt";
       default:
         return status || "Không xác định";
     }
@@ -258,7 +280,60 @@ const StudentRegisteredEvents = () => {
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
-      {/* ========== HEADER ĐÃ UPDATE ========== */}
+      {/* Dialog for cancel confirmation */}
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title" sx={{ pr: 8 }}>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Warning color="warning" />
+            Xác nhận hủy đăng ký
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {selectedRegistration && (
+              <>
+                Bạn có chắc chắn muốn hủy đăng ký sự kiện "{selectedRegistration.title}"?
+                <br />
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  Lưu ý: Hành động này không thể hoàn tác.
+                </Typography>
+              </>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} color="inherit">
+            Hủy bỏ
+          </Button>
+          <Button onClick={handleConfirmCancel} color="error" variant="contained">
+            Xác nhận hủy đăng ký
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
+      {/* Header */}
       <Box
         display="flex"
         justifyContent="space-between"
@@ -466,45 +541,49 @@ const StudentRegisteredEvents = () => {
                         : "Chưa xác định"}
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        label={getStatusText(status)}
-                        color={getStatusColor(status)}
-                        size="small"
-                      />
+                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                        <Chip
+                          label={getStatusText(status)}
+                          color={getStatusColor(status)}
+                          size="small"
+                          sx={{
+                            fontWeight: 500,
+                            minWidth: '100px',
+                            '& .MuiChip-label': {
+                              px: 2
+                            }
+                          }}
+                        />
+                      </Box>
                     </TableCell>
                     <TableCell align="center">
-                      {hasActiveSessions ? (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+                        {hasActiveSessions ? (
                           <Chip
-                            label={`Có ${eventSessions.length} ${eventSessions.length > 1 ? 'phiên' : 'phiên'}`}
+                            label={`${eventSessions.length} phiên`}
                             color="success"
                             size="small"
                             sx={{
                               fontWeight: 500,
-                              backgroundColor: '#e8f5e9',
-                              color: '#2e7d32',
                               '& .MuiChip-label': {
                                 px: 2
                               }
                             }}
                           />
-                        </Box>
-                      ) : (
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                        ) : (
                           <Chip
                             label="Chưa có phiên"
+                            color="warning"
                             size="small"
                             sx={{
                               fontWeight: 500,
-                              backgroundColor: '#fff3e0',
-                              color: '#ed6c02',
                               '& .MuiChip-label': {
                                 px: 2
                               }
                             }}
                           />
-                        </Box>
-                      )}
+                        )}
+                      </Box>
                     </TableCell>
 
                     <TableCell align="center">
