@@ -27,19 +27,21 @@ import {
   Card,
   CardContent,
   Grid,
-  TablePagination, // <-- THÊM IMPORT NÀY
+  TablePagination,
+  Container,
+  Stack,
+  Avatar,
 } from "@mui/material";
 import {
   Add,
   Edit,
   Delete,
-  Lock,
-  LockOpen,
   Refresh,
   AdminPanelSettings,
   People,
   PersonAdd,
   Group,
+  Settings,
 } from "@mui/icons-material";
 import {
   getAllUsers,
@@ -54,10 +56,8 @@ import { useAuth } from "../contexts/AuthContext";
 const AdminUserManagement = () => {
   const { user: currentUser } = useAuth();
   const [users, setUsers] = useState([]);
-  // --- THÊM STATE CHO PHÂN TRANG ---
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  // ---------------------------------
   const [universities, setUniversities] = useState([]);
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -80,7 +80,7 @@ const AdminUserManagement = () => {
     try {
       const data = await getAllUsers();
       setUsers(data);
-      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
+      setPage(0);
     } catch (error) {
       setSnackbar({
         open: true,
@@ -93,7 +93,6 @@ const AdminUserManagement = () => {
   };
 
   const fetchUniversities = async () => {
-    // ... (Giữ nguyên)
     try {
       const data = await getUniversities();
       setUniversities(data);
@@ -108,8 +107,6 @@ const AdminUserManagement = () => {
   }, []);
 
   const handleOpen = (user = null) => {
-    // ... (Giữ nguyên)
-    // Check permissions when editing
     if (user && !canModifyUser(user)) {
       setSnackbar({
         open: true,
@@ -147,7 +144,6 @@ const AdminUserManagement = () => {
   };
 
   const handleClose = () => {
-    // ... (Giữ nguyên)
     setOpen(false);
     setForm({
       username: "",
@@ -162,9 +158,7 @@ const AdminUserManagement = () => {
   };
 
   const handleSave = async () => {
-    // ... (Giữ nguyên)
     try {
-      // Validation
       if (
         (form.role === "organizer" || form.role === "student") &&
         !form.universityId
@@ -177,7 +171,6 @@ const AdminUserManagement = () => {
         return;
       }
 
-      // Additional validation for student
       if (form.role === "student") {
         if (!form.name || !form.studentCode) {
           setSnackbar({
@@ -205,7 +198,7 @@ const AdminUserManagement = () => {
         });
       }
       setOpen(false);
-      fetchUsers(); // <-- fetchUsers đã có setPage(0)
+      fetchUsers();
     } catch (error) {
       setSnackbar({
         open: true,
@@ -216,8 +209,6 @@ const AdminUserManagement = () => {
   };
 
   const handleDelete = async (userId) => {
-    // ... (Giữ nguyên)
-    // Find the user to check permissions
     const targetUser = users.find((u) => u.userId === userId);
 
     if (!canModifyUser(targetUser)) {
@@ -246,7 +237,7 @@ const AdminUserManagement = () => {
           message: "Xóa người dùng thành công!",
           severity: "success",
         });
-        fetchUsers(); // <-- fetchUsers đã có setPage(0)
+        fetchUsers();
       } catch (error) {
         setSnackbar({
           open: true,
@@ -258,7 +249,6 @@ const AdminUserManagement = () => {
   };
 
   const handleResetPassword = async (userId) => {
-    // ... (Giữ nguyên)
     if (
       window.confirm("Bạn có chắc muốn đặt lại mật khẩu của người dùng này?")
     ) {
@@ -280,37 +270,32 @@ const AdminUserManagement = () => {
   };
 
   const getRoleColor = (role) => {
-    // ... (Giữ nguyên)
     switch (role) {
       case "admin":
-        return "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)";
+        return "#7c3aed";
       case "organizer":
-        return "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)";
+        return "#9333ea";
       case "student":
-        return "linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)";
+        return "#a855f7";
       default:
-        return "#F5F5F5";
+        return "#9ca3af";
     }
   };
 
   const getRoleIcon = (role) => {
-    // ... (Giữ nguyên)
     switch (role) {
       case "admin":
-        return <AdminPanelSettings sx={{ color: "#FFFFFF" }} />;
+        return <AdminPanelSettings sx={{ fontSize: 16 }} />;
       case "organizer":
-        return <People sx={{ color: "#FFFFFF" }} />;
+        return <People sx={{ fontSize: 16 }} />;
       case "student":
-        return <PersonAdd sx={{ color: "#6C63FF" }} />;
+        return <PersonAdd sx={{ fontSize: 16 }} />;
       default:
-        return <People sx={{ color: "#6B7280" }} />;
+        return <People sx={{ fontSize: 16 }} />;
     }
   };
 
-  // Check if current user can edit/delete another user
   const canModifyUser = (targetUser) => {
-    // ... (Giữ nguyên)
-    // Không thể sửa/xóa tài khoản admin khác
     if (
       targetUser.role === "admin" &&
       targetUser.userId !== currentUser?.userId
@@ -320,576 +305,194 @@ const AdminUserManagement = () => {
     return true;
   };
 
-  // Kiểm tra xem có được phép xóa user không
   const canDeleteUser = (targetUser) => {
-    // ... (Giữ nguyên)
-    // Không cho phép xóa bất kỳ tài khoản admin nào
     if (targetUser.role === "admin") {
       return false;
     }
     return true;
   };
 
-  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Quay về trang đầu tiên
+    setPage(0);
   };
 
-  // Lọc danh sách người dùng, không hiển thị tài khoản đang đăng nhập
   const filteredUsers = users.filter(
     (user) => user.userId !== currentUser?.userId
   );
 
-  // Stats calculation
   const stats = {
-    // ... (Giữ nguyên)
     total: users.length,
     admins: users.filter((u) => u.role === "admin").length,
     organizers: users.filter((u) => u.role === "organizer").length,
     students: users.filter((u) => u.role === "student").length,
-    active: users.filter((u) => u.isActive).length,
   };
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #F5F5F5 0%, #FFFFFF 100%)",
-        fontFamily: "'Inter', 'Open Sans', sans-serif",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Animated Wave Blobs Background */}
-      {/* ... (Giữ nguyên background animation) */}
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 0,
-          overflow: "hidden",
-          pointerEvents: "none",
-        }}
-      >
-        {/* Blob 1 */}
-        <Box
+    <Box sx={{ backgroundColor: "#f3f0ff", minHeight: "100vh", py: 3 }}>
+      <Container maxWidth="lg">
+        {/* Header - Giống mẫu */}
+        <Card
           sx={{
-            position: "absolute",
-            top: "-10%",
-            left: "-5%",
-            width: "500px",
-            height: "500px",
-            background:
-              "radial-gradient(circle, rgba(108, 99, 255, 0.08) 0%, rgba(139, 92, 246, 0.03) 70%, transparent 100%)",
-            borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%",
-            animation: "blob1 20s ease-in-out infinite",
-            "@keyframes blob1": {
-              "0%, 100%": {
-                transform: "translate(0, 0) scale(1) rotate(0deg)",
-                borderRadius: "40% 60% 70% 30% / 40% 50% 60% 50%",
-              },
-              "33%": {
-                transform: "translate(30px, -50px) scale(1.1) rotate(120deg)",
-                borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-              },
-              "66%": {
-                transform: "translate(-20px, 20px) scale(0.9) rotate(240deg)",
-                borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
-              },
-            },
-          }}
-        />
-
-        {/* Blob 2 */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: "20%",
-            right: "-8%",
-            width: "600px",
-            height: "600px",
-            background:
-              "radial-gradient(circle, rgba(167, 139, 250, 0.07) 0%, rgba(196, 181, 253, 0.03) 70%, transparent 100%)",
-            borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-            animation: "blob2 25s ease-in-out infinite",
-            "@keyframes blob2": {
-              "0%, 100%": {
-                transform: "translate(0, 0) scale(1) rotate(0deg)",
-                borderRadius: "60% 40% 30% 70% / 60% 30% 70% 40%",
-              },
-              "33%": {
-                transform: "translate(-40px, 30px) scale(1.15) rotate(-120deg)",
-                borderRadius: "30% 70% 60% 40% / 40% 60% 50% 60%",
-              },
-              "66%": {
-                transform: "translate(20px, -40px) scale(0.95) rotate(-240deg)",
-                borderRadius: "70% 30% 40% 60% / 30% 70% 60% 40%",
-              },
-            },
-          }}
-        />
-
-        {/* Blob 3 */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "-15%",
-            left: "30%",
-            width: "450px",
-            height: "450px",
-            background:
-              "radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(196, 181, 253, 0.02) 70%, transparent 100%)",
-            borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
-            animation: "blob3 22s ease-in-out infinite",
-            "@keyframes blob3": {
-              "0%, 100%": {
-                transform: "translate(0, 0) scale(1) rotate(0deg)",
-                borderRadius: "30% 70% 60% 40% / 50% 60% 40% 50%",
-              },
-              "50%": {
-                transform: "translate(50px, -30px) scale(1.2) rotate(180deg)",
-                borderRadius: "70% 30% 40% 60% / 40% 50% 60% 50%",
-              },
-            },
-          }}
-        />
-
-        {/* Blob 4 */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: "10%",
-            right: "15%",
-            width: "350px",
-            height: "350px",
-            background:
-              "radial-gradient(circle, rgba(196, 181, 253, 0.08) 0%, rgba(221, 214, 254, 0.03) 70%, transparent 100%)",
-            borderRadius: "50% 50% 50% 50% / 60% 40% 60% 40%",
-            animation: "blob4 18s ease-in-out infinite",
-            "@keyframes blob4": {
-              "0%, 100%": {
-                transform: "translate(0, 0) scale(1) rotate(0deg)",
-                borderRadius: "50% 50% 50% 50% / 60% 40% 60% 40%",
-              },
-              "50%": {
-                transform: "translate(-30px, 40px) scale(0.85) rotate(-180deg)",
-                borderRadius: "40% 60% 70% 30% / 50% 50% 50% 50%",
-              },
-            },
-          }}
-        />
-
-        {/* Wave effect */}
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: "200px",
-            background:
-              "linear-gradient(180deg, transparent 0%, rgba(196, 181, 253, 0.05) 100%)",
-            animation: "wave 15s ease-in-out infinite",
-            "@keyframes wave": {
-              "0%, 100%": {
-                transform: "translateX(0) scaleY(1)",
-              },
-              "50%": {
-                transform: "translateX(-25px) scaleY(1.1)",
-              },
-            },
-          }}
-        />
-      </Box>
-
-      <Box
-        sx={{
-          maxWidth: 1400,
-          margin: "0 auto",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Header Section */}
-        {/* ... (Giữ nguyên Header) */}
-        <Box
-          sx={{
-            mb: 4,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2.5,
-            background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
-            p: 3.5,
-            borderRadius: "16px",
-            boxShadow: "0 8px 24px rgba(108, 99, 255, 0.25)",
-            transition: "all 0.3s ease",
-            flexWrap: "wrap",
-            "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 12px 32px rgba(108, 99, 255, 0.35)",
-            },
+            mb: 3,
+            borderRadius: "20px",
+            background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
+            boxShadow: "0 8px 24px rgba(124, 58, 237, 0.3)",
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2.5 }}>
-            <Box
-              sx={{
-                background: "rgba(255, 255, 255, 0.15)",
-                backdropFilter: "blur(10px)",
-                borderRadius: "12px",
-                p: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <AdminPanelSettings sx={{ fontSize: 44, color: "#FFFFFF" }} />
-            </Box>
-            <Box>
-              <Typography
-                variant="h4"
-                fontWeight={700}
+          <CardContent sx={{ p: 3 }}>
+            <Stack direction="row" alignItems="center" spacing={2}>
+              <Avatar
                 sx={{
-                  fontFamily: "'Poppins', sans-serif",
-                  mb: 0.5,
-                  color: "#FFFFFF",
-                  letterSpacing: "-0.5px",
+                  width: 56,
+                  height: 56,
+                  bgcolor: "rgba(255,255,255,0.2)",
                 }}
               >
-                Quản lý Người dùng
-              </Typography>
-              <Typography
-                variant="body1"
-                sx={{
-                  color: "rgba(255, 255, 255, 0.9)",
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: 500,
-                }}
-              >
-                Tri thức & Uy tín — Nền tảng học thuật hiện đại
-              </Typography>
-            </Box>
-          </Box>
+                <Settings sx={{ fontSize: 32, color: "#fff" }} />
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="h5" fontWeight={700} color="#fff">
+                  Quản lý Người dùng
+                </Typography>
+                <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.9)" }}>
+                  Tri thức & Uyên tín — Nền tảng học thuật hiện đại
+                </Typography>
+              </Box>
+              <Stack direction="row" spacing={1.5}>
+                <Button
+                  variant="contained"
+                  startIcon={<Add />}
+                  onClick={() => handleOpen()}
+                  sx={{
+                    bgcolor: "rgba(255,255,255,0.95)",
+                    color: "#7c3aed",
+                    borderRadius: "12px",
+                    px: 2.5,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    "&:hover": {
+                      bgcolor: "#fff",
+                      transform: "translateY(-2px)",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                    },
+                  }}
+                >
+                  Tạo người dùng mới
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<Refresh />}
+                  onClick={fetchUsers}
+                  disabled={loading}
+                  sx={{
+                    borderColor: "rgba(255,255,255,0.5)",
+                    color: "#fff",
+                    borderRadius: "12px",
+                    px: 2.5,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    "&:hover": {
+                      borderColor: "#fff",
+                      bgcolor: "rgba(255,255,255,0.1)",
+                    },
+                  }}
+                >
+                  Làm mới
+                </Button>
+              </Stack>
+            </Stack>
+          </CardContent>
+        </Card>
 
-          {/* Action Buttons in Header */}
-          <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              sx={{
-                fontWeight: 600,
-                background: "rgba(255, 255, 255, 0.2)",
-                backdropFilter: "blur(10px)",
-                color: "#FFFFFF",
-                fontFamily: "'Inter', sans-serif",
-                borderRadius: "12px",
-                px: 3.5,
-                py: 1.3,
-                fontSize: "0.95rem",
-                border: "2px solid rgba(255, 255, 255, 0.3)",
-                boxShadow: "0 4px 16px rgba(255, 255, 255, 0.1)",
-                textTransform: "none",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  background: "rgba(255, 255, 255, 0.3)",
-                  border: "2px solid rgba(255, 255, 255, 0.5)",
-                  transform: "translateY(-2px)",
-                  boxShadow: "0 6px 20px rgba(255, 255, 255, 0.2)",
-                },
-              }}
-              onClick={() => handleOpen()}
-            >
-              Tạo Người dùng Mới
-            </Button>
-            <Button
-              variant="outlined"
-              startIcon={<Refresh />}
-              sx={{
-                fontWeight: 600,
-                color: "#FFFFFF",
-                borderColor: "rgba(255, 255, 255, 0.5)",
-                borderWidth: 2,
-                fontFamily: "'Inter', sans-serif",
-                borderRadius: "12px",
-                px: 3.5,
-                py: 1.3,
-                fontSize: "0.95rem",
-                textTransform: "none",
-                transition: "all 0.3s ease",
-                "&:hover": {
-                  backgroundColor: "rgba(255, 255, 255, 0.15)",
-                  borderColor: "rgba(255, 255, 255, 0.8)",
-                  borderWidth: 2,
-                  transform: "translateY(-2px)",
-                },
-                "&.Mui-disabled": {
-                  color: "rgba(255, 255, 255, 0.5)",
-                  borderColor: "rgba(255, 255, 255, 0.3)",
-                },
-              }}
-              onClick={fetchUsers}
-              disabled={loading}
-            >
-              Làm mới
-            </Button>
-          </Box>
-        </Box>
-
-        {/* Stats Cards */}
-        {/* ... (Giữ nguyên Stats Cards) */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Stats Cards - Giống mẫu */}
+        <Grid container spacing={2} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
                 borderRadius: "16px",
-                boxShadow: "0 4px 16px rgba(108, 99, 255, 0.2)",
-                transition: "all 0.3s ease",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 8px 24px rgba(108, 99, 255, 0.3)",
-                },
+                background: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
+                boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
+                transition: "transform 0.2s",
+                "&:hover": { transform: "translateY(-4px)" },
               }}
             >
-              <CardContent
-                sx={{
-                  textAlign: "center",
-                  p: 3,
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    borderRadius: "12px",
-                    p: 1.5,
-                    display: "inline-flex",
-                    mb: 1.5,
-                  }}
-                >
-                  <Group sx={{ fontSize: 40, color: "#FFFFFF" }} />
-                </Box>
-                <Typography
-                  variant="h3"
-                  fontWeight={800}
-                  sx={{
-                    fontFamily: "'Poppins', sans-serif",
-                    mb: 0.5,
-                    color: "#FFFFFF",
-                  }}
-                >
+              <CardContent sx={{ textAlign: "center", py: 3 }}>
+                <Group sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
+                <Typography variant="h3" fontWeight={700} color="#fff">
                   {stats.total}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 600,
-                    color: "rgba(255, 255, 255, 0.9)",
-                  }}
-                >
-                  Tổng Người dùng
+                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+                  Total User
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #8B5CF6 0%, #A78BFA 100%)",
                 borderRadius: "16px",
-                boxShadow: "0 4px 16px rgba(139, 92, 246, 0.2)",
-                transition: "all 0.3s ease",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 8px 24px rgba(139, 92, 246, 0.3)",
-                },
+                background: "linear-gradient(135deg, #8b5cf6 0%, #9333ea 100%)",
+                boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
+                transition: "transform 0.2s",
+                "&:hover": { transform: "translateY(-4px)" },
               }}
             >
-              <CardContent
-                sx={{
-                  textAlign: "center",
-                  p: 3,
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    borderRadius: "12px",
-                    p: 1.5,
-                    display: "inline-flex",
-                    mb: 1.5,
-                  }}
-                >
-                  <AdminPanelSettings sx={{ fontSize: 40, color: "#FFFFFF" }} />
-                </Box>
-                <Typography
-                  variant="h3"
-                  fontWeight={800}
-                  sx={{
-                    fontFamily: "'Poppins', sans-serif",
-                    mb: 0.5,
-                    color: "#FFFFFF",
-                  }}
-                >
+              <CardContent sx={{ textAlign: "center", py: 3 }}>
+                <AdminPanelSettings sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
+                <Typography variant="h3" fontWeight={700} color="#fff">
                   {stats.admins}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 600,
-                    color: "rgba(255, 255, 255, 0.9)",
-                  }}
-                >
+                <Typography variant="body2" color="rgba(255,255,255,0.9)">
                   Quản Trị Viên
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #A78BFA 0%, #C4B5FD 100%)",
                 borderRadius: "16px",
-                boxShadow: "0 4px 16px rgba(167, 139, 250, 0.2)",
-                transition: "all 0.3s ease",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 8px 24px rgba(167, 139, 250, 0.3)",
-                },
+                background: "linear-gradient(135deg, #9333ea 0%, #a855f7 100%)",
+                boxShadow: "0 4px 12px rgba(147, 51, 234, 0.2)",
+                transition: "transform 0.2s",
+                "&:hover": { transform: "translateY(-4px)" },
               }}
             >
-              <CardContent
-                sx={{
-                  textAlign: "center",
-                  p: 3,
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    borderRadius: "12px",
-                    p: 1.5,
-                    display: "inline-flex",
-                    mb: 1.5,
-                  }}
-                >
-                  <People sx={{ fontSize: 40, color: "#FFFFFF" }} />
-                </Box>
-                <Typography
-                  variant="h3"
-                  fontWeight={800}
-                  sx={{
-                    fontFamily: "'Poppins', sans-serif",
-                    mb: 0.5,
-                    color: "#FFFFFF",
-                  }}
-                >
+              <CardContent sx={{ textAlign: "center", py: 3 }}>
+                <People sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
+                <Typography variant="h3" fontWeight={700} color="#fff">
                   {stats.organizers}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 600,
-                    color: "rgba(255, 255, 255, 0.9)",
-                  }}
-                >
+                <Typography variant="body2" color="rgba(255,255,255,0.9)">
                   Người Tổ Chức
                 </Typography>
               </CardContent>
             </Card>
           </Grid>
+
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                background: "linear-gradient(135deg, #C4B5FD 0%, #DDD6FE 100%)",
                 borderRadius: "16px",
-                boxShadow: "0 4px 16px rgba(196, 181, 253, 0.2)",
-                transition: "all 0.3s ease",
-                height: "100%",
-                display: "flex",
-                flexDirection: "column",
-                "&:hover": {
-                  transform: "translateY(-6px)",
-                  boxShadow: "0 8px 24px rgba(196, 181, 253, 0.3)",
-                },
+                background: "linear-gradient(135deg, #a855f7 0%, #c084fc 100%)",
+                boxShadow: "0 4px 12px rgba(168, 85, 247, 0.2)",
+                transition: "transform 0.2s",
+                "&:hover": { transform: "translateY(-4px)" },
               }}
             >
-              <CardContent
-                sx={{
-                  textAlign: "center",
-                  p: 3,
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <Box
-                  sx={{
-                    background: "rgba(108, 99, 255, 0.1)",
-                    borderRadius: "12px",
-                    p: 1.5,
-                    display: "inline-flex",
-                    mb: 1.5,
-                  }}
-                >
-                  <PersonAdd sx={{ fontSize: 40, color: "#6C63FF" }} />
-                </Box>
-                <Typography
-                  variant="h3"
-                  fontWeight={800}
-                  sx={{
-                    fontFamily: "'Poppins', sans-serif",
-                    mb: 0.5,
-                    color: "#6C63FF",
-                  }}
-                >
+              <CardContent sx={{ textAlign: "center", py: 3 }}>
+                <PersonAdd sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
+                <Typography variant="h3" fontWeight={700} color="#fff">
                   {stats.students}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    fontWeight: 600,
-                    color: "#8B5CF6",
-                  }}
-                >
+                <Typography variant="body2" color="rgba(255,255,255,0.9)">
                   Sinh Viên
                 </Typography>
               </CardContent>
@@ -897,290 +500,140 @@ const AdminUserManagement = () => {
           </Grid>
         </Grid>
 
-        {/* Users Table */}
-        <Box
-          sx={{
-            background: "#FFFFFF",
-            borderRadius: "16px",
-            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.08)",
-            p: 2.5,
-            overflow: "hidden",
-          }}
-        >
-          {loading ? (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-              <CircularProgress sx={{ color: "#6C63FF" }} size={48} />
-            </Box>
-          ) : (
-            <>
-              {" "}
-              {/* Fragment needed to group Table and TablePagination */}
-              <Table>
-                <TableHead>
-                  {/* ... (Giữ nguyên TableHead styles) */}
-                  <TableRow
-                    sx={{
-                      background:
-                        "linear-gradient(135deg, #F5F5F5 0%, #E5E7EB 100%)",
-                    }}
-                  >
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Username
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Email
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Role
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Trường
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Ngày tạo
-                    </TableCell>
-                    <TableCell
-                      sx={{
-                        fontWeight: 700,
-                        fontSize: "0.95rem",
-                        color: "#374151",
-                        fontFamily: "'Inter', sans-serif",
-                        py: 2.5,
-                      }}
-                    >
-                      Hành động
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {/* --- CẬP NHẬT LOGIC RENDER VỚI SLICE --- */}
-                  {(rowsPerPage > 0
-                    ? filteredUsers.slice(
-                        page * rowsPerPage,
-                        page * rowsPerPage + rowsPerPage
-                      )
-                    : filteredUsers
-                  ).map((user, index) => (
-                    <TableRow
-                      key={user.userId}
-                      sx={{
-                        backgroundColor:
-                          index % 2 === 0 ? "#FAFAFA" : "#FFFFFF",
-                        transition: "all 0.2s ease",
-                        "&:hover": {
-                          background:
-                            "linear-gradient(90deg, rgba(108, 99, 255, 0.05), rgba(139, 92, 246, 0.05))",
-                          transform: "scale(1.005)",
-                        },
-                      }}
-                    >
-                      {/* ... (Giữ nguyên các TableCell) */}
-                      <TableCell
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          color: "#1F2937",
-                          py: 2.5,
-                          fontWeight: 500,
-                        }}
-                      >
-                        {user.username}
+        {/* Table Section */}
+        <Card sx={{ borderRadius: "16px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+          <CardContent sx={{ p: 0 }}>
+            {loading ? (
+              <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                <CircularProgress sx={{ color: "#7c3aed" }} />
+              </Box>
+            ) : (
+              <>
+                <Table>
+                  <TableHead sx={{ bgcolor: "#f9fafb" }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Username
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          color: "#1F2937",
-                          py: 2.5,
-                        }}
-                      >
-                        {user.email}
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Email
                       </TableCell>
-                      <TableCell>
-                        <Chip
-                          icon={getRoleIcon(user.role)}
-                          label={user.role}
-                          size="small"
-                          sx={{
-                            borderRadius: "10px",
-                            fontFamily: "'Inter', sans-serif",
-                            background: getRoleColor(user.role),
-                            color:
-                              user.role === "student" ? "#6C63FF" : "#FFFFFF",
-                            fontWeight: 700,
-                            px: 1.5,
-                            border: "none",
-                            boxShadow:
-                              user.role === "admin"
-                                ? "0 2px 8px rgba(108, 99, 255, 0.3)"
-                                : user.role === "organizer"
-                                ? "0 2px 8px rgba(139, 92, 246, 0.3)"
-                                : "0 2px 8px rgba(196, 181, 253, 0.3)",
-                          }}
-                        />
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Role
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          color: "#1F2937",
-                          py: 2.5,
-                        }}
-                      >
-                        {user.universityName || "N/A"}
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Trường
                       </TableCell>
-                      <TableCell
-                        sx={{
-                          fontFamily: "'Inter', sans-serif",
-                          color: "#1F2937",
-                          py: 2.5,
-                        }}
-                      >
-                        {new Date(user.createdAt).toLocaleDateString("vi-VN")}
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Ngày tạo
                       </TableCell>
-                      <TableCell>
-                        {canModifyUser(user) && (
-                          <IconButton
-                            onClick={() => handleOpen(user)}
-                            sx={{
-                              color: "#6C63FF",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                color: "#8B5CF6",
-                                background: "rgba(108, 99, 255, 0.1)",
-                                transform: "scale(1.15)",
-                              },
-                            }}
-                          >
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        )}
-                        {canModifyUser(user) && (
-                          <IconButton
-                            onClick={() => handleResetPassword(user.userId)}
-                            sx={{
-                              color: "#8B5CF6",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                color: "#A78BFA",
-                                background: "rgba(139, 92, 246, 0.1)",
-                                transform: "scale(1.15)",
-                              },
-                            }}
-                          >
-                            <Refresh fontSize="small" />
-                          </IconButton>
-                        )}
-                        {canModifyUser(user) && canDeleteUser(user) && (
-                          <IconButton
-                            onClick={() => handleDelete(user.userId)}
-                            sx={{
-                              color: "#EF4444",
-                              transition: "all 0.3s ease",
-                              "&:hover": {
-                                color: "#DC2626",
-                                background: "rgba(239, 68, 68, 0.1)",
-                                transform: "scale(1.15)",
-                              },
-                            }}
-                          >
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        )}
+                      <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
+                        Hành động
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              {/* --- THÊM COMPONENT PHÂN TRANG --- */}
-              <TablePagination
-                rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]}
-                component="div"
-                count={filteredUsers.length} // Tổng số người dùng đã lọc
-                rowsPerPage={rowsPerPage}
-                page={page}
-                onPageChange={handleChangePage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                labelRowsPerPage="Số hàng mỗi trang:"
-                labelDisplayedRows={({ from, to, count }) => {
-                  if (count === -1) return "Tất cả";
-                  return `${from}–${to} trong số ${
-                    count !== -1 ? count : `hơn ${to}`
-                  }`;
-                }}
-                SelectProps={{
-                  inputProps: { "aria-label": "Số hàng mỗi trang" },
-                  native: true,
-                }}
-                sx={{
-                  mt: 2, // Margin top for spacing
-                  ".MuiTablePagination-toolbar": {
-                    color: "#6B7280",
-                    fontFamily: "'Inter', sans-serif",
-                  },
-                  ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows":
-                    {
-                      fontWeight: 500,
-                      fontSize: "0.9rem",
-                    },
-                  ".MuiTablePagination-select": {
-                    fontWeight: 600,
-                    color: "#6C63FF",
-                  },
-                  ".MuiTablePagination-actions button": {
-                    color: "#6C63FF",
-                    "&:hover": {
-                      backgroundColor: "rgba(108, 99, 255, 0.1)",
-                    },
-                    "&.Mui-disabled": {
-                      color: "#D1D5DB",
-                    },
-                  },
-                }}
-              />
-            </> // End Fragment
-          )}
-        </Box>
+                  </TableHead>
+                  <TableBody>
+                    {(rowsPerPage > 0
+                      ? filteredUsers.slice(
+                          page * rowsPerPage,
+                          page * rowsPerPage + rowsPerPage
+                        )
+                      : filteredUsers
+                    ).map((user) => (
+                      <TableRow
+                        key={user.userId}
+                        sx={{
+                          "&:hover": {
+                            bgcolor: "#f9fafb",
+                          },
+                        }}
+                      >
+                        <TableCell>{user.username}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Chip
+                            icon={getRoleIcon(user.role)}
+                            label={user.role}
+                            size="small"
+                            sx={{
+                              bgcolor: `${getRoleColor(user.role)}20`,
+                              color: getRoleColor(user.role),
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell>{user.universityName || "N/A"}</TableCell>
+                        <TableCell>
+                          {new Date(user.createdAt).toLocaleDateString("vi-VN")}
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction="row" spacing={0.5}>
+                            {canModifyUser(user) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleOpen(user)}
+                                sx={{
+                                  color: "#7c3aed",
+                                  "&:hover": { bgcolor: "#f3f0ff" },
+                                }}
+                              >
+                                <Edit fontSize="small" />
+                              </IconButton>
+                            )}
+                            {canModifyUser(user) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleResetPassword(user.userId)}
+                                sx={{
+                                  color: "#9333ea",
+                                  "&:hover": { bgcolor: "#f3f0ff" },
+                                }}
+                              >
+                                <Refresh fontSize="small" />
+                              </IconButton>
+                            )}
+                            {canModifyUser(user) && canDeleteUser(user) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDelete(user.userId)}
+                                sx={{
+                                  color: "#ef4444",
+                                  "&:hover": { bgcolor: "#fef2f2" },
+                                }}
+                              >
+                                <Delete fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
 
-        {/* Create/Edit User Dialog */}
-        {/* ... (Giữ nguyên Dialog styles) */}
+                <TablePagination
+                  rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]}
+                  component="div"
+                  count={filteredUsers.length}
+                  rowsPerPage={rowsPerPage}
+                  page={page}
+                  onPageChange={handleChangePage}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
+                  labelRowsPerPage="Số hàng mỗi trang:"
+                  sx={{
+                    borderTop: "1px solid #e5e7eb",
+                    ".MuiTablePagination-actions button": {
+                      color: "#7c3aed",
+                    },
+                  }}
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Dialog - Giống mẫu */}
         <Dialog
           open={open}
           onClose={handleClose}
@@ -1189,24 +642,18 @@ const AdminUserManagement = () => {
           PaperProps={{
             sx: {
               borderRadius: "16px",
-              background: "#FFFFFF",
-              boxShadow: "0 8px 32px rgba(108, 99, 255, 0.2)",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
             },
           }}
         >
           <DialogTitle
             sx={{
-              fontFamily: "'Poppins', sans-serif",
+              background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
+              color: "#fff",
               fontWeight: 700,
-              color: "#1F2937",
-              fontSize: "1.5rem",
-              pt: 3,
-              background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
-              color: "#FFFFFF",
-              borderRadius: "16px 16px 0 0",
             }}
           >
-            {editId ? "✏️ Chỉnh sửa User" : "✨ Tạo User Mới"}
+            {editId ? "Chỉnh sửa User" : "Tạo User Mới"}
           </DialogTitle>
           <DialogContent sx={{ pt: 3 }}>
             <TextField
@@ -1218,26 +665,12 @@ const AdminUserManagement = () => {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "12px",
-                  background: "#F9FAFB",
-                  fontFamily: "'Inter', sans-serif",
-                  "& fieldset": {
-                    borderColor: "rgba(108, 99, 255, 0.2)",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#6C63FF",
-                  },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#6C63FF",
-                    borderWidth: 2,
+                    borderColor: "#7c3aed",
                   },
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#6B7280",
-                  fontFamily: "'Inter', sans-serif",
-                  "&.Mui-focused": {
-                    color: "#6C63FF",
-                    fontWeight: 600,
-                  },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#7c3aed",
                 },
               }}
             />
@@ -1251,26 +684,12 @@ const AdminUserManagement = () => {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: "12px",
-                  background: "#F9FAFB",
-                  fontFamily: "'Inter', sans-serif",
-                  "& fieldset": {
-                    borderColor: "rgba(108, 99, 255, 0.2)",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#6C63FF",
-                  },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#6C63FF",
-                    borderWidth: 2,
+                    borderColor: "#7c3aed",
                   },
                 },
-                "& .MuiInputLabel-root": {
-                  color: "#6B7280",
-                  fontFamily: "'Inter', sans-serif",
-                  "&.Mui-focused": {
-                    color: "#6C63FF",
-                    fontWeight: 600,
-                  },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: "#7c3aed",
                 },
               }}
             />
@@ -1285,26 +704,12 @@ const AdminUserManagement = () => {
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     borderRadius: "12px",
-                    background: "#F9FAFB",
-                    fontFamily: "'Inter', sans-serif",
-                    "& fieldset": {
-                      borderColor: "rgba(108, 99, 255, 0.2)",
-                    },
-                    "&:hover fieldset": {
-                      borderColor: "#6C63FF",
-                    },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#6C63FF",
-                      borderWidth: 2,
+                      borderColor: "#7c3aed",
                     },
                   },
-                  "& .MuiInputLabel-root": {
-                    color: "#6B7280",
-                    fontFamily: "'Inter', sans-serif",
-                    "&.Mui-focused": {
-                      color: "#6C63FF",
-                      fontWeight: 600,
-                    },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "#7c3aed",
                   },
                 }}
               />
@@ -1312,11 +717,8 @@ const AdminUserManagement = () => {
             <FormControl fullWidth margin="normal">
               <InputLabel
                 sx={{
-                  fontFamily: "'Inter', sans-serif",
-                  color: "#6B7280",
                   "&.Mui-focused": {
-                    color: "#6C63FF",
-                    fontWeight: 600,
+                    color: "#7c3aed",
                   },
                 }}
               >
@@ -1328,32 +730,13 @@ const AdminUserManagement = () => {
                 onChange={(e) => setForm({ ...form, role: e.target.value })}
                 sx={{
                   borderRadius: "12px",
-                  background: "#F9FAFB",
-                  fontFamily: "'Inter', sans-serif",
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "rgba(108, 99, 255, 0.2)",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#6C63FF",
-                  },
                   "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#6C63FF",
-                    borderWidth: 2,
+                    borderColor: "#7c3aed",
                   },
                 }}
               >
-                <MenuItem
-                  value="organizer"
-                  sx={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  Người Tổ Chức
-                </MenuItem>
-                <MenuItem
-                  value="student"
-                  sx={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  Sinh Viên
-                </MenuItem>
+                <MenuItem value="organizer">Người Tổ Chức</MenuItem>
+                <MenuItem value="student">Sinh Viên</MenuItem>
               </Select>
             </FormControl>
 
@@ -1361,11 +744,8 @@ const AdminUserManagement = () => {
               <FormControl fullWidth margin="normal">
                 <InputLabel
                   sx={{
-                    fontFamily: "'Inter', sans-serif",
-                    color: "#6B7280",
                     "&.Mui-focused": {
-                      color: "#6C63FF",
-                      fontWeight: 600,
+                      color: "#7c3aed",
                     },
                   }}
                 >
@@ -1379,17 +759,8 @@ const AdminUserManagement = () => {
                   }
                   sx={{
                     borderRadius: "12px",
-                    background: "#F9FAFB",
-                    fontFamily: "'Inter', sans-serif",
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "rgba(108, 99, 255, 0.2)",
-                    },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#6C63FF",
-                    },
                     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#6C63FF",
-                      borderWidth: 2,
+                      borderColor: "#7c3aed",
                     },
                   }}
                 >
@@ -1397,7 +768,6 @@ const AdminUserManagement = () => {
                     <MenuItem
                       key={university.universityId}
                       value={university.universityId}
-                      sx={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {university.name}
                     </MenuItem>
@@ -1418,26 +788,12 @@ const AdminUserManagement = () => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      background: "#F9FAFB",
-                      fontFamily: "'Inter', sans-serif",
-                      "& fieldset": {
-                        borderColor: "rgba(108, 99, 255, 0.2)",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#6C63FF",
-                      },
                       "&.Mui-focused fieldset": {
-                        borderColor: "#6C63FF",
-                        borderWidth: 2,
+                        borderColor: "#7c3aed",
                       },
                     },
-                    "& .MuiInputLabel-root": {
-                      color: "#6B7280",
-                      fontFamily: "'Inter', sans-serif",
-                      "&.Mui-focused": {
-                        color: "#6C63FF",
-                        fontWeight: 600,
-                      },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#7c3aed",
                     },
                   }}
                 />
@@ -1453,26 +809,12 @@ const AdminUserManagement = () => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      background: "#F9FAFB",
-                      fontFamily: "'Inter', sans-serif",
-                      "& fieldset": {
-                        borderColor: "rgba(108, 99, 255, 0.2)",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#6C63FF",
-                      },
                       "&.Mui-focused fieldset": {
-                        borderColor: "#6C63FF",
-                        borderWidth: 2,
+                        borderColor: "#7c3aed",
                       },
                     },
-                    "& .MuiInputLabel-root": {
-                      color: "#6B7280",
-                      fontFamily: "'Inter', sans-serif",
-                      "&.Mui-focused": {
-                        color: "#6C63FF",
-                        fontWeight: 600,
-                      },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#7c3aed",
                     },
                   }}
                 />
@@ -1485,26 +827,12 @@ const AdminUserManagement = () => {
                   sx={{
                     "& .MuiOutlinedInput-root": {
                       borderRadius: "12px",
-                      background: "#F9FAFB",
-                      fontFamily: "'Inter', sans-serif",
-                      "& fieldset": {
-                        borderColor: "rgba(108, 99, 255, 0.2)",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "#6C63FF",
-                      },
                       "&.Mui-focused fieldset": {
-                        borderColor: "#6C63FF",
-                        borderWidth: 2,
+                        borderColor: "#7c3aed",
                       },
                     },
-                    "& .MuiInputLabel-root": {
-                      color: "#6B7280",
-                      fontFamily: "'Inter', sans-serif",
-                      "&.Mui-focused": {
-                        color: "#6C63FF",
-                        fontWeight: 600,
-                      },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "#7c3aed",
                     },
                   }}
                 />
@@ -1515,16 +843,10 @@ const AdminUserManagement = () => {
             <Button
               onClick={handleClose}
               sx={{
-                fontFamily: "'Inter', sans-serif",
-                color: "#6B7280",
                 borderRadius: "10px",
                 px: 3,
-                py: 1,
-                fontWeight: 600,
                 textTransform: "none",
-                "&:hover": {
-                  background: "rgba(107, 114, 128, 0.1)",
-                },
+                color: "#6b7280",
               }}
             >
               Hủy
@@ -1533,20 +855,12 @@ const AdminUserManagement = () => {
               onClick={handleSave}
               variant="contained"
               sx={{
-                fontWeight: 600,
-                background: "linear-gradient(135deg, #6C63FF 0%, #8B5CF6 100%)",
-                color: "#FFFFFF",
-                fontFamily: "'Inter', sans-serif",
                 borderRadius: "10px",
                 px: 4,
-                py: 1,
                 textTransform: "none",
-                boxShadow: "0 4px 12px rgba(108, 99, 255, 0.3)",
+                background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
                 "&:hover": {
-                  background:
-                    "linear-gradient(135deg, #8B5CF6 0%, #6C63FF 100%)",
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 6px 16px rgba(108, 99, 255, 0.4)",
+                  background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)",
                 },
               }}
             >
@@ -1555,8 +869,6 @@ const AdminUserManagement = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Snackbar for notifications */}
-        {/* ... (Giữ nguyên) */}
         <Snackbar
           open={snackbar.open}
           autoHideDuration={6000}
@@ -1565,17 +877,12 @@ const AdminUserManagement = () => {
           <Alert
             onClose={() => setSnackbar({ ...snackbar, open: false })}
             severity={snackbar.severity}
-            sx={{
-              fontFamily: "'Inter', sans-serif",
-              borderRadius: "12px",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.1)",
-              fontWeight: 500,
-            }}
+            sx={{ borderRadius: "12px" }}
           >
             {snackbar.message}
           </Alert>
         </Snackbar>
-      </Box>
+      </Container>
     </Box>
   );
 };
