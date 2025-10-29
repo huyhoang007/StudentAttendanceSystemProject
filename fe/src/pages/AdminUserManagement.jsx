@@ -42,6 +42,9 @@ import {
   PersonAdd,
   Group,
   Settings,
+  TrendingUp,
+  TrendingDown,
+  CheckCircleOutline,
 } from "@mui/icons-material";
 import {
   getAllUsers,
@@ -333,37 +336,37 @@ const AdminUserManagement = () => {
   };
 
   return (
-    <Box sx={{ backgroundColor: "#f3f0ff", minHeight: "100vh", py: 3 }}>
+    <Box sx={{ backgroundColor: "#F9FAFB", minHeight: "100vh", py: 3 }}>
       <Container maxWidth="lg">
-        {/* Header - Giống mẫu */}
+        {/* Header - Card lớn hơn */}
         <Card
           sx={{
             mb: 3,
-            borderRadius: "20px",
-            background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
+            borderRadius: "24px",
+            background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
             boxShadow: "0 8px 24px rgba(124, 58, 237, 0.3)",
           }}
         >
-          <CardContent sx={{ p: 3 }}>
-            <Stack direction="row" alignItems="center" spacing={2}>
+          <CardContent sx={{ p: 4 }}>
+            <Stack direction="row" alignItems="center" spacing={3}>
               <Avatar
                 sx={{
-                  width: 56,
-                  height: 56,
+                  width: 72,
+                  height: 72,
                   bgcolor: "rgba(255,255,255,0.2)",
                 }}
               >
-                <Settings sx={{ fontSize: 32, color: "#fff" }} />
+                <Settings sx={{ fontSize: 40, color: "#fff" }} />
               </Avatar>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h5" fontWeight={700} color="#fff">
+                <Typography variant="h4" fontWeight={700} color="#fff" sx={{ mb: 0.5 }}>
                   Quản lý Người dùng
                 </Typography>
-                <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.9)" }}>
+                <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.9)" }}>
                   Tri thức & Uyên tín — Nền tảng học thuật hiện đại
                 </Typography>
               </Box>
-              <Stack direction="row" spacing={1.5}>
+              <Stack direction="row" spacing={2}>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
@@ -371,12 +374,14 @@ const AdminUserManagement = () => {
                   sx={{
                     bgcolor: "rgba(255,255,255,0.95)",
                     color: "#7c3aed",
-                    borderRadius: "12px",
-                    px: 2.5,
+                    borderRadius: "14px",
+                    px: 3,
+                    py: 1.5,
                     textTransform: "none",
                     fontWeight: 600,
+                    fontSize: "15px",
                     "&:hover": {
-                      bgcolor: "#fff",
+                      bgcolor: "#f3f0ff",
                       transform: "translateY(-2px)",
                       boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                     },
@@ -391,13 +396,15 @@ const AdminUserManagement = () => {
                   disabled={loading}
                   sx={{
                     borderColor: "rgba(255,255,255,0.5)",
-                    color: "#fff",
-                    borderRadius: "12px",
-                    px: 2.5,
+                    color: "#f3f0ff",
+                    borderRadius: "14px",
+                    px: 3,
+                    py: 1.5,
                     textTransform: "none",
                     fontWeight: 600,
+                    fontSize: "15px",
                     "&:hover": {
-                      borderColor: "#fff",
+                      borderColor: "#f3f0ff",
                       bgcolor: "rgba(255,255,255,0.1)",
                     },
                   }}
@@ -409,92 +416,333 @@ const AdminUserManagement = () => {
           </CardContent>
         </Card>
 
-        {/* Stats Cards - Giống mẫu */}
-        <Grid container spacing={2} sx={{ mb: 3 }}>
+        {/* Stats Cards - Style mới giống ví dụ */}
+        <Grid container spacing={2.5} sx={{ mb: 3 }}>
+          {/* Card 1: Total Users */}
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
-                boxShadow: "0 4px 12px rgba(124, 58, 237, 0.2)",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "translateY(-4px)" },
+                borderRadius: "20px",
+                background: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
+                boxShadow: "0 2px 8px rgba(124, 58, 237, 0.1)",
+                transition: "all 0.3s ease",
+                position: "relative",
+                overflow: "visible",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(124, 58, 237, 0.2)",
+                },
               }}
             >
-              <CardContent sx={{ textAlign: "center", py: 3 }}>
-                <Group sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
-                <Typography variant="h3" fontWeight={700} color="#fff">
+              <CardContent sx={{ p: 3, position: "relative" }}>
+                {/* Icon Box */}
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "16px",
+                    bgcolor: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                    boxShadow: "0 4px 12px rgba(124, 58, 237, 0.15)",
+                  }}
+                >
+                  <CheckCircleOutline sx={{ fontSize: 32, color: "#7c3aed" }} />
+                </Box>
+
+                {/* Badge phần trăm */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                    bgcolor: "#10b981",
+                    color: "#fff",
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
+                  }}
+                >
+                  <TrendingUp sx={{ fontSize: 16 }} />
+                  +12%
+                </Box>
+
+                {/* Số lớn */}
+                <Typography
+                  variant="h2"
+                  fontWeight={700}
+                  color="#7c3aed"
+                  sx={{ mb: 1, fontSize: "48px" }}
+                >
                   {stats.total}
                 </Typography>
-                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+
+                {/* Label */}
+                <Typography
+                  variant="h6"
+                  color="#1f2937"
+                  fontWeight={600}
+                  sx={{ mb: 1 }}
+                >
                   Total User
                 </Typography>
+
+                {/* Thông tin phụ */}
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <TrendingUp sx={{ fontSize: 16, color: "#10b981" }} />
+                  <Typography variant="body2" color="#6b7280">
+                    1,75 lượt/sự kiện
+                  </Typography>
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
 
+          {/* Card 2: Admins */}
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #8b5cf6 0%, #9333ea 100%)",
-                boxShadow: "0 4px 12px rgba(139, 92, 246, 0.2)",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "translateY(-4px)" },
+                borderRadius: "20px",
+                background: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
+                boxShadow: "0 2px 8px rgba(139, 92, 246, 0.1)",
+                transition: "all 0.3s ease",
+                position: "relative",
+                overflow: "visible",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(139, 92, 246, 0.2)",
+                },
               }}
             >
-              <CardContent sx={{ textAlign: "center", py: 3 }}>
-                <AdminPanelSettings sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
-                <Typography variant="h3" fontWeight={700} color="#fff">
+              <CardContent sx={{ p: 3, position: "relative" }}>
+                {/* Icon Box */}
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "16px",
+                    bgcolor: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                    boxShadow: "0 4px 12px rgba(139, 92, 246, 0.15)",
+                  }}
+                >
+                  <Group sx={{ fontSize: 32, color: "#8b5cf6" }} />
+                </Box>
+
+                {/* Badge phần trăm */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                    bgcolor: "#10b981",
+                    color: "#fff",
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
+                  }}
+                >
+                  <TrendingUp sx={{ fontSize: 16 }} />
+                  +8%
+                </Box>
+
+                {/* Số lớn */}
+                <Typography
+                  variant="h2"
+                  fontWeight={700}
+                  color="#8b5cf6"
+                  sx={{ mb: 1, fontSize: "48px" }}
+                >
                   {stats.admins}
                 </Typography>
-                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+
+                {/* Label */}
+                <Typography
+                  variant="h6"
+                  color="#1f2937"
+                  fontWeight={600}
+                  sx={{ mb: 1 }}
+                >
                   Quản Trị Viên
                 </Typography>
+
+                {/* Thông tin phụ */}
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <TrendingUp sx={{ fontSize: 16, color: "#10b981" }} />
+                  <Typography variant="body2" color="#6b7280">
+                    {stats.admins} admin duy nhất
+                  </Typography>
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
 
+          {/* Card 3: Organizers */}
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #9333ea 0%, #a855f7 100%)",
-                boxShadow: "0 4px 12px rgba(147, 51, 234, 0.2)",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "translateY(-4px)" },
+                borderRadius: "20px",
+                background: "linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%)",
+                boxShadow: "0 2px 8px rgba(147, 51, 234, 0.1)",
+                transition: "all 0.3s ease",
+                position: "relative",
+                overflow: "visible",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(147, 51, 234, 0.2)",
+                },
               }}
             >
-              <CardContent sx={{ textAlign: "center", py: 3 }}>
-                <People sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
-                <Typography variant="h3" fontWeight={700} color="#fff">
+              <CardContent sx={{ p: 3, position: "relative" }}>
+                {/* Icon Box */}
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "16px",
+                    bgcolor: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                    boxShadow: "0 4px 12px rgba(236, 72, 153, 0.15)",
+                  }}
+                >
+                  <People sx={{ fontSize: 32, color: "#ec4899" }} />
+                </Box>
+
+                {/* Badge phần trăm - Màu đỏ cho giảm */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 16,
+                    right: 16,
+                    bgcolor: "#ef4444",
+                    color: "#fff",
+                    px: 1.5,
+                    py: 0.5,
+                    borderRadius: "8px",
+                    fontSize: "13px",
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    boxShadow: "0 2px 8px rgba(239, 68, 68, 0.3)",
+                  }}
+                >
+                  <TrendingDown sx={{ fontSize: 16 }} />
+                  -3%
+                </Box>
+
+                {/* Số lớn */}
+                <Typography
+                  variant="h2"
+                  fontWeight={700}
+                  color="#ec4899"
+                  sx={{ mb: 1, fontSize: "48px" }}
+                >
                   {stats.organizers}
                 </Typography>
-                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+
+                {/* Label */}
+                <Typography
+                  variant="h6"
+                  color="#1f2937"
+                  fontWeight={600}
+                  sx={{ mb: 1 }}
+                >
                   Người Tổ Chức
                 </Typography>
+
+                {/* Thông tin phụ */}
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <TrendingDown sx={{ fontSize: 16, color: "#ef4444" }} />
+                  <Typography variant="body2" color="#6b7280">
+                    {stats.organizers} người tổ chức
+                  </Typography>
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
 
+          {/* Card 4: Students */}
           <Grid item xs={12} sm={6} md={3}>
             <Card
               sx={{
-                borderRadius: "16px",
-                background: "linear-gradient(135deg, #a855f7 0%, #c084fc 100%)",
-                boxShadow: "0 4px 12px rgba(168, 85, 247, 0.2)",
-                transition: "transform 0.2s",
-                "&:hover": { transform: "translateY(-4px)" },
+                borderRadius: "20px",
+                background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+                boxShadow: "0 2px 8px rgba(168, 85, 247, 0.1)",
+                transition: "all 0.3s ease",
+                position: "relative",
+                overflow: "visible",
+                "&:hover": {
+                  transform: "translateY(-4px)",
+                  boxShadow: "0 8px 24px rgba(168, 85, 247, 0.2)",
+                },
               }}
             >
-              <CardContent sx={{ textAlign: "center", py: 3 }}>
-                <PersonAdd sx={{ fontSize: 40, color: "#fff", mb: 1 }} />
-                <Typography variant="h3" fontWeight={700} color="#fff">
+              <CardContent sx={{ p: 3, position: "relative" }}>
+                {/* Icon Box */}
+                <Box
+                  sx={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "16px",
+                    bgcolor: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    mb: 2,
+                    boxShadow: "0 4px 12px rgba(168, 85, 247, 0.15)",
+                  }}
+                >
+                  <PersonAdd sx={{ fontSize: 32, color: "#a855f7" }} />
+                </Box>
+
+                {/* Số lớn */}
+                <Typography
+                  variant="h2"
+                  fontWeight={700}
+                  color="#a855f7"
+                  sx={{ mb: 1, fontSize: "48px" }}
+                >
                   {stats.students}
                 </Typography>
-                <Typography variant="body2" color="rgba(255,255,255,0.9)">
+
+                {/* Label */}
+                <Typography
+                  variant="h6"
+                  color="#1f2937"
+                  fontWeight={600}
+                  sx={{ mb: 1 }}
+                >
                   Sinh Viên
                 </Typography>
+
+                {/* Thông tin phụ */}
+                <Stack direction="row" alignItems="center" spacing={0.5}>
+                  <TrendingDown sx={{ fontSize: 16, color: "#ef4444" }} />
+                  <Typography variant="body2" color="#6b7280">
+                    {stats.students} sinh viên đang học
+                  </Typography>
+                </Stack>
               </CardContent>
             </Card>
           </Grid>
