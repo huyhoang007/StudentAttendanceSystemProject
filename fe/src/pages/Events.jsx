@@ -389,6 +389,14 @@ const Events = () => {
                     fetchData();
                   }
                 }}
+                SelectProps={{
+                  displayEmpty: true,
+                  renderValue: (selected) => {
+                    if (!selected) return <span style={{ color: '#9e9e9e' }}>Chọn trường để xem sự kiện</span>;
+                    const u = universities.find((x) => x.universityId === selected);
+                    return u ? u.name : selected;
+                  },
+                }}
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     backgroundColor: "#fff",
