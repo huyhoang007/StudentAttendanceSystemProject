@@ -148,7 +148,7 @@ const StudentRegisteredEvents = () => {
     }
   }, [user]);
 
-    // State for dialog
+  // State for dialog
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedRegistration, setSelectedRegistration] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -166,10 +166,11 @@ const StudentRegisteredEvents = () => {
     try {
       const token = localStorage.getItem("authToken");
       await cancelRegistration(selectedRegistration.id, token);
-      
+
       setRegistrations((prevRegistrations) =>
         prevRegistrations.filter((reg) => {
-          const regId = reg.studentInEventId || reg.StudentInEventId || reg.id || reg.Id;
+          const regId =
+            reg.studentInEventId || reg.StudentInEventId || reg.id || reg.Id;
           return regId !== selectedRegistration.id;
         })
       );
@@ -181,7 +182,9 @@ const StudentRegisteredEvents = () => {
       console.log("Removed registration from state:", selectedRegistration.id);
     } catch (error) {
       console.error("Error canceling registration:", error);
-      setSnackbarMessage("Lỗi khi hủy đăng ký: " + (error.message || "Không xác định"));
+      setSnackbarMessage(
+        "Lỗi khi hủy đăng ký: " + (error.message || "Không xác định")
+      );
       setSnackbarSeverity("error");
       setSnackbarOpen(true);
     } finally {
@@ -216,7 +219,7 @@ const StudentRegisteredEvents = () => {
     };
   }, [refreshData]);
 
-    const getStatusColor = (status) => {
+  const getStatusColor = (status) => {
     // Map status to colors with consistent branding
     switch (status?.toLowerCase()) {
       case "registered":
@@ -297,7 +300,8 @@ const StudentRegisteredEvents = () => {
           <DialogContentText id="alert-dialog-description">
             {selectedRegistration && (
               <>
-                Bạn có chắc chắn muốn hủy đăng ký sự kiện "{selectedRegistration.title}"?
+                Bạn có chắc chắn muốn hủy đăng ký sự kiện "
+                {selectedRegistration.title}"?
                 <br />
                 <Typography variant="body2" color="error" sx={{ mt: 1 }}>
                   Lưu ý: Hành động này không thể hoàn tác.
@@ -310,7 +314,11 @@ const StudentRegisteredEvents = () => {
           <Button onClick={() => setDialogOpen(false)} color="inherit">
             Hủy bỏ
           </Button>
-          <Button onClick={handleConfirmCancel} color="error" variant="contained">
+          <Button
+            onClick={handleConfirmCancel}
+            color="error"
+            variant="contained"
+          >
             Xác nhận hủy đăng ký
           </Button>
         </DialogActions>
@@ -321,13 +329,13 @@ const StudentRegisteredEvents = () => {
         open={snackbarOpen}
         autoHideDuration={6000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
         <Alert
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
           variant="filled"
-          sx={{ width: '100%' }}
+          sx={{ width: "100%" }}
         >
           {snackbarMessage}
         </Alert>
@@ -541,23 +549,30 @@ const StudentRegisteredEvents = () => {
                         : "Chưa xác định"}
                     </TableCell>
                     <TableCell align="center">
-                      <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+                      <Box sx={{ display: "flex", justifyContent: "center" }}>
                         <Chip
                           label={getStatusText(status)}
                           color={getStatusColor(status)}
                           size="small"
                           sx={{
                             fontWeight: 500,
-                            minWidth: '100px',
-                            '& .MuiChip-label': {
-                              px: 2
-                            }
+                            minWidth: "100px",
+                            "& .MuiChip-label": {
+                              px: 2,
+                            },
                           }}
                         />
                       </Box>
                     </TableCell>
                     <TableCell align="center">
-                      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
                         {hasActiveSessions ? (
                           <Chip
                             label={`${eventSessions.length} phiên`}
@@ -565,9 +580,9 @@ const StudentRegisteredEvents = () => {
                             size="small"
                             sx={{
                               fontWeight: 500,
-                              '& .MuiChip-label': {
-                                px: 2
-                              }
+                              "& .MuiChip-label": {
+                                px: 2,
+                              },
                             }}
                           />
                         ) : (
@@ -577,9 +592,9 @@ const StudentRegisteredEvents = () => {
                             size="small"
                             sx={{
                               fontWeight: 500,
-                              '& .MuiChip-label': {
-                                px: 2
-                              }
+                              "& .MuiChip-label": {
+                                px: 2,
+                              },
                             }}
                           />
                         )}

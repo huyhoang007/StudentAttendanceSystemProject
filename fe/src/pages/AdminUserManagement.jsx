@@ -359,10 +359,18 @@ const AdminUserManagement = () => {
                 <Settings sx={{ fontSize: 40, color: "#fff" }} />
               </Avatar>
               <Box sx={{ flex: 1 }}>
-                <Typography variant="h4" fontWeight={700} color="#fff" sx={{ mb: 0.5 }}>
+                <Typography
+                  variant="h4"
+                  fontWeight={700}
+                  color="#fff"
+                  sx={{ mb: 0.5 }}
+                >
                   Quản lý Người dùng
                 </Typography>
-                <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.9)" }}>
+                <Typography
+                  variant="body1"
+                  sx={{ color: "rgba(255,255,255,0.9)" }}
+                >
                   Tri thức & Uyên tín — Nền tảng học thuật hiện đại
                 </Typography>
               </Box>
@@ -452,29 +460,6 @@ const AdminUserManagement = () => {
                   <CheckCircleOutline sx={{ fontSize: 32, color: "#7c3aed" }} />
                 </Box>
 
-                {/* Badge phần trăm */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    bgcolor: "#10b981",
-                    color: "#fff",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
-                  }}
-                >
-                  <TrendingUp sx={{ fontSize: 16 }} />
-                  +12%
-                </Box>
-
                 {/* Số lớn */}
                 <Typography
                   variant="h2"
@@ -492,16 +477,8 @@ const AdminUserManagement = () => {
                   fontWeight={600}
                   sx={{ mb: 1 }}
                 >
-                  Total User
+                  Tổng Người Dùng
                 </Typography>
-
-                {/* Thông tin phụ */}
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <TrendingUp sx={{ fontSize: 16, color: "#10b981" }} />
-                  <Typography variant="body2" color="#6b7280">
-                    1,75 lượt/sự kiện
-                  </Typography>
-                </Stack>
               </CardContent>
             </Card>
           </Grid>
@@ -540,29 +517,6 @@ const AdminUserManagement = () => {
                   <Group sx={{ fontSize: 32, color: "#8b5cf6" }} />
                 </Box>
 
-                {/* Badge phần trăm */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    bgcolor: "#10b981",
-                    color: "#fff",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    boxShadow: "0 2px 8px rgba(16, 185, 129, 0.3)",
-                  }}
-                >
-                  <TrendingUp sx={{ fontSize: 16 }} />
-                  +8%
-                </Box>
-
                 {/* Số lớn */}
                 <Typography
                   variant="h2"
@@ -582,14 +536,6 @@ const AdminUserManagement = () => {
                 >
                   Quản Trị Viên
                 </Typography>
-
-                {/* Thông tin phụ */}
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <TrendingUp sx={{ fontSize: 16, color: "#10b981" }} />
-                  <Typography variant="body2" color="#6b7280">
-                    {stats.admins} admin duy nhất
-                  </Typography>
-                </Stack>
               </CardContent>
             </Card>
           </Grid>
@@ -628,29 +574,6 @@ const AdminUserManagement = () => {
                   <People sx={{ fontSize: 32, color: "#ec4899" }} />
                 </Box>
 
-                {/* Badge phần trăm - Màu đỏ cho giảm */}
-                <Box
-                  sx={{
-                    position: "absolute",
-                    top: 16,
-                    right: 16,
-                    bgcolor: "#ef4444",
-                    color: "#fff",
-                    px: 1.5,
-                    py: 0.5,
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                    fontWeight: 700,
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                    boxShadow: "0 2px 8px rgba(239, 68, 68, 0.3)",
-                  }}
-                >
-                  <TrendingDown sx={{ fontSize: 16 }} />
-                  -3%
-                </Box>
-
                 {/* Số lớn */}
                 <Typography
                   variant="h2"
@@ -670,14 +593,6 @@ const AdminUserManagement = () => {
                 >
                   Người Tổ Chức
                 </Typography>
-
-                {/* Thông tin phụ */}
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <TrendingDown sx={{ fontSize: 16, color: "#ef4444" }} />
-                  <Typography variant="body2" color="#6b7280">
-                    {stats.organizers} người tổ chức
-                  </Typography>
-                </Stack>
               </CardContent>
             </Card>
           </Grid>
@@ -735,21 +650,18 @@ const AdminUserManagement = () => {
                 >
                   Sinh Viên
                 </Typography>
-
-                {/* Thông tin phụ */}
-                <Stack direction="row" alignItems="center" spacing={0.5}>
-                  <TrendingDown sx={{ fontSize: 16, color: "#ef4444" }} />
-                  <Typography variant="body2" color="#6b7280">
-                    {stats.students} sinh viên đang học
-                  </Typography>
-                </Stack>
               </CardContent>
             </Card>
           </Grid>
         </Grid>
 
         {/* Table Section */}
-        <Card sx={{ borderRadius: "16px", boxShadow: "0 4px 16px rgba(0,0,0,0.08)" }}>
+        <Card
+          sx={{
+            borderRadius: "16px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+          }}
+        >
           <CardContent sx={{ p: 0 }}>
             {loading ? (
               <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -861,7 +773,12 @@ const AdminUserManagement = () => {
                 </Table>
 
                 <TablePagination
-                  rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]}
+                  rowsPerPageOptions={[
+                    5,
+                    10,
+                    25,
+                    { label: "Tất cả", value: -1 },
+                  ]}
                   component="div"
                   count={filteredUsers.length}
                   rowsPerPage={rowsPerPage}
@@ -1108,7 +1025,8 @@ const AdminUserManagement = () => {
                 textTransform: "none",
                 background: "linear-gradient(135deg, #7c3aed 0%, #9333ea 100%)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)",
+                  background:
+                    "linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%)",
                 },
               }}
             >
