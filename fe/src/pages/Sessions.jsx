@@ -24,12 +24,12 @@ import {
   Chip,
   Snackbar,
   Alert,
-  // ========== CÁC COMPONENT MỚI ĐỂ UPDATE GIAO DIỆN ==========
   Card,
   AlertTitle,
-  Grid, // Vẫn import Gridเผื่อ dùng, nhưng sẽ dùng Table
-  Tooltip, // Thêm Tooltip
-  TablePagination, // <-- THÊM IMPORT NÀY
+  Grid,
+  Tooltip,
+  TablePagination,
+  alpha, // Import alpha for subtle color variations
 } from "@mui/material";
 import {
   Add,
@@ -37,7 +37,6 @@ import {
   Delete,
   ArrowBack,
   Visibility,
-  // ========== CÁC ICON MỚI ĐỂ UPDATE GIAO DIỆN ==========
   Schedule,
   EventBusy,
 } from "@mui/icons-material";
@@ -56,10 +55,18 @@ import {
   formatDateTimeForBackend,
 } from "../utils/dateUtils";
 
+// Define a purple palette
+const purple = {
+  main: '#7B1FA2', // Deeper purple for primary actions/headers
+  light: '#9C27B0',
+  dark: '#4A148C',
+  contrastText: '#fff',
+};
+
 const Sessions = () => {
   // =================================================================
   //
-  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
+  //            TOÀN BỘ LOGIC CODE CỦA BẠN (GIỮ NGUYÊN 100%)
   //
   // =================================================================
 
@@ -81,7 +88,6 @@ const Sessions = () => {
     severity: "success",
   });
 
-  // --- THÊM STATE CHO PHÂN TRANG ---
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -96,8 +102,6 @@ const Sessions = () => {
   });
 
   const resetForm = () => {
-    // ... (Giữ nguyên logic)
-    // Set default time to current time
     const now = new Date();
     const defaultStartTime = formatDateTimeLocal(now);
     const oneHourLater = new Date(now.getTime() + 60 * 60 * 1000);
@@ -116,9 +120,7 @@ const Sessions = () => {
     setEditId(null);
   };
 
-  // Fetch events
   const fetchEvents = useCallback(async () => {
-    // ... (Giữ nguyên logic)
     try {
       let eventsData;
       if (role === "organizer" && organizerId) {
@@ -147,12 +149,10 @@ const Sessions = () => {
     }
   }, [role, organizerId, initialEventId]);
 
-  // Fetch sessions
   const fetchData = useCallback(async () => {
     try {
       let sessions;
       if (selectedEventId) {
-        // Fetch sessions by event ID
         const token = localStorage.getItem("authToken");
         const res = await fetch(
           `/api/EventSession/by-event/${selectedEventId}`,
@@ -165,11 +165,10 @@ const Sessions = () => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         sessions = await res.json();
       } else {
-        // Fetch all sessions
         sessions = await getSessions();
       }
       setData(Array.isArray(sessions) ? sessions : []);
-      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
+      setPage(0);
       setError("");
     } catch (error) {
       console.error("Error fetching sessions:", error);
@@ -182,7 +181,6 @@ const Sessions = () => {
     fetchEvents();
   }, [role, organizerId, fetchEvents]);
 
-  // *** LOGIC useEffect NÀY LÀ CỦA BẠN - GIỮ NGUYÊN 100% ***
   useEffect(() => {
     if (selectedEventId) {
       fetchData();
@@ -192,7 +190,6 @@ const Sessions = () => {
   }, [selectedEventId, events, fetchData]);
 
   const handleOpen = (item = null) => {
-    // ... (Giữ nguyên logic)
     if (item) {
       setEditId(item.session_id || item.SessionId);
       setForm({
@@ -216,15 +213,12 @@ const Sessions = () => {
     setOpen(true);
   };
   const handleClose = () => {
-    // ... (Giữ nguyên logic)
     setOpen(false);
     resetForm();
   };
 
   const handleSave = async () => {
-    // ... (Giữ nguyên logic)
     try {
-      // Validate required fields
       const title = form.title?.trim();
       const startTime = form.start_time?.trim();
       const endTime = form.end_time?.trim();
@@ -239,7 +233,6 @@ const Sessions = () => {
         return;
       }
 
-      // Additional validation: check if datetime format is valid
       if (startTime.length < 16 || endTime.length < 16) {
         setSnackbar({
           open: true,
@@ -249,7 +242,6 @@ const Sessions = () => {
         return;
       }
 
-      // Validate start time < end time (using string comparison for datetime-local format)
       if (startTime >= endTime) {
         setSnackbar({
           open: true,
@@ -259,7 +251,6 @@ const Sessions = () => {
         return;
       }
 
-      // Ensure event_id is set (from selectedEventId or form)
       const eventId = selectedEventId || form.event_id;
 
       if (!eventId || eventId === "00000000-0000-0000-0000-000000000000") {
@@ -271,8 +262,6 @@ const Sessions = () => {
         return;
       }
 
-      // Prepare session data in correct format for backend (PascalCase)
-      // Keep datetime as local Vietnam time without UTC conversion
       const sessionData = {
         EventId: eventId,
         Title: title,
@@ -290,7 +279,6 @@ const Sessions = () => {
       console.log("Available Events:", events);
 
       if (editId) {
-        // Update existing session
         await updateSession(editId, sessionData);
         setSnackbar({
           open: true,
@@ -298,7 +286,6 @@ const Sessions = () => {
           severity: "success",
         });
       } else {
-        // Create new session
         await addSession(sessionData);
         setSnackbar({
           open: true,
@@ -308,7 +295,7 @@ const Sessions = () => {
       }
 
       setOpen(false);
-      fetchData(); // <-- fetchData đã có setPage(0)
+      fetchData();
     } catch (error) {
       console.error("Error saving session:", error);
       setSnackbar({
@@ -319,70 +306,78 @@ const Sessions = () => {
     }
   };
   const handleDelete = async (id) => {
-    // ... (Giữ nguyên logic)
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       await deleteSession(id);
-      fetchData(); // <-- fetchData đã có setPage(0)
+      fetchData();
     }
   };
 
-  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Quay về trang đầu tiên
+    setPage(0);
   };
 
   // =================================================================
   //
-  //            BẮT ĐẦU PHẦN GIAO DIỆN (JSX) ĐÃ UPDATE
+  //            BẮT ĐẦU PHẦN GIAO DIỆN (JSX) ĐÃ UPDATE
   //
   // =================================================================
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
-      {/* ========== HEADER ĐÃ UPDATE ========== */}
-      {/* ... (Giữ nguyên Header) */}
+    <Box sx={{ p: 4, backgroundColor: '#f0f2f5', minHeight: "100vh" }}>
       {error && (
         <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
           {error}
         </Alert>
       )}
 
+      {/* HEADER WITH PURPLE THEME */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           mb: 4,
+          p: 3,
+          borderRadius: 3,
+          backgroundColor: 'white',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          borderLeft: `8px solid ${purple.main}`, // Accent border
         }}
       >
         <Box display="flex" alignItems="center" gap={2}>
-          <Schedule color="primary" sx={{ fontSize: 40 }} />
+          <Schedule sx={{ fontSize: 48, color: purple.main }} />
           <Box>
             <Typography variant="h4" fontWeight={700} color="text.primary">
               Quản lý Phiên sự kiện
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Xem, thêm, sửa và xóa các phiên sự kiện
             </Typography>
           </Box>
         </Box>
 
         <Box display="flex" gap={2}>
-          {/* Nút "Thêm phiên mới" được chuyển lên đây từ code gốc của bạn */}
           <Button
             variant="contained"
             startIcon={<Add />}
             onClick={() => handleOpen()}
-            disabled={!selectedEventId} // Giữ nguyên logic disabled
+            disabled={!selectedEventId}
             sx={{
               borderRadius: 2,
               textTransform: "none",
               px: 3,
               py: 1,
               fontWeight: 600,
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              backgroundColor: purple.main,
+              '&:hover': {
+                backgroundColor: purple.dark,
+              },
+              boxShadow: '0 4px 15px rgba(123, 31, 162, 0.3)', // Purple shadow
             }}
           >
             Thêm phiên mới
@@ -396,6 +391,12 @@ const Sessions = () => {
                 borderRadius: 2,
                 textTransform: "none",
                 fontWeight: 600,
+                color: purple.main,
+                borderColor: alpha(purple.main, 0.5),
+                '&:hover': {
+                  borderColor: purple.main,
+                  backgroundColor: alpha(purple.main, 0.05),
+                }
               }}
             >
               Quay lại sự kiện
@@ -404,8 +405,7 @@ const Sessions = () => {
         </Box>
       </Box>
 
-      {/* ========== KHUNG CHỌN SỰ KIỆN ĐÃ UPDATE ========== */}
-      {/* ... (Giữ nguyên) */}
+      {/* EVENT SELECTION CARD */}
       {!initialEventId && (
         <Card
           sx={{
@@ -413,15 +413,27 @@ const Sessions = () => {
             mb: 3,
             borderRadius: 3,
             boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
+            border: `1px solid ${alpha(purple.main, 0.2)}`,
           }}
         >
-          {/* Giữ nguyên 100% logic FormControl của bạn */}
           <FormControl fullWidth>
             <InputLabel>Chọn sự kiện</InputLabel>
             <Select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
               label="Chọn sự kiện"
+              sx={{
+                '.MuiOutlinedInput-notchedOutline': {
+                  borderColor: alpha(purple.main, 0.4),
+                },
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: purple.main,
+                },
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: purple.main,
+                  borderWidth: '2px',
+                },
+              }}
             >
               {events.map((event) => (
                 <MenuItem
@@ -440,15 +452,23 @@ const Sessions = () => {
         </Card>
       )}
 
-      {/* ========== KHUNG THÔNG TIN SỰ KIỆN ĐÃ UPDATE ========== */}
-      {/* ... (Giữ nguyên) */}
+      {/* SELECTED EVENT INFO ALERT */}
       {selectedEvent && (
-        <Alert severity="info" sx={{ mb: 3, borderRadius: 2 }}>
-          {/* Giữ nguyên 100% logic hiển thị thông tin của bạn */}
-          <AlertTitle sx={{ fontWeight: 600 }}>
+        <Alert
+          severity="info"
+          icon={<EventBusy sx={{ color: purple.light }} />} // Use a relevant icon or adjust color
+          sx={{
+            mb: 3,
+            borderRadius: 2,
+            backgroundColor: alpha(purple.light, 0.1),
+            color: purple.dark,
+            borderColor: alpha(purple.light, 0.3),
+          }}
+        >
+          <AlertTitle sx={{ fontWeight: 600, color: purple.dark }}>
             📅 {selectedEvent.title || selectedEvent.Title}
           </AlertTitle>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color={purple.dark}>
             <strong>Tổ chức:</strong>{" "}
             {selectedEvent.organizer || selectedEvent.Organizer} |
             <strong> Từ:</strong>{" "}
@@ -463,54 +483,45 @@ const Sessions = () => {
         </Alert>
       )}
 
-      {/* Nút "Thêm phiên mới" gốc của bạn đã được chuyển lên Header */}
-
-      {/* ==================================================================
-          BẢNG (TABLE) ĐƯỢC BỌC LẠI VÀ STYLED
-          NHƯNG NỘI DUNG BÊN TRONG GIỮ NGUYÊN 100%
-        ==================================================================
-      */}
+      {/* TABLE WRAPPED IN CARD */}
       <Card
         sx={{
           borderRadius: 4,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-          overflow: "hidden", // Đảm bảo table head bo góc theo card
+          boxShadow: "0 8px 30px rgba(0,0,0,0.1)",
+          overflow: "hidden",
         }}
       >
         <Table>
-          <TableHead sx={{ backgroundColor: "grey.100" }}>
-            {/* ... (Giữ nguyên TableHead) */}
+          <TableHead sx={{ backgroundColor: alpha(purple.main, 0.1) }}>
             <TableRow>
-              <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+              <TableCell sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}>
                 Tiêu đề phiên
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+              <TableCell sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}>
                 Thời gian bắt đầu
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+              <TableCell sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}>
                 Thời gian kết thúc
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+              <TableCell sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}>
                 Địa điểm
               </TableCell>
-              <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+              <TableCell sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}>
                 Check-in
               </TableCell>
               <TableCell
                 align="right"
-                sx={{ fontWeight: 600, color: "text.secondary" }}
+                sx={{ fontWeight: 700, color: purple.dark, fontSize: '0.9rem' }}
               >
                 Thao tác
               </TableCell>
             </TableRow>
           </TableHead>
 
-          {/* GIỮ NGUYÊN 100% LOGIC TABLEBODY CỦA BẠN */}
           <TableBody>
             {data.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
-                  {/* ... (Giữ nguyên) */}
                   <Box
                     display="flex"
                     flexDirection="column"
@@ -518,17 +529,19 @@ const Sessions = () => {
                     gap={1}
                     color="text.secondary"
                   >
-                    <EventBusy sx={{ fontSize: 48, color: "grey.400" }} />
-                    <Typography>
+                    <EventBusy sx={{ fontSize: 56, color: alpha(purple.main, 0.4) }} />
+                    <Typography variant="h6" color="text.secondary" fontWeight={500}>
                       {selectedEventId
                         ? "Chưa có phiên nào cho sự kiện này"
                         : "Chọn sự kiện để xem các phiên"}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Nhấn "Thêm phiên mới" để bắt đầu!
                     </Typography>
                   </Box>
                 </TableCell>
               </TableRow>
             ) : (
-              // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
               (rowsPerPage > 0
                 ? data.slice(
                     page * rowsPerPage,
@@ -540,11 +553,11 @@ const Sessions = () => {
                   key={s.sessionId || s.SessionId || s.session_id}
                   hover
                   sx={{
-                    "&:hover": { backgroundColor: "action.hover" },
+                    "&:hover": { backgroundColor: alpha(purple.light, 0.05) },
                   }}
                 >
                   <TableCell>
-                    <Typography variant="subtitle2">
+                    <Typography variant="subtitle2" fontWeight={600} color="text.primary">
                       {s.title || s.Title || "Chưa có tiêu đề"}
                     </Typography>
                   </TableCell>
@@ -577,6 +590,11 @@ const Sessions = () => {
                             ? "success"
                             : "default"
                         }
+                        sx={{
+                            backgroundColor: s.checkinStartTime || s.CheckinStartTime || s.checkin_start_time ? '#4CAF50' : '#E0E0E0',
+                            color: s.checkinStartTime || s.CheckinStartTime || s.checkin_start_time ? 'white' : 'text.primary',
+                            fontWeight: 600,
+                        }}
                       />
                       {(s.checkinStartTime ||
                         s.CheckinStartTime ||
@@ -584,7 +602,7 @@ const Sessions = () => {
                         <Typography
                           variant="caption"
                           display="block"
-                          sx={{ mt: 0.5 }}
+                          sx={{ mt: 0.5, color: 'text.secondary' }}
                         >
                           <strong>Bắt đầu:</strong>{" "}
                           {formatDateTimeDisplay(
@@ -610,84 +628,108 @@ const Sessions = () => {
                     </Box>
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton
-                      color="primary"
-                      onClick={() =>
-                        navigate(
-                          `/event-sessions/${selectedEventId}?sessionId=${
-                            s.sessionId || s.SessionId || s.session_id
-                          }`
-                        )
-                      }
-                      title="Xem chi tiết phiên"
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton color="primary" onClick={() => handleOpen(s)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      onClick={() =>
-                        handleDelete(s.sessionId || s.SessionId || s.session_id)
-                      }
-                    >
-                      <Delete />
-                    </IconButton>
+                    <Tooltip title="Xem chi tiết phiên">
+                      <IconButton
+                        sx={{ color: purple.light }}
+                        onClick={() =>
+                          navigate(
+                            `/event-sessions/${selectedEventId}?sessionId=${
+                              s.sessionId || s.SessionId || s.session_id
+                            }`
+                          )
+                        }
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Chỉnh sửa phiên">
+                      <IconButton sx={{ color: purple.main }} onClick={() => handleOpen(s)}>
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Xóa phiên">
+                      <IconButton
+                        color="error"
+                        onClick={() =>
+                          handleDelete(s.sessionId || s.SessionId || s.session_id)
+                        }
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
-              // *** KẾT THÚC PHẦN GIỮ NGUYÊN 100% ***
             )}
           </TableBody>
         </Table>
 
-        {/* --- THÊM COMPONENT PHÂN TRANG --- */}
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+          rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={data.length} // Tổng số phiên
-          rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
-          page={page} // Trang hiện tại
-          onPageChange={handleChangePage} // Hàm khi đổi trang
-          onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
-          // Thêm label tiếng Việt
+          count={data.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage="Số hàng mỗi trang:"
           labelDisplayedRows={({ from, to, count }) =>
             `${from}–${to} trong số ${count}`
           }
+          sx={{
+            '.MuiTablePagination-toolbar': {
+              backgroundColor: alpha(purple.main, 0.05),
+              borderTop: `1px solid ${alpha(purple.main, 0.1)}`,
+            },
+            '.MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows': {
+              color: purple.dark,
+            },
+            '.MuiTablePagination-select': {
+              color: purple.main,
+            },
+            '.MuiIconButton-root': {
+              color: purple.main,
+            }
+          }}
         />
       </Card>
 
-      {/* ==================================================================
-          DIALOG FORM (GIỮ NGUYÊN 100% THEO YÊU CẦU)
-        ==================================================================
-      */}
-      {/* ... (Giữ nguyên Dialog) */}
+      {/* DIALOG FORM */}
       <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
         <DialogTitle
           sx={{
-            fontWeight: 600,
-            bgcolor: "#1976d2",
-            color: "white",
-            py: 1.5,
+            fontWeight: 700,
+            bgcolor: purple.main,
+            color: purple.contrastText,
+            py: 2,
             px: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
           }}
         >
-          {editId ? "✏️ Chỉnh sửa phiên sự kiện" : "🗓️ Thêm phiên sự kiện mới"}
+          {editId ? (
+            <>
+              <Edit /> Chỉnh sửa phiên sự kiện
+            </>
+          ) : (
+            <>
+              <Add /> Thêm phiên sự kiện mới
+            </>
+          )}
         </DialogTitle>
 
-        <DialogContent sx={{ backgroundColor: "#fafafa", p: 3 }}>
+        <DialogContent sx={{ backgroundColor: '#f9f9f9', p: 3 }}>
           <Paper
             elevation={0}
             sx={{
               p: 3,
               borderRadius: 2,
-              border: "1px solid #e0e0e0",
-              bgcolor: "white",
+              border: `1px solid ${alpha(purple.main, 0.2)}`,
+              bgcolor: 'white',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
             }}
           >
-            {/* Chọn sự kiện */}
             {!selectedEventId && (
               <FormControl fullWidth margin="normal" size="small">
                 <InputLabel>Chọn sự kiện</InputLabel>
@@ -697,6 +739,18 @@ const Sessions = () => {
                     setForm({ ...form, event_id: e.target.value })
                   }
                   label="Chọn sự kiện"
+                  sx={{
+                    '.MuiOutlinedInput-notchedOutline': {
+                      borderColor: alpha(purple.main, 0.4),
+                    },
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      borderColor: purple.main,
+                    },
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: purple.main,
+                      borderWidth: '2px',
+                    },
+                  }}
                 >
                   {events.map((event) => (
                     <MenuItem
@@ -710,11 +764,10 @@ const Sessions = () => {
               </FormControl>
             )}
 
-            {/* Thông tin cơ bản */}
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ mt: 2, mb: 1 }}
+              sx={{ mt: 2, mb: 1, color: purple.dark }}
             >
               🧾 Thông tin cơ bản
             </Typography>
@@ -726,6 +779,17 @@ const Sessions = () => {
                 required
                 fullWidth
                 size="small"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
               <TextField
                 label="Địa điểm"
@@ -733,14 +797,24 @@ const Sessions = () => {
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 fullWidth
                 size="small"
+                InputLabelProps={{ shrink: true }}
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
             </Box>
 
-            {/* Thời gian sự kiện */}
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ mt: 3, mb: 1 }}
+              sx={{ mt: 3, mb: 1, color: purple.dark }}
             >
               ⏰ Thời gian diễn ra
             </Typography>
@@ -762,6 +836,16 @@ const Sessions = () => {
                 required
                 fullWidth
                 size="small"
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
               <TextField
                 label="Kết thúc"
@@ -778,14 +862,23 @@ const Sessions = () => {
                 required
                 fullWidth
                 size="small"
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
             </Box>
 
-            {/* Check-in config */}
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ mt: 3, mb: 1 }}
+              sx={{ mt: 3, mb: 1, color: purple.dark }}
             >
               🕓 Thời gian Check-in
             </Typography>
@@ -802,6 +895,16 @@ const Sessions = () => {
                 helperText="Thời điểm mở check-in"
                 fullWidth
                 size="small"
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
               <TextField
                 label="Kết thúc check-in"
@@ -815,33 +918,52 @@ const Sessions = () => {
                 helperText="Thời điểm đóng check-in"
                 fullWidth
                 size="small"
+                sx={{
+                  '.MuiOutlinedInput-root': {
+                    '&.Mui-focused fieldset': {
+                      borderColor: purple.main,
+                    },
+                  },
+                  '.MuiInputLabel-root.Mui-focused': {
+                    color: purple.main,
+                  },
+                }}
               />
             </Box>
           </Paper>
         </DialogContent>
 
-        <DialogActions sx={{ px: 3, py: 2, bgcolor: "#f5f5f5" }}>
-          <Button onClick={handleClose} color="inherit">
+        <DialogActions sx={{ px: 3, py: 2, bgcolor: '#f0f0f0' }}>
+          <Button
+            onClick={handleClose}
+            sx={{
+              color: 'text.secondary',
+              '&:hover': {
+                backgroundColor: alpha(purple.main, 0.05),
+              }
+            }}
+          >
             Hủy
           </Button>
           <Button
             onClick={handleSave}
             variant="contained"
             sx={{
-              background: "linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)",
+              background: `linear-gradient(90deg, ${purple.main} 0%, ${purple.light} 100%)`,
               px: 3,
+              fontWeight: 600,
+              boxShadow: '0 4px 12px rgba(123, 31, 162, 0.2)',
+              '&:hover': {
+                background: purple.dark,
+                boxShadow: '0 6px 16px rgba(123, 31, 162, 0.3)',
+              }
             }}
           >
             {editId ? "Cập nhật" : "Tạo phiên"}
           </Button>
         </DialogActions>
       </Dialog>
-      {/* ==================================================================
-          HẾT PHẦN FORM DIALOG
-        ==================================================================
-      */}
 
-      {/* SNACKBAR (GIỮ NGUYÊN 100%) */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
@@ -851,6 +973,7 @@ const Sessions = () => {
           onClose={() => setSnackbar({ ...snackbar, open: false })}
           severity={snackbar.severity}
           variant="filled"
+          sx={{ boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
         >
           {snackbar.message}
         </Alert>

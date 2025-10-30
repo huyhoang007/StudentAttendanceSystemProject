@@ -21,7 +21,7 @@ import {
   CircularProgress,
   Tooltip,
   MenuItem,
-  TablePagination, // <-- THÊM IMPORT NÀY
+  TablePagination,
 } from "@mui/material";
 import {
   Add,
@@ -43,14 +43,122 @@ import {
 import { getOrganizerById, getOrganizers } from "../services/organizerService";
 import { getUniversities } from "../services/universityService";
 import { useAuth } from "../contexts/AuthContext";
+import { createTheme, ThemeProvider } from '@mui/material/styles'; // Import ThemeProvider và createTheme
+
+// Định nghĩa theme với tông màu tím
+const purpleTheme = createTheme({
+  palette: {
+    primary: {
+      main: '#673ab7', // Màu tím đậm chính
+    },
+    secondary: {
+      main: '#9c27b0', // Màu tím magenta
+    },
+    info: {
+      main: '#ba68c8', // Màu tím nhạt hơn cho icon info
+    },
+    success: {
+      main: '#4caf50', // Giữ màu xanh lá cho trạng thái "Đang diễn ra"
+    },
+    error: {
+      main: '#f44336', // Giữ màu đỏ cho lỗi
+    },
+    background: {
+      default: '#f3e5f5', // Nền màu tím rất nhạt
+      paper: '#ffffff', // Nền card và dialog
+    },
+  },
+  components: {
+    MuiChip: {
+      styleOverrides: {
+        root: {
+          fontWeight: 600,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        containedPrimary: {
+          background: 'linear-gradient(135deg, #7e57c2 0%, #9c27b0 100%)', // Gradient tím
+          color: 'white',
+          '&:hover': {
+            background: 'linear-gradient(135deg, #673ab7 0%, #8e24aa 100%)',
+          },
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: 12, // Bo tròn nhiều hơn cho card
+          boxShadow: '0 8px 30px rgba(0,0,0,0.1)', // Đổ bóng mềm mại hơn
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 12,
+        }
+      }
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#673ab7', // Nền tím đậm cho tiêu đề dialog
+          color: 'white',
+        }
+      }
+    },
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          backgroundColor: '#ede7f6', // Nền tím nhạt cho tiêu đề bảng
+        }
+      }
+    },
+    MuiTableRow: {
+      styleOverrides: {
+        root: {
+          '&:hover': {
+            backgroundColor: '#f3e5f5 !important', // Nền tím nhạt khi hover
+          },
+        },
+      },
+    },
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          fontWeight: 700,
+          color: '#424242',
+        }
+      }
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiOutlinedInput-root': {
+            '& fieldset': {
+              borderColor: '#d1c4e9', // Viền tím nhạt
+            },
+            '&:hover fieldset': {
+              borderColor: '#9575cd', // Viền tím đậm hơn khi hover
+            },
+            '&.Mui-focused fieldset': {
+              borderColor: '#673ab7', // Viền tím đậm khi focus
+            },
+          },
+        },
+      },
+    },
+  },
+});
 
 const Events = () => {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  // --- THÊM STATE CHO PHÂN TRANG ---
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  // ---------------------------------
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const { role, organizerId } = useAuth();
@@ -94,7 +202,7 @@ const Events = () => {
         res = await getEvents();
       }
       setData(Array.isArray(res) ? res : []);
-      setPage(0); // <-- RESET VỀ TRANG ĐẦU TIÊN
+      setPage(0);
     } catch (error) {
       console.error("Error fetching events:", error);
       setEventError("Không thể tải danh sách sự kiện: " + error.message);
@@ -105,7 +213,6 @@ const Events = () => {
   }, [role, organizerId]);
 
   const loadOrganizerInfo = useCallback(async () => {
-    // ... (Giữ nguyên logic)
     if (!organizerId) return;
     try {
       const orgData = await getOrganizerById(organizerId);
@@ -129,7 +236,6 @@ const Events = () => {
   }, [fetchData, role, organizerId, loadOrganizerInfo]);
 
   const handleOpen = (item = null) => {
-    // ... (Giữ nguyên logic)
     setEditId(item ? item.eventId || item.EventId : null);
     setForm(
       item
@@ -163,7 +269,6 @@ const Events = () => {
     );
 
   const handleSave = async () => {
-    // ... (Giữ nguyên logic)
     let eventData = { ...form };
     if (role === "organizer" && isGuid(organizerId)) {
       eventData.OrganizerId = organizerId;
@@ -172,7 +277,7 @@ const Events = () => {
     } else {
       eventData.OrganizerId = "";
     }
-    eventData.createdByRole = role; // Gửi role khi tạo event
+    eventData.createdByRole = role;
 
     if (!eventData.StartDate || !eventData.EndDate) {
       alert("Vui lòng nhập đầy đủ ngày bắt đầu và ngày kết thúc!");
@@ -194,7 +299,7 @@ const Events = () => {
       if (editId) await updateEvent(editId, eventData, token);
       else await addEvent(eventData, token);
       setOpen(false);
-      fetchData(); // <-- fetchData đã có setPage(0)
+      fetchData();
     } catch (err) {
       setEventError(
         err && err.message
@@ -205,489 +310,476 @@ const Events = () => {
   };
 
   const handleDelete = async (id) => {
-    // ... (Giữ nguyên logic)
     if (window.confirm("Bạn có chắc muốn xóa?")) {
       const token = localStorage.getItem("authToken");
       await deleteEvent(id, token);
-      fetchData(); // <-- fetchData đã có setPage(0)
+      fetchData();
     }
   };
 
-  // --- THÊM CÁC HÀM HANDLER CHO PHÂN TRANG ---
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Quay về trang đầu tiên
+    setPage(0);
   };
 
   return (
-    <Box sx={{ p: 4, backgroundColor: "#f9fafc", minHeight: "100vh" }}>
-      {/* ... (Giữ nguyên Header Card) */}
-      <Card
-        sx={{
-          mb: 3,
-          borderRadius: 3,
-          boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
-          background: "linear-gradient(135deg, #1976d2, #42a5f5)",
-          color: "white",
-        }}
-      >
-        <CardContent>
-          <Box display="flex" alignItems="center" gap={2}>
-            <EventIcon sx={{ fontSize: 40 }} />
-            <Box>
-              <Typography variant="h4" fontWeight={700}>
-                Quản lý Sự kiện NVH Sinh viên
-              </Typography>
-              <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                Quản lý, theo dõi và điểm danh sinh viên tham gia các hoạt động.
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {role === "admin" && (
-        <Box sx={{ mb: 2 }}>
-          <Typography
-            variant="subtitle1"
-            fontWeight={600}
-            sx={{ mb: 1, color: "#1976d2" }}
-          >
-            🏫 Chọn trường để xem sự kiện
-          </Typography>
-          <Card sx={{ p: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
-            <TextField
-              select
-              fullWidth
-              size="small"
-              value={selectedUniversity || ""}
-              onChange={(e) => {
-                setSelectedUniversity(e.target.value);
-                if (e.target.value) {
-                  getEventsByUniversity(e.target.value)
-                    .then((eventsData) => {
-                      // <-- Cập nhật
-                      setData(eventsData);
-                      setPage(0); // <-- RESET TRANG KHI LỌC
-                    })
-                    .catch((error) => {
-                      console.error(
-                        "Error fetching events by university:",
-                        error
-                      );
-                      setEventError(
-                        "Không thể tải danh sách sự kiện: " + error.message
-                      );
-                    });
-                } else {
-                  // If no university selected, fetch all events
-                  fetchData(); // <-- fetchData đã có setPage(0)
-                }
-              }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "#fff",
-                  "& fieldset": {
-                    borderColor: "#e0e0e0",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "#1976d2",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#1976d2",
-                  },
-                },
-              }}
-            >
-              <MenuItem value="">-- Tất cả các trường --</MenuItem>
-              {universities.map((univ) => (
-                <MenuItem key={univ.universityId} value={univ.universityId}>
-                  {univ.name}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Card>
-        </Box>
-      )}
-
-      {/* ... (Giữ nguyên Box Button "Thêm sự kiện") */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={2}
-      >
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          color="primary"
-          sx={{ opacity: 1 }}
-        >
-          Danh sách sự kiện
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-          onClick={() => handleOpen()}
-          sx={{
-            borderRadius: 2,
-            textTransform: "none",
-            px: 3,
-            py: 1,
-            fontWeight: 600,
-          }}
-        >
-          Thêm sự kiện
-        </Button>
-      </Box>
-
-      {loading ? (
-        <Box display="flex" justifyContent="center" my={5}>
-          <CircularProgress />
-        </Box>
-      ) : (
+    <ThemeProvider theme={purpleTheme}> {/* Áp dụng theme tím */}
+      <Box sx={{ p: 4, backgroundColor: purpleTheme.palette.background.default, minHeight: "100vh" }}>
         <Card
           sx={{
-            borderRadius: 3,
-            boxShadow: "0 3px 10px rgba(0,0,0,0.05)",
-            backgroundColor: "white",
-            width: "100%",
-          }}
-        >
-          <Table>
-            <TableHead sx={{ backgroundColor: "#e3f2fd" }}>
-              {/* ... (Giữ nguyên TableHead) */}
-              <TableRow>
-                <TableCell>Tiêu đề</TableCell>
-                <TableCell>Mô tả</TableCell>
-                <TableCell>Đơn vị tổ chức</TableCell>
-                <TableCell>Ngày bắt đầu</TableCell>
-                <TableCell>Ngày kết thúc</TableCell>
-                <TableCell align="center">Thao tác</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {data.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
-                    {eventError ? (
-                      <Typography color="error">{eventError}</Typography>
-                    ) : (
-                      "Chưa có sự kiện nào"
-                    )}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                // --- CẬP NHẬT LOGIC RENDER VỚI SLICE ---
-                (rowsPerPage > 0
-                  ? data.slice(
-                      page * rowsPerPage,
-                      page * rowsPerPage + rowsPerPage
-                    )
-                  : data
-                ).map((e) => (
-                  <TableRow
-                    key={e.eventId || e.EventId}
-                    hover
-                    sx={{
-                      transition: "all 0.2s",
-                      "&:hover": {
-                        backgroundColor: "#f1f8ff",
-                      },
-                    }}
-                  >
-                    <TableCell>
-                      <Typography fontWeight={600}>
-                        {e.title || e.Title || "Chưa có tiêu đề"}
-                      </Typography>
-                      <Chip
-                        size="small"
-                        label={(() => {
-                          const startDate = e.startDate || e.StartDate;
-                          const endDate = e.endDate || e.EndDate;
-                          if (!startDate || isNaN(new Date(startDate)))
-                            return "Chưa xác định";
-                          const now = new Date();
-                          const s = new Date(startDate);
-                          const ed = endDate ? new Date(endDate) : null;
-                          if (s > now) return "Sắp diễn ra";
-                          if (ed && ed >= now) return "Đang diễn ra";
-                          return "Đã kết thúc";
-                        })()}
-                        color={(() => {
-                          const s = new Date(e.startDate || e.StartDate);
-                          const ed = new Date(e.endDate || e.EndDate);
-                          const now = new Date();
-                          if (s > now) return "primary";
-                          if (ed >= now) return "success";
-                          return "default";
-                        })()}
-                        sx={{ mt: 0.5 }}
-                      />
-                    </TableCell>
-                    <TableCell>{e.description || e.Description}</TableCell>
-                    <TableCell>{e.organizer || e.Organizer}</TableCell>
-                    <TableCell>
-                      {new Date(
-                        e.startDate || e.StartDate
-                      ).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(e.endDate || e.EndDate).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box display="flex" justifyContent="center" gap={0.8}>
-                        <Tooltip title="Quản lý phiên">
-                          <IconButton
-                            color="info"
-                            onClick={() =>
-                              navigate(
-                                `/sessions?eventId=${e.eventId || e.EventId}`
-                              )
-                            }
-                          >
-                            <Schedule />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Quản lý sinh viên">
-                          <IconButton
-                            color="secondary"
-                            onClick={() =>
-                              navigate(
-                                `/student-in-event-management?eventId=${
-                                  e.eventId || e.EventId
-                                }`
-                              )
-                            }
-                          >
-                            <Group />
-                          </IconButton>
-                        </Tooltip>
-                        {(role === "organizer" &&
-                          (e.organizerId === organizerId ||
-                            e.OrganizerId === organizerId)) ||
-                        role === "admin" ? (
-                          <>
-                            <Tooltip title="Sửa sự kiện">
-                              <IconButton
-                                color="primary"
-                                onClick={() => handleOpen(e)}
-                              >
-                                <Edit />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title="Xóa sự kiện">
-                              <IconButton
-                                color="error"
-                                onClick={() =>
-                                  handleDelete(e.eventId || e.EventId)
-                                }
-                              >
-                                <Delete />
-                              </IconButton>
-                            </Tooltip>
-                          </>
-                        ) : (
-                          <Tooltip title="Xem chi tiết">
-                            <IconButton
-                              onClick={() =>
-                                navigate(
-                                  `/event-details/${e.eventId || e.EventId}`
-                                )
-                              }
-                            >
-                              <Visibility />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-
-          {/* --- THÊM COMPONENT PHÂN TRANG --- */}
-          <TablePagination
-            rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
-            component="div"
-            count={data.length} // Tổng số sự kiện
-            rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
-            page={page} // Trang hiện tại
-            onPageChange={handleChangePage} // Hàm khi đổi trang
-            onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng
-            // Thêm label tiếng Việt
-            labelRowsPerPage="Số hàng mỗi trang:"
-            labelDisplayedRows={({ from, to, count }) =>
-              `${from}–${to} trong số ${count}`
-            }
-          />
-        </Card>
-      )}
-
-      {/* ... (Giữ nguyên Dialog) */}
-      <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
-        <DialogTitle
-          sx={{
-            fontWeight: 600,
-            bgcolor: "#1976d2",
+            mb: 3,
+            background: 'linear-gradient(135deg, #673ab7 0%, #9c27b0 100%)', // Gradient tím cho header
             color: "white",
-            py: 1.5,
-            px: 3,
+            // Đã có borderRadius và boxShadow từ theme.components.MuiCard
           }}
         >
-          {editId ? "✏️ Chỉnh sửa sự kiện" : "🗓️ Thêm sự kiện mới"}
-        </DialogTitle>
-
-        <DialogContent sx={{ backgroundColor: "#fafafa", p: 3 }}>
-          <Box
-            sx={{
-              borderRadius: 2,
-              border: "1px solid #e0e0e0",
-              bgcolor: "white",
-              p: 3,
-            }}
-          >
-            {role === "organizer" && organizerInfo && (
-              <Alert severity="info" sx={{ mb: 3 }}>
-                Sự kiện này sẽ thuộc về trường:{" "}
-                <strong>
-                  {organizerInfo.university?.name ||
-                    organizerInfo.universityName ||
-                    "Chưa xác định trường"}
-                </strong>
-              </Alert>
-            )}
-
-            {role === "admin" && (
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-                  👥 Chọn người tổ chức
+          <CardContent>
+            <Box display="flex" alignItems="center" gap={2}>
+              <EventIcon sx={{ fontSize: 40 }} />
+              <Box>
+                <Typography variant="h4" fontWeight={700}>
+                  Quản lý Sự kiện NVH Sinh viên
                 </Typography>
-                <TextField
-                  select
-                  fullWidth
-                  value={form.OrganizerId}
-                  onChange={(e) =>
-                    setForm({ ...form, OrganizerId: e.target.value })
-                  }
-                  SelectProps={{ native: true }}
-                  size="small"
-                >
-                  <option value="">-- Chọn người tổ chức để quản lý--</option>
-                  {organizers.map((o) => (
-                    <option
-                      key={o.organizerId || o.OrganizerId}
-                      value={o.organizerId || o.OrganizerId}
-                    >
-                      {o.organizerName || o.OrganizerName} -{" "}
-                      {o.university?.name ||
-                        o.universityName ||
-                        "Không rõ trường"}
-                    </option>
-                  ))}
-                </TextField>
+                <Typography variant="body1" sx={{ opacity: 0.9 }}>
+                  Quản lý, theo dõi và điểm danh sinh viên tham gia các hoạt động.
+                </Typography>
               </Box>
-            )}
-
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
-              🧾 Thông tin sự kiện
-            </Typography>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
-              <TextField
-                label="Tiêu đề"
-                fullWidth
-                value={form.Title}
-                onChange={(e) => setForm({ ...form, Title: e.target.value })}
-                size="small"
-              />
-              <TextField
-                label="Đơn vị tổ chức"
-                fullWidth
-                value={form.Organizer}
-                onChange={(e) =>
-                  setForm({ ...form, Organizer: e.target.value })
-                }
-                size="small"
-              />
             </Box>
+          </CardContent>
+        </Card>
 
-            <TextField
-              label="Mô tả"
-              fullWidth
-              margin="normal"
-              multiline
-              rows={3}
-              value={form.Description}
-              onChange={(e) =>
-                setForm({ ...form, Description: e.target.value })
-              }
-              size="small"
-            />
-
+        {role === "admin" && (
+          <Box sx={{ mb: 2 }}>
             <Typography
               variant="subtitle1"
               fontWeight={600}
-              sx={{ mt: 3, mb: 1 }}
+              color="primary" // Sử dụng màu primary từ theme (tím)
+              sx={{ mb: 1 }}
             >
-              ⏰ Thời gian diễn ra
+              🏫 Chọn trường để xem sự kiện
             </Typography>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <Card sx={{ p: 0.5, boxShadow: "0 2px 8px rgba(0,0,0,0.1)" }}>
               <TextField
-                label="Ngày bắt đầu"
-                type="date"
+                select
                 fullWidth
-                value={form.StartDate}
-                onChange={(e) =>
-                  setForm({ ...form, StartDate: e.target.value })
-                }
-                InputLabelProps={{ shrink: true }}
                 size="small"
-              />
-              <TextField
-                label="Ngày kết thúc"
-                type="date"
-                fullWidth
-                value={form.EndDate}
-                onChange={(e) => setForm({ ...form, EndDate: e.target.value })}
-                InputLabelProps={{ shrink: true }}
-                size="small"
-              />
-            </Box>
+                value={selectedUniversity || ""}
+                onChange={(e) => {
+                  setSelectedUniversity(e.target.value);
+                  if (e.target.value) {
+                    getEventsByUniversity(e.target.value)
+                      .then((eventsData) => {
+                        setData(eventsData);
+                        setPage(0);
+                      })
+                      .catch((error) => {
+                        console.error(
+                          "Error fetching events by university:",
+                          error
+                        );
+                        setEventError(
+                          "Không thể tải danh sách sự kiện: " + error.message
+                        );
+                      });
+                  } else {
+                    fetchData();
+                  }
+                }}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    backgroundColor: "#fff",
+                    "& fieldset": {
+                      borderColor: purpleTheme.palette.primary.light, // Viền tím nhạt
+                    },
+                    "&:hover fieldset": {
+                      borderColor: purpleTheme.palette.primary.main, // Viền tím đậm khi hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: purpleTheme.palette.primary.dark, // Viền tím đậm nhất khi focus
+                    },
+                  },
+                }}
+              >
+                <MenuItem value="">-- Tất cả các trường --</MenuItem>
+                {universities.map((univ) => (
+                  <MenuItem key={univ.universityId} value={univ.universityId}>
+                    {univ.name}
+                  </MenuItem>
+                ))}
+              </TextField>
+            </Card>
           </Box>
-        </DialogContent>
+        )}
 
-        <DialogActions
-          sx={{
-            px: 3,
-            py: 2,
-            bgcolor: "#f5f5f5",
-            borderTop: "1px solid #e0e0e0",
-          }}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
         >
-          <Button onClick={handleClose} color="inherit">
-            Hủy
-          </Button>
+          <Typography
+            variant="h5"
+            fontWeight={700}
+            color="primary"
+            sx={{ opacity: 1 }}
+          >
+            Danh sách sự kiện
+          </Typography>
           <Button
             variant="contained"
-            onClick={handleSave}
+            color="primary"
+            startIcon={<Add />}
+            onClick={() => handleOpen()}
             sx={{
-              background: "linear-gradient(90deg, #1976d2, #42a5f5)",
+              borderRadius: 2,
+              textTransform: "none",
               px: 3,
+              py: 1,
               fontWeight: 600,
             }}
           >
-            {editId ? "Cập nhật" : "Tạo sự kiện"}
+            Thêm sự kiện
           </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        </Box>
+
+        {loading ? (
+          <Box display="flex" justifyContent="center" my={5}>
+            <CircularProgress color="primary" /> {/* Màu tím cho loading */}
+          </Box>
+        ) : (
+          <Card
+            sx={{
+              backgroundColor: "white",
+              width: "100%",
+              // Đã có borderRadius và boxShadow từ theme.components.MuiCard
+            }}
+          >
+            <Table>
+              <TableHead sx={{ backgroundColor: purpleTheme.palette.grey[100] }}>
+                <TableRow>
+                  <TableCell>Tiêu đề</TableCell>
+                  <TableCell>Mô tả</TableCell>
+                  <TableCell>Đơn vị tổ chức</TableCell>
+                  <TableCell>Ngày bắt đầu</TableCell>
+                  <TableCell>Ngày kết thúc</TableCell>
+                  <TableCell align="center">Thao tác</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {data.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center" sx={{ py: 4 }}>
+                      {eventError ? (
+                        <Typography color="error">{eventError}</Typography>
+                      ) : (
+                        "Chưa có sự kiện nào"
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  (rowsPerPage > 0
+                    ? data.slice(
+                        page * rowsPerPage,
+                        page * rowsPerPage + rowsPerPage
+                      )
+                    : data
+                  ).map((e) => (
+                    <TableRow
+                      key={e.eventId || e.EventId}
+                      hover
+                      sx={{
+                        transition: "all 0.2s",
+                        // '&:hover' đã được định nghĩa trong theme
+                      }}
+                    >
+                      <TableCell>
+                        <Typography fontWeight={600}>
+                          {e.title || e.Title || "Chưa có tiêu đề"}
+                        </Typography>
+                        <Chip
+                          size="small"
+                          label={(() => {
+                            const startDate = e.startDate || e.StartDate;
+                            const endDate = e.endDate || e.EndDate;
+                            if (!startDate || isNaN(new Date(startDate)))
+                              return "Chưa xác định";
+                            const now = new Date();
+                            const s = new Date(startDate);
+                            const ed = endDate ? new Date(endDate) : null;
+                            if (s > now) return "Sắp diễn ra";
+                            if (ed && ed >= now) return "Đang diễn ra";
+                            return "Đã kết thúc";
+                          })()}
+                          color={(() => {
+                            const s = new Date(e.startDate || e.StartDate);
+                            const ed = new Date(e.endDate || e.EndDate);
+                            const now = new Date();
+                            if (s > now) return "primary"; // Màu tím cho "Sắp diễn ra"
+                            if (ed >= now) return "success"; // Giữ màu xanh lá cho "Đang diễn ra"
+                            return "default";
+                          })()}
+                          sx={{ mt: 0.5 }}
+                        />
+                      </TableCell>
+                      <TableCell>{e.description || e.Description}</TableCell>
+                      <TableCell>{e.organizer || e.Organizer}</TableCell>
+                      <TableCell>
+                        {new Date(
+                          e.startDate || e.StartDate
+                        ).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        {new Date(e.endDate || e.EndDate).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Box display="flex" justifyContent="center" gap={0.8}>
+                          <Tooltip title="Quản lý phiên">
+                            <IconButton
+                              color="info" // Sử dụng màu info từ theme (tím nhạt)
+                              onClick={() =>
+                                navigate(
+                                  `/sessions?eventId=${e.eventId || e.EventId}`
+                                )
+                              }
+                            >
+                              <Schedule />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title="Quản lý sinh viên">
+                            <IconButton
+                              color="secondary" // Sử dụng màu secondary từ theme (tím magenta)
+                              onClick={() =>
+                                navigate(
+                                  `/student-in-event-management?eventId=${
+                                    e.eventId || e.EventId
+                                  }`
+                                )
+                              }
+                            >
+                              <Group />
+                            </IconButton>
+                          </Tooltip>
+                          {(role === "organizer" &&
+                            (e.organizerId === organizerId ||
+                              e.OrganizerId === organizerId)) ||
+                          role === "admin" ? (
+                            <>
+                              <Tooltip title="Sửa sự kiện">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleOpen(e)}
+                                >
+                                  <Edit />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Xóa sự kiện">
+                                <IconButton
+                                  color="error"
+                                  onClick={() =>
+                                    handleDelete(e.eventId || e.EventId)
+                                  }
+                                >
+                                  <Delete />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          ) : (
+                            <Tooltip title="Xem chi tiết">
+                              <IconButton
+                                onClick={() =>
+                                  navigate(
+                                    `/event-details/${e.eventId || e.EventId}`
+                                  )
+                                }
+                              >
+                                <Visibility />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+
+            <TablePagination
+              rowsPerPageOptions={[5, 10, 25]}
+              component="div"
+              count={data.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={handleChangePage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              labelRowsPerPage="Số hàng mỗi trang:"
+              labelDisplayedRows={({ from, to, count }) =>
+                `${from}–${to} trong số ${count}`
+              }
+            />
+          </Card>
+        )}
+
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="md">
+          <DialogTitle
+            sx={{
+              fontWeight: 600,
+              // backgroundColor và color đã được định nghĩa trong theme.components.MuiDialogTitle
+              py: 1.5,
+              px: 3,
+            }}
+          >
+            {editId ? "✏️ Chỉnh sửa sự kiện" : "🗓️ Thêm sự kiện mới"}
+          </DialogTitle>
+
+          <DialogContent sx={{ backgroundColor: purpleTheme.palette.background.default, p: 3 }}>
+            <Box
+              sx={{
+                borderRadius: 2,
+                border: "1px solid #e0e0e0",
+                bgcolor: "white",
+                p: 3,
+              }}
+            >
+              {role === "organizer" && organizerInfo && (
+                <Alert severity="info" sx={{ mb: 3 }}>
+                  Sự kiện này sẽ thuộc về trường:{" "}
+                  <strong>
+                    {organizerInfo.university?.name ||
+                      organizerInfo.universityName ||
+                      "Chưa xác định trường"}
+                  </strong>
+                </Alert>
+              )}
+
+              {role === "admin" && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                    👥 Chọn người tổ chức
+                  </Typography>
+                  <TextField
+                    select
+                    fullWidth
+                    value={form.OrganizerId}
+                    onChange={(e) =>
+                      setForm({ ...form, OrganizerId: e.target.value })
+                    }
+                    SelectProps={{ native: true }}
+                    size="small"
+                  >
+                    <option value="">-- Chọn người tổ chức để quản lý--</option>
+                    {organizers.map((o) => (
+                      <option
+                        key={o.organizerId || o.OrganizerId}
+                        value={o.organizerId || o.OrganizerId}
+                      >
+                        {o.organizerName || o.OrganizerName} -{" "}
+                        {o.university?.name ||
+                          o.universityName ||
+                          "Không rõ trường"}
+                      </option>
+                    ))}
+                  </TextField>
+                </Box>
+              )}
+
+              <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                🧾 Thông tin sự kiện
+              </Typography>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <TextField
+                  label="Tiêu đề"
+                  fullWidth
+                  value={form.Title}
+                  onChange={(e) => setForm({ ...form, Title: e.target.value })}
+                  size="small"
+                />
+                <TextField
+                  label="Đơn vị tổ chức"
+                  fullWidth
+                  value={form.Organizer}
+                  onChange={(e) =>
+                    setForm({ ...form, Organizer: e.target.value })
+                  }
+                  size="small"
+                />
+              </Box>
+
+              <TextField
+                label="Mô tả"
+                fullWidth
+                margin="normal"
+                multiline
+                rows={3}
+                value={form.Description}
+                onChange={(e) =>
+                  setForm({ ...form, Description: e.target.value })
+                }
+                size="small"
+              />
+
+              <Typography
+                variant="subtitle1"
+                fontWeight={600}
+                sx={{ mt: 3, mb: 1 }}
+              >
+                ⏰ Thời gian diễn ra
+              </Typography>
+              <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+                <TextField
+                  label="Ngày bắt đầu"
+                  type="date"
+                  fullWidth
+                  value={form.StartDate}
+                  onChange={(e) =>
+                    setForm({ ...form, StartDate: e.target.value })
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  size="small"
+                />
+                <TextField
+                  label="Ngày kết thúc"
+                  type="date"
+                  fullWidth
+                  value={form.EndDate}
+                  onChange={(e) => setForm({ ...form, EndDate: e.target.value })}
+                  InputLabelProps={{ shrink: true }}
+                  size="small"
+                />
+              </Box>
+            </Box>
+          </DialogContent>
+
+          <DialogActions
+            sx={{
+              px: 3,
+              py: 2,
+              bgcolor: purpleTheme.palette.grey[50], // Nền nhạt cho footer dialog
+              borderTop: "1px solid #e0e0e0",
+            }}
+          >
+            <Button onClick={handleClose} color="inherit">
+              Hủy
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{
+                background: "linear-gradient(90deg, #7e57c2, #9c27b0)", // Gradient tím cho button save
+                px: 3,
+                fontWeight: 600,
+              }}
+            >
+              {editId ? "Cập nhật" : "Tạo sự kiện"}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </ThemeProvider>
   );
 };
 
