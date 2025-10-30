@@ -72,9 +72,9 @@ const MainLayout = () => {
         position="static"
         color="primary"
         sx={{
-          background: "linear-gradient(90deg,#74ebd5,#ACB6E5)",
+          background: "linear-gradient(90deg, #6a1b9a 0%, #ab47bc 100%)", // purple gradient
           boxShadow: "none",
-          borderBottom: "1px solid rgba(0,0,0,0.1)",
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
         }}
       >
         <Toolbar
@@ -116,6 +116,7 @@ const MainLayout = () => {
                 fontWeight: 700,
                 letterSpacing: 1,
                 fontSize: { xs: "1rem", sm: "1.25rem" },
+                color: "rgba(255,255,255,0.95)",
               }}
             >
               Student Attendance System
@@ -149,15 +150,15 @@ const MainLayout = () => {
                     fontSize: { xs: "0.875rem", sm: "1rem" },
                     // hover effect
                     "&:hover": {
-                      background: "rgba(255,255,255,0.08)",
+                      background: "rgba(255,255,255,0.06)",
                       transform: "translateY(-2px)",
-                      boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
+                      boxShadow: "0 6px 18px rgba(106,27,154,0.08)",
                     },
                     // active state styling
-                    bgcolor: active ? "rgba(255,255,255,0.12)" : "transparent",
+                    bgcolor: active ? "rgba(255,255,255,0.10)" : "transparent",
                     // subtle underline for active using boxShadow inset
                     boxShadow: active
-                      ? "inset 0 -3px 0 rgba(255,255,255,0.18)"
+                      ? "inset 0 -3px 0 rgba(255,255,255,0.12)"
                       : "none",
                     // ensure text alignment
                     display: "flex",
@@ -184,23 +185,24 @@ const MainLayout = () => {
               <Tooltip title={user.username}>
                 <Avatar
                   sx={{
-                    bgcolor: "#74ebd5",
+                    bgcolor: "rgba(255,255,255,0.12)",
                     color: "#fff",
                     fontWeight: 700,
                     mr: 1,
                     width: { xs: 32, sm: 40 },
                     height: { xs: 32, sm: 40 },
+                    border: "1px solid rgba(255,255,255,0.12)",
                   }}
                 >
                   {user.username.charAt(0).toUpperCase()}
                 </Avatar>
               </Tooltip>
               <IconButton
-                color="error"
                 onClick={handleLogout}
                 sx={{
                   ml: 1,
                   fontSize: { xs: "0.875rem", sm: "1rem" },
+                  color: "rgba(255,255,255,0.95)",
                 }}
               >
                 <span style={{ fontWeight: 700 }}>Đăng xuất</span>
@@ -212,7 +214,7 @@ const MainLayout = () => {
       <Box
         sx={{
           mt: 0,
-          background: "linear-gradient(135deg, #f8fafc 0%, #e0eafc 100%)",
+          background: "linear-gradient(135deg, #faf5ff 0%, #efe6fb 100%)", // light purple background
           minHeight: "calc(100vh - 64px)",
           p: { xs: 1, sm: 2 },
         }}
