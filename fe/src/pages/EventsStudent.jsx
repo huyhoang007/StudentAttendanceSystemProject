@@ -20,7 +20,13 @@ import {
   TableContainer,
   Paper,
   Tooltip,
-  TablePagination, // <-- THÊM IMPORT NÀY
+  TablePagination,
+  Card,
+  CardContent,
+  Container,
+  Stack,
+  Avatar,
+  IconButton,
 } from "@mui/material";
 import {
   Event,
@@ -298,57 +304,89 @@ const EventsStudent = () => {
   // --- RENDERING UI (CẬP NHẬT PHÂN TRANG) ---
 
   return (
-    <Box sx={{ p: { xs: 2, md: 4 } }}>
-      {/* HEADER */}
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          borderBottom: "2px solid #e0e0e0",
-          pb: 1,
-          mb: 3,
-        }}
-      >
-        <Event sx={{ fontSize: 36, color: "#1976d2", mr: 1 }} />
-        <Typography variant="h4" fontWeight={700} color="#1976d2">
-          Danh sách tất cả sự kiện
-        </Typography>
-      </Box>
-      {/* --- Alert Messages --- */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
-          {success}
-        </Alert>
-      )}
+    <Box sx={{ backgroundColor: "#F9FAFB", minHeight: "100vh", py: 3 }}>
+      <Container maxWidth="lg">
+        {/* Header - Card gradient */}
+        <Card
+          sx={{
+            mb: 3,
+            borderRadius: "24px",
+            background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
+            boxShadow: "0 8px 24px rgba(134, 76, 232, 0.3)",
+          }}
+        >
+          <CardContent sx={{ p: 4 }}>
+            <Stack direction="row" alignItems="center" spacing={3}>
+              <Avatar
+                sx={{
+                  width: 72,
+                  height: 72,
+                  bgcolor: "rgba(255,255,255,0.2)",
+                }}
+              >
+                <Event sx={{ fontSize: 40, color: "#fff" }} />
+              </Avatar>
+              <Box sx={{ flex: 1 }}>
+                <Typography
+                  variant="h4"
+                  fontWeight={700}
+                  color="#fff"
+                  sx={{ mb: 0.5 }}
+                >
+                  Danh sách tất cả sự kiện
+                </Typography>
+                <Typography
+                  variant="body1"
+                  sx={{ color: "rgba(255,255,255,0.9)" }}
+                >
+                  Đăng ký và tham gia các sự kiện học thuật, ngoại khóa, phát triển bản thân.
+                </Typography>
+              </Box>
+            </Stack>
+          </CardContent>
+        </Card>
 
-      {/* --- Main Table --- */}
-      <TableContainer component={Paper} elevation={4} sx={{ borderRadius: 2 }}>
-        <Table size="small">
-          <TableHead sx={{ bgcolor: "#f5f5f5" }}>
-            <TableRow>
-              <TableCell sx={{ fontWeight: 700 }}>Tiêu đề</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Mô tả</TableCell>
-              <TableCell sx={{ fontWeight: 700 }}>Đơn vị tổ chức</TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700 }}>
-                Ngày bắt đầu
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700 }}>
-                Ngày kết thúc
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700 }}>
-                Trạng thái
-              </TableCell>
-              <TableCell align="center" sx={{ fontWeight: 700 }}>
-                Thao tác
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+        {/* --- Alert Messages --- */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError("")}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess("")}>
+            {success}
+          </Alert>
+        )}
+
+        {/* --- Main Table --- */}
+        <Card
+          sx={{
+            borderRadius: "16px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+          }}
+        >
+          <CardContent sx={{ p: 0 }}>
+            <Table>
+              <TableHead sx={{ bgcolor: "#f9fafb" }}>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }}>Tiêu đề</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }}>Mô tả</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }}>Đơn vị tổ chức</TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: "#374151" }}>
+                    Ngày bắt đầu
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: "#374151" }}>
+                    Ngày kết thúc
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: "#374151" }}>
+                    Trạng thái
+                  </TableCell>
+                  <TableCell align="center" sx={{ fontWeight: 700, color: "#374151" }}>
+                    Thao tác
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
             {events.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center" sx={{ py: 3 }}>
@@ -372,34 +410,17 @@ const EventsStudent = () => {
                 return (
                   <TableRow
                     key={eventId}
-                    hover
-                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                    sx={{ "&:hover": { bgcolor: "#f9fafb" } }}
                   >
                     <TableCell>
-                      <Typography variant="body1" fontWeight={600}>
+                      <Typography variant="body2" fontWeight={600}>
                         {e.title || e.Title}
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Tooltip
-                        title={
-                          e.description || e.Description || "Không có mô tả"
-                        }
-                      >
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: "2",
-                            WebkitBoxOrient: "vertical",
-                            maxWidth: "200px",
-                          }}
-                        >
-                          {e.description || e.Description || "Không có mô tả"}
-                        </Typography>
-                      </Tooltip>
+                      <Typography variant="body2" color="text.secondary" sx={{ maxWidth: "200px" }}>
+                        {e.description || e.Description || "Không có mô tả"}
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" color="text.secondary">
@@ -407,22 +428,14 @@ const EventsStudent = () => {
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        icon={<CalendarToday />}
-                        label={formatDate(e.startDate || e.StartDate)}
-                        size="small"
-                        variant="outlined"
-                        color="default"
-                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(e.startDate || e.StartDate)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      <Chip
-                        icon={<CalendarToday />}
-                        label={formatDate(e.endDate || e.EndDate)}
-                        size="small"
-                        variant="outlined"
-                        color="default"
-                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(e.endDate || e.EndDate)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
                       {isRegistered ? (
@@ -431,6 +444,12 @@ const EventsStudent = () => {
                           color="success"
                           size="small"
                           icon={<AssignmentTurnedIn />}
+                          sx={{
+                            bgcolor: "#d1fae5",
+                            color: "#059669",
+                            fontWeight: 600,
+                            borderRadius: "8px",
+                          }}
                         />
                       ) : (
                         <Chip
@@ -438,32 +457,45 @@ const EventsStudent = () => {
                           color="default"
                           size="small"
                           variant="outlined"
+                          sx={{
+                            bgcolor: "#f3f4f6",
+                            color: "#6b7280",
+                            fontWeight: 600,
+                            borderRadius: "8px",
+                            border: "1px solid #e5e7eb",
+                          }}
                         />
                       )}
                     </TableCell>
                     <TableCell align="center">
-                      {isRegistered ? (
-                        <Button
-                          variant="text"
-                          color="success"
-                          disabled
-                          startIcon={<AssignmentTurnedIn />}
-                          size="small"
-                          sx={{ fontWeight: 600 }}
-                        >
-                          Đã đăng ký
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          onClick={() => handleRegisterEvent(e)}
-                          startIcon={<HowToReg />}
-                          size="small"
-                        >
-                          Đăng ký
-                        </Button>
-                      )}
+                      <Stack direction="row" spacing={0.5} justifyContent="center">
+                        {!isRegistered && (
+                          <IconButton
+                            size="small"
+                            onClick={() => handleRegisterEvent(e)}
+                            sx={{
+                              color: "#864ce8ff",
+                              "&:hover": { bgcolor: "#f3e8ff" },
+                            }}
+                            title="Đăng ký sự kiện"
+                          >
+                            <HowToReg fontSize="small" />
+                          </IconButton>
+                        )}
+                        {isRegistered && (
+                          <IconButton
+                            size="small"
+                            disabled
+                            sx={{
+                              color: "#10b981",
+                              "&:hover": { bgcolor: "#f0fdf4" },
+                            }}
+                            title="Đã đăng ký"
+                          >
+                            <AssignmentTurnedIn fontSize="small" />
+                          </IconButton>
+                        )}
+                      </Stack>
                     </TableCell>
                   </TableRow>
                 );
@@ -474,29 +506,44 @@ const EventsStudent = () => {
 
         {/* --- THÊM COMPONENT PHÂN TRANG --- */}
         <TablePagination
-          rowsPerPageOptions={[5, 10, 25]} // Các tùy chọn số hàng mỗi trang
+          rowsPerPageOptions={[5, 10, 25, { label: "Tất cả", value: -1 }]}
           component="div"
-          count={events.length} // Tổng số sự kiện
-          rowsPerPage={rowsPerPage} // Số hàng mỗi trang hiện tại
-          page={page} // Trang hiện tại
-          onPageChange={handleChangePage} // Hàm khi đổi trang
-          onRowsPerPageChange={handleChangeRowsPerPage} // Hàm khi đổi số hàng mỗi trang
-          // Thêm label tiếng Việt cho thân thiện
+          count={events.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage="Số sự kiện mỗi trang:"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}–${to} trong số ${count}`
-          }
+          sx={{
+            borderTop: "1px solid #e5e7eb",
+            ".MuiTablePagination-actions button": {
+              color: "#7c3aed",
+            },
+          }}
         />
-      </TableContainer>
+          </CardContent>
+        </Card>
 
-      {/* Registration Confirmation Dialog (GIỮ NGUYÊN) */}
+        {/* Registration Confirmation Dialog */}
       <Dialog
         open={open}
         onClose={() => setOpen(false)}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          },
+        }}
       >
-        <DialogTitle sx={{ bgcolor: "primary.main", color: "white" }}>
+        <DialogTitle
+          sx={{
+            background: "linear-gradient(135deg, #864ce8ff 0%, #9333ea 100%)",
+            color: "#fff",
+            fontWeight: 700,
+          }}
+        >
           <Box display="flex" alignItems="center">
             <HowToReg sx={{ mr: 1 }} /> Xác nhận Đăng ký Sự kiện
           </Box>
@@ -505,9 +552,9 @@ const EventsStudent = () => {
           <Typography variant="h6" mb={2}>
             Bạn có chắc muốn đăng ký sự kiện này không?
           </Typography>
-          <Box sx={{ p: 2, bgcolor: "grey.50", borderRadius: 1 }}>
-            <Typography variant="body1">
-              Sự kiện:{selectedEvent?.title || selectedEvent?.Title}
+          <Box sx={{ p: 2, bgcolor: "#f3e8ff", borderRadius: 1, border: "1px solid #e9d5ff" }}>
+            <Typography variant="body1" fontWeight={600}>
+              Sự kiện: {selectedEvent?.title || selectedEvent?.Title}
             </Typography>
             <Typography variant="body2" color="textSecondary">
               Tổ chức: {selectedEvent?.organizer || selectedEvent?.Organizer}
@@ -523,8 +570,9 @@ const EventsStudent = () => {
           <Button
             onClick={() => setOpen(false)}
             disabled={loading}
-            color="error"
-            variant="outlined"
+            color="inherit"
+            variant="text"
+            sx={{ color: "#6b7280" }}
           >
             Hủy
           </Button>
@@ -532,7 +580,6 @@ const EventsStudent = () => {
             onClick={handleConfirmEvent}
             variant="contained"
             disabled={loading}
-            color="primary"
             startIcon={
               loading ? (
                 <CircularProgress size={20} color="inherit" />
@@ -540,27 +587,49 @@ const EventsStudent = () => {
                 <HowToReg />
               )
             }
+            sx={{
+              background: "linear-gradient(135deg, #864ce8ff 0%, #9333ea 100%)",
+              color: "#fff",
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              "&:hover": {
+                background: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
+              },
+            }}
           >
             {loading ? "Đang xử lý..." : "Xác nhận Đăng ký"}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Sessions Dialog (GIỮ NGUYÊN) */}
+      {/* Sessions Dialog */}
       <Dialog
         open={openSession}
         onClose={() => setOpenSession(false)}
         maxWidth="md"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "16px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
+          },
+        }}
       >
-        <DialogTitle sx={{ bgcolor: "success.main", color: "white" }}>
+        <DialogTitle
+          sx={{
+            background: "linear-gradient(135deg, #864ce8ff 0%, #9333ea 100%)",
+            color: "#fff",
+            fontWeight: 700,
+          }}
+        >
           <Box display="flex" alignItems="center">
             <AssignmentTurnedIn sx={{ mr: 1 }} /> Đăng ký thành công & Phiên sự
             kiện
           </Box>
         </DialogTitle>
         <DialogContent dividers>
-          <Typography variant="h6" mb={1} color="success.main">
+          <Typography variant="h6" mb={1} sx={{ color: "#864ce8ff", fontWeight: 600 }}>
             🎉 Đã đăng ký thành công sự kiện "
             {selectedEvent?.title || selectedEvent?.Title}"!
           </Typography>
@@ -572,53 +641,55 @@ const EventsStudent = () => {
               sx={{
                 textAlign: "center",
                 py: 3,
-                border: "1px dashed grey",
-                borderRadius: 1,
+                border: "1px dashed #ddd",
+                borderRadius: "12px",
+                bgcolor: "#f9fafb",
               }}
             >
               <Typography variant="h6" color="textSecondary" gutterBottom>
                 Chưa có phiên nào cho sự kiện này
               </Typography>
               <Typography variant="body2" color="textSecondary">
-                Bạn đã đăng ký thành công!.Sự kiện này chưa được tạo phiên. Hệ
+                Bạn đã đăng ký thành công! Sự kiện này chưa được tạo phiên. Hệ
                 thống sẽ sớm cập nhật phiên cho bạn.
               </Typography>
             </Box>
           ) : (
             <Table size="small">
-              <TableHead sx={{ bgcolor: "info.light" }}>
+              <TableHead sx={{ bgcolor: "#f3e8ff" }}>
                 <TableRow>
-                  <TableCell sx={{ fontWeight: 600 }}>Tên phiên</TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }}>Tên phiên</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }} align="center">
                     Thời gian bắt đầu
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }} align="center">
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }} align="center">
                     Thời gian kết thúc
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 600 }}>Địa điểm</TableCell>
+                  <TableCell sx={{ fontWeight: 700, color: "#374151" }}>Địa điểm</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {sessions.map((s, index) => (
-                  <TableRow key={s.sessionId || s.SessionId}>
+                  <TableRow key={s.sessionId || s.SessionId} sx={{ "&:hover": { bgcolor: "#f9fafb" } }}>
                     <TableCell>
-                      <Typography variant="body1" fontWeight={500}>
+                      <Typography variant="body2" fontWeight={600}>
                         {s.displayName || `Phiên ${index + 1}`}
                       </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {formatDate(s.startTime || s.StartTime, true)}
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(s.startTime || s.StartTime, true)}
+                      </Typography>
                     </TableCell>
                     <TableCell align="center">
-                      {formatDate(s.endTime || s.EndTime, true)}
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDate(s.endTime || s.EndTime, true)}
+                      </Typography>
                     </TableCell>
                     <TableCell>
-                      <Chip
-                        icon={<LocationOn />}
-                        label={s.location || s.Location || "Chưa xác định"}
-                        size="small"
-                        variant="outlined"
-                      />
+                      <Typography variant="body2" color="text.secondary">
+                        {s.location || s.Location || "Chưa xác định"}
+                      </Typography>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -630,12 +701,22 @@ const EventsStudent = () => {
           <Button
             onClick={() => setOpenSession(false)}
             variant="contained"
-            color="success"
+            sx={{
+              background: "linear-gradient(135deg, #864ce8ff 0%, #9333ea 100%)",
+              color: "#fff",
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              "&:hover": {
+                background: "linear-gradient(135deg, #7c3aed 0%, #8b5cf6 100%)",
+              },
+            }}
           >
             Đóng
           </Button>
         </DialogActions>
       </Dialog>
+      </Container>
     </Box>
   );
 };
