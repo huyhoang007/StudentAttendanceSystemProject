@@ -20,6 +20,7 @@ import {
   TableContainer,
   Paper,
   Chip,
+  Tooltip, // <-- THÊM ĐỂ HIỂN THỊ TOOLTIP KHI TEXT BỊ CẮT
 } from "@mui/material";
 import {
   Add,
@@ -41,16 +42,16 @@ import {
 const Universities = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
-  const pageSize = 10; // items per page
+  const pageSize = 10;
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ name: "", address: "", contact_info: "" });
 
   const fetchData = async () => {
     const res = await getUniversities();
-    console.log("Universities data:", res); // Debug log
+    console.log("Universities data:", res);
     setData([...res]);
-    setPage(1); // reset to first page when data changes
+    setPage(1);
   };
 
   useEffect(() => {
@@ -107,21 +108,20 @@ const Universities = () => {
       sx={{
         p: 3,
         minHeight: "100vh",
-        background:
-          "linear-gradient(180deg, rgba(246,249,252,1) 0%, rgba(243,246,250,1) 40%, rgba(227,236,247,1) 100%)",
+        backgroundColor: "#F9FAFB",
       }}
     >
       <Box sx={{ maxWidth: 1200, mx: "auto" }}>
-        {/* Big rounded header (mimic sample) */}
+        {/* Header với tone tím */}
         <Fade in={true} timeout={800}>
           <Card
             elevation={10}
             sx={{
               mb: 4,
-              borderRadius: "48px",
-              boxShadow: "0 20px 60px rgba(20,40,80,0.12)",
+              borderRadius: "24px",
+              boxShadow: "0 20px 60px rgba(124,58,237,0.15)",
               background:
-                "linear-gradient(90deg, #6c6ce6 0%, #8a5fe6 40%, #5dd39e 100%)",
+                "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)",
               color: "white",
               overflow: "visible",
             }}
@@ -134,66 +134,71 @@ const Universities = () => {
                 justifyContent: "space-between",
                 gap: 2,
                 position: "relative",
+                flexDirection: { xs: "column", md: "row" }, // Stack trên mobile
               }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 <Box
                   sx={{
-                    width: 84,
-                    height: 84,
-                    borderRadius: "999px",
+                    width: { xs: 64, md: 84 },
+                    height: { xs: 64, md: 84 },
+                    borderRadius: "20px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    bgcolor: "rgba(255,255,255,0.12)",
-                    boxShadow: "inset 0 2px 10px rgba(255,255,255,0.06)",
+                    bgcolor: "rgba(255,255,255,0.15)",
+                    boxShadow: "0 8px 32px rgba(255,255,255,0.1)",
                   }}
                 >
-                  <School sx={{ fontSize: 36, color: "white" }} />
+                  <School sx={{ fontSize: { xs: 32, md: 40 }, color: "white" }} />
                 </Box>
                 <Box>
                   <Typography
                     variant="h4"
-                    fontWeight={800}
+                    fontWeight={700}
                     sx={{ fontSize: { xs: 20, md: 28 } }}
                   >
                     Quản lý Trường/Đơn vị
                   </Typography>
-                  <Typography variant="body1" sx={{ opacity: 0.95, mt: 0.5 }}>
+                  <Typography variant="body1" sx={{ opacity: 0.95, mt: 0.5, fontSize: { xs: "0.875rem", md: "1rem" } }}>
                     Quản lý thông tin các trường đại học và đơn vị trong hệ
                     thống
                   </Typography>
                   <Chip
                     label={`${data.length} trường`}
                     sx={{
-                      mt: 1,
-                      bgcolor: "rgba(255,255,255,0.14)",
+                      mt: 1.5,
+                      bgcolor: "rgba(255,255,255,0.2)",
                       color: "white",
                       fontWeight: 700,
-                      borderRadius: 2,
+                      borderRadius: "12px",
+                      px: 1,
                     }}
                   />
                 </Box>
               </Box>
 
-              <Box>
+              <Box sx={{ width: { xs: "100%", md: "auto" } }}>
                 <Button
                   variant="contained"
                   startIcon={<Add />}
                   onClick={() => handleOpen()}
+                  fullWidth={{ xs: true, md: false }}
                   sx={{
-                    bgcolor: "#2ecc71",
-                    color: "white",
+                    bgcolor: "white",
+                    color: "#7c3aed",
                     px: 3,
                     py: 1.25,
-                    borderRadius: 999,
-                    boxShadow: "0 10px 30px rgba(46,204,113,0.18)",
+                    borderRadius: "12px",
+                    boxShadow: "0 8px 24px rgba(255,255,255,0.3)",
                     "&:hover": {
-                      bgcolor: "#27c56a",
+                      bgcolor: "#f3f0ff",
                       transform: "translateY(-2px)",
+                      boxShadow: "0 12px 32px rgba(255,255,255,0.4)",
                     },
                     textTransform: "none",
                     fontWeight: 700,
+                    transition: "all 0.2s ease",
                   }}
                 >
                   Thêm trường mới
@@ -203,62 +208,91 @@ const Universities = () => {
           </Card>
         </Fade>
 
-        {/* White rounded list area */}
+        {/* Bảng danh sách - CỐ ĐỊNH KÍCH THƯỚC, KHÔNG THANH TRƯỢT NGANG */}
         <Fade in={true} timeout={1000}>
           <Card
             elevation={6}
             sx={{
-              borderRadius: 4,
-              boxShadow: "0 12px 40px rgba(12,30,60,0.08)",
+              borderRadius: "16px",
+              boxShadow: "0 4px 24px rgba(124,58,237,0.08)",
               overflow: "hidden",
             }}
           >
             <TableContainer
               component={Paper}
-              sx={{ borderRadius: 4, boxShadow: "none" }}
+              sx={{ 
+                borderRadius: "16px", 
+                boxShadow: "none",
+                // LOẠI BỎ THANH TRƯỢT NGANG
+                overflowX: "hidden",
+              }}
             >
               <Table
                 sx={{
+                  // CỐ ĐỊNH LAYOUT ĐỂ KIỂM SOÁT CHIỀU RỘNG CỘT
+                  tableLayout: "fixed",
+                  width: "100%",
                   "& .MuiTableCell-root": {
-                    borderBottom: "none",
+                    borderBottom: "1px solid #f3f0ff",
                     py: 2,
+                    px: { xs: 1, sm: 2 }, // Padding responsive
                   },
                 }}
               >
                 <TableHead>
-                  <TableRow sx={{ bgcolor: "#f6f8ff" }}>
+                  <TableRow sx={{ bgcolor: "#faf5ff" }}>
                     <TableCell
-                      sx={{ fontWeight: 800, fontSize: "1rem", color: "#233" }}
+                      sx={{ 
+                        fontWeight: 700, 
+                        fontSize: { xs: "0.875rem", sm: "1rem" }, 
+                        color: "#7c3aed",
+                        width: { xs: "30%", sm: "35%" }, // Responsive width
+                      }}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <School sx={{ color: "#6c6ce6" }} /> Tên trường
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <School sx={{ color: "#7c3aed", fontSize: { xs: 18, sm: 24 } }} /> 
+                        <Box sx={{ display: { xs: "none", sm: "block" } }}>Tên trường</Box>
+                        <Box sx={{ display: { xs: "block", sm: "none" } }}>Trường</Box>
                       </Box>
                     </TableCell>
                     <TableCell
-                      sx={{ fontWeight: 800, fontSize: "1rem", color: "#233" }}
+                      sx={{ 
+                        fontWeight: 700, 
+                        fontSize: { xs: "0.875rem", sm: "1rem" }, 
+                        color: "#7c3aed",
+                        width: { xs: "35%", sm: "35%" },
+                        display: { xs: "table-cell", sm: "table-cell" }, // Luôn hiển thị
+                      }}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <LocationOn sx={{ color: "#6c6ce6" }} /> Địa chỉ
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <LocationOn sx={{ color: "#7c3aed", fontSize: { xs: 18, sm: 24 } }} /> 
+                        <Box>Địa chỉ</Box>
                       </Box>
                     </TableCell>
                     <TableCell
-                      sx={{ fontWeight: 800, fontSize: "1rem", color: "#233" }}
+                      sx={{ 
+                        fontWeight: 700, 
+                        fontSize: { xs: "0.875rem", sm: "1rem" }, 
+                        color: "#7c3aed",
+                        width: { xs: "0%", sm: "20%" },
+                        display: { xs: "none", sm: "table-cell" }, // Ẩn trên mobile
+                      }}
                     >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                      >
-                        <Phone sx={{ color: "#6c6ce6" }} /> Liên hệ
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Phone sx={{ color: "#7c3aed" }} /> Liên hệ
                       </Box>
                     </TableCell>
                     <TableCell
                       align="right"
-                      sx={{ fontWeight: 800, fontSize: "1rem", color: "#233" }}
+                      sx={{ 
+                        fontWeight: 700, 
+                        fontSize: { xs: "0.875rem", sm: "1rem" }, 
+                        color: "#7c3aed",
+                        width: { xs: "35%", sm: "10%" },
+                      }}
                     >
-                      Thao tác
+                      <Box sx={{ display: { xs: "none", sm: "block" } }}>Thao tác</Box>
+                      <Box sx={{ display: { xs: "block", sm: "none" } }}>Tác vụ</Box>
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -270,117 +304,138 @@ const Universities = () => {
                     const displayed = data.slice(startIdx, endIdx);
                     return displayed.map((u, index) => (
                       <TableRow
-                        key={
-                          u.universityId || u.university_id || startIdx + index
-                        }
+                        key={u.universityId || u.university_id || startIdx + index}
                         sx={{
-                          bgcolor:
-                            index % 2 === 0 ? "#e7f1faff" : "transparent", // zebra striping
-                          transition: "background-color 0.15s ease",
-                          "&:hover": { bgcolor: "#d1e0feff" }, // subtle hover
+                          bgcolor: index % 2 === 0 ? "#faf5ff" : "transparent",
+                          transition: "all 0.2s ease",
+                          "&:hover": {
+                            bgcolor: "#f3e8ff",
+                          },
                         }}
                       >
-                        <TableCell sx={{ py: 1.5, width: "35%" }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 2,
-                            }}
-                          >
+                        {/* CỘT TÊN TRƯỜNG - CẮT TEXT DÀI */}
+                        <TableCell sx={{ py: 1.5 }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 2 } }}>
                             <Avatar
                               sx={{
-                                bgcolor: "rgba(108,108,230,0.09)",
-                                color: "#6c6ce6",
-                                width: 44,
-                                height: 44,
+                                bgcolor: "#f3e8ff",
+                                color: "#7c3aed",
+                                width: { xs: 36, sm: 48 },
+                                height: { xs: 36, sm: 48 },
+                                boxShadow: "0 4px 12px rgba(124,58,237,0.1)",
                               }}
                             >
-                              <School />
+                              <School sx={{ fontSize: { xs: 18, sm: 24 } }} />
                             </Avatar>
-                            <Box>
+                            <Tooltip title={u.name} arrow placement="top">
                               <Typography
                                 variant="body1"
-                                fontWeight={700}
-                                color="#223"
+                                fontWeight={600}
+                                color="#1f2937"
+                                sx={{
+                                  fontSize: { xs: "0.875rem", sm: "1rem" },
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: "100%",
+                                }}
                               >
                                 {u.name}
                               </Typography>
-                            </Box>
+                            </Tooltip>
                           </Box>
                         </TableCell>
 
-                        <TableCell sx={{ py: 1.5, width: "40%" }}>
-                          <Typography variant="body2" color="#6b7280">
-                            {u.address}
-                          </Typography>
-                        </TableCell>
-
-                        <TableCell sx={{ py: 1.5, width: "15%" }}>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 1,
-                            }}
-                          >
-                            <Phone sx={{ color: "#4fd2b6", fontSize: 18 }} />
-                            <Typography variant="body2" color="#6b7280">
-                              {u.contactInfo || u.contact_info || (
-                                <span
-                                  style={{
-                                    color: "#9aa1b3",
-                                    fontStyle: "italic",
-                                  }}
-                                >
-                                  Chưa có thông tin
-                                </span>
-                              )}
+                        {/* CỘT ĐỊA CHỈ - CẮT TEXT DÀI */}
+                        <TableCell sx={{ py: 1.5 }}>
+                          <Tooltip title={u.address} arrow placement="top">
+                            <Typography 
+                              variant="body2" 
+                              color="#6b7280"
+                              sx={{
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                                maxWidth: "100%",
+                              }}
+                            >
+                              {u.address}
                             </Typography>
+                          </Tooltip>
+                        </TableCell>
+
+                        {/* CỘT LIÊN HỆ - ẨN TRÊN MOBILE */}
+                        <TableCell sx={{ py: 1.5, display: { xs: "none", sm: "table-cell" } }}>
+                          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <Phone sx={{ color: "#a855f7", fontSize: 18 }} />
+                            <Tooltip 
+                              title={u.contactInfo || u.contact_info || "Chưa có thông tin"} 
+                              arrow 
+                              placement="top"
+                            >
+                              <Typography 
+                                variant="body2" 
+                                color="#6b7280"
+                                sx={{
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  maxWidth: "100%",
+                                }}
+                              >
+                                {u.contactInfo || u.contact_info || (
+                                  <span style={{ color: "#9ca3af", fontStyle: "italic" }}>
+                                    Chưa có
+                                  </span>
+                                )}
+                              </Typography>
+                            </Tooltip>
                           </Box>
                         </TableCell>
 
-                        <TableCell align="right" sx={{ py: 1.5, width: "10%" }}>
+                        {/* CỘT THAO TÁC - RESPONSIVE BUTTON SIZE */}
+                        <TableCell align="right" sx={{ py: 1.5 }}>
                           <Box
                             sx={{
                               display: "flex",
                               justifyContent: "flex-end",
                               alignItems: "center",
-                              gap: 1.25, // tăng khoảng cách giữa các nút
+                              gap: { xs: 0.5, sm: 1 },
                             }}
                           >
                             <IconButton
-                              color="primary"
                               onClick={() => handleOpen(u)}
                               sx={{
-                                bgcolor: "rgba(108,108,230,0.08)",
-                                width: 44,
-                                height: 44,
+                                bgcolor: "#f3e8ff",
+                                color: "#7c3aed",
+                                width: { xs: 32, sm: 40 },
+                                height: { xs: 32, sm: 40 },
                                 "&:hover": {
-                                  bgcolor: "rgba(108,108,230,0.14)",
-                                  transform: "scale(1.06)",
+                                  bgcolor: "#e9d5ff",
+                                  transform: "scale(1.05)",
                                 },
-                                transition: "all 0.15s ease-in-out",
+                                transition: "all 0.2s ease",
                               }}
                             >
-                              <Edit />
+                              <Edit sx={{ fontSize: { xs: 16, sm: 20 } }} />
                             </IconButton>
 
                             <IconButton
-                              color="error"
                               onClick={() => handleDelete(u.university_id)}
                               sx={{
-                                bgcolor: "rgba(255,80,80,0.08)",
-                                width: 44,
-                                height: 44,
+                                bgcolor: "#fef2f2",
+                                color: "#ef4444",
+                                width: { xs: 32, sm: 40 },
+                                height: { xs: 32, sm: 40 },
                                 "&:hover": {
-                                  bgcolor: "rgba(255,80,80,0.14)",
-                                  transform: "scale(1.06)",
+                                  bgcolor: "#fee2e2",
+                                  transform: "scale(1.05)",
                                 },
-                                transition: "all 0.15s ease-in-out",
+                                transition: "all 0.2s ease",
                               }}
                             >
-                              <Delete />
+                              <Delete sx={{ fontSize: { xs: 16, sm: 20 } }} />
                             </IconButton>
                           </Box>
                         </TableCell>
@@ -398,17 +453,21 @@ const Universities = () => {
                             alignItems: "center",
                           }}
                         >
-                          <School
-                            sx={{ fontSize: 64, color: "#d9e6ff", mb: 2 }}
-                          />
+                          <School sx={{ fontSize: { xs: 48, sm: 64 }, color: "#e9d5ff", mb: 2 }} />
                           <Typography
                             variant="h6"
-                            color="#9aa1b3"
+                            color="#9ca3af"
                             fontWeight={600}
+                            sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
                           >
                             Chưa có trường nào được thêm
                           </Typography>
-                          <Typography variant="body2" color="#b8c3d9" mt={1}>
+                          <Typography 
+                            variant="body2" 
+                            color="#d1d5db" 
+                            mt={1}
+                            sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+                          >
                             Nhấp vào "Thêm trường mới" để bắt đầu
                           </Typography>
                         </Box>
@@ -419,7 +478,7 @@ const Universities = () => {
               </Table>
             </TableContainer>
 
-            {/* Pagination controls */}
+            {/* Pagination */}
             {data.length > pageSize && (
               <Box
                 sx={{
@@ -427,13 +486,19 @@ const Universities = () => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   p: 2,
+                  borderTop: "1px solid #f3f0ff",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: { xs: 2, sm: 0 },
                 }}
               >
                 <Box>
-                  <Typography variant="body2" color="#6b7280">
+                  <Typography 
+                    variant="body2" 
+                    color="#6b7280"
+                    sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+                  >
                     Hiển thị {Math.min((page - 1) * pageSize + 1, data.length)}-
-                    {Math.min(page * pageSize, data.length)} trên {data.length}{" "}
-                    trường
+                    {Math.min(page * pageSize, data.length)} trên {data.length} trường
                   </Typography>
                 </Box>
 
@@ -442,14 +507,28 @@ const Universities = () => {
                     startIcon={<ChevronLeft />}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                     disabled={page === 1}
-                    sx={{ textTransform: "none" }}
+                    sx={{
+                      textTransform: "none",
+                      color: "#7c3aed",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      minWidth: { xs: 60, sm: 80 },
+                      "&:hover": { bgcolor: "#f3f0ff" },
+                      "&.Mui-disabled": { color: "#d1d5db" },
+                    }}
                   >
                     Trước
                   </Button>
 
-                  <Typography variant="body2" sx={{ px: 1 }}>
-                    {page} / {Math.max(1, Math.ceil(data.length / pageSize))}
-                  </Typography>
+                  <Chip
+                    label={`${page} / ${Math.max(1, Math.ceil(data.length / pageSize))}`}
+                    sx={{
+                      bgcolor: "#faf5ff",
+                      color: "#7c3aed",
+                      fontWeight: 600,
+                      px: 1,
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                    }}
+                  />
 
                   <Button
                     endIcon={<ChevronRight />}
@@ -459,7 +538,14 @@ const Universities = () => {
                       )
                     }
                     disabled={page >= Math.ceil(data.length / pageSize)}
-                    sx={{ textTransform: "none" }}
+                    sx={{
+                      textTransform: "none",
+                      color: "#7c3aed",
+                      fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                      minWidth: { xs: 60, sm: 80 },
+                      "&:hover": { bgcolor: "#f3f0ff" },
+                      "&.Mui-disabled": { color: "#d1d5db" },
+                    }}
                   >
                     Tiếp
                   </Button>
@@ -469,7 +555,7 @@ const Universities = () => {
           </Card>
         </Fade>
 
-        {/* Dialog (giữ nguyên logic, style nhỏ để khớp theme) */}
+        {/* Dialog với tone tím */}
         <Dialog
           open={open}
           onClose={handleClose}
@@ -477,29 +563,43 @@ const Universities = () => {
           fullWidth
           PaperProps={{
             sx: {
-              borderRadius: 3,
-              boxShadow: "0 20px 80px rgba(12,30,60,0.16)",
+              borderRadius: "16px",
+              boxShadow: "0 20px 60px rgba(124,58,237,0.2)",
+              mx: { xs: 2, sm: 0 }, // Margin cho mobile
             },
           }}
         >
           <DialogTitle
             sx={{
               pb: 1,
-              background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+              background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
               color: "white",
               display: "flex",
               alignItems: "center",
+              px: { xs: 2, sm: 3 },
+              py: { xs: 2, sm: 2 },
             }}
           >
-            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.2)", mr: 2 }}>
-              <School sx={{ color: "white" }} />
+            <Avatar
+              sx={{
+                bgcolor: "rgba(255,255,255,0.2)",
+                mr: 2,
+                width: { xs: 40, sm: 48 },
+                height: { xs: 40, sm: 48 },
+              }}
+            >
+              <School sx={{ color: "white", fontSize: { xs: 20, sm: 24 } }} />
             </Avatar>
-            <Typography variant="h6" fontWeight={700}>
+            <Typography 
+              variant="h6" 
+              fontWeight={700}
+              sx={{ fontSize: { xs: "1rem", sm: "1.25rem" } }}
+            >
               {editId ? "Cập nhật thông tin trường" : "Thêm trường mới"}
             </Typography>
           </DialogTitle>
 
-          <DialogContent sx={{ pt: 3 }}>
+          <DialogContent sx={{ pt: 3, px: { xs: 2, sm: 3 } }}>
             <TextField
               label="Tên trường"
               fullWidth
@@ -510,10 +610,10 @@ const Universities = () => {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  "&:hover fieldset": { borderColor: "#667eea" },
-                  "&.Mui-focused fieldset": { borderColor: "#667eea" },
+                  "&:hover fieldset": { borderColor: "#7c3aed" },
+                  "&.Mui-focused fieldset": { borderColor: "#7c3aed" },
                 },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#7c3aed" },
               }}
             />
             <TextField
@@ -528,10 +628,10 @@ const Universities = () => {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  "&:hover fieldset": { borderColor: "#667eea" },
-                  "&.Mui-focused fieldset": { borderColor: "#667eea" },
+                  "&:hover fieldset": { borderColor: "#7c3aed" },
+                  "&.Mui-focused fieldset": { borderColor: "#7c3aed" },
                 },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#7c3aed" },
               }}
             />
             <TextField
@@ -550,24 +650,28 @@ const Universities = () => {
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
-                  "&:hover fieldset": { borderColor: "#667eea" },
-                  "&.Mui-focused fieldset": { borderColor: "#667eea" },
+                  "&:hover fieldset": { borderColor: "#7c3aed" },
+                  "&.Mui-focused fieldset": { borderColor: "#7c3aed" },
                 },
-                "& .MuiInputLabel-root.Mui-focused": { color: "#667eea" },
+                "& .MuiInputLabel-root.Mui-focused": { color: "#7c3aed" },
               }}
             />
           </DialogContent>
 
-          <DialogActions sx={{ p: 3, gap: 1 }}>
+          <DialogActions sx={{ p: { xs: 2, sm: 3 }, gap: 1, flexDirection: { xs: "column", sm: "row" } }}>
             <Button
               onClick={handleClose}
               variant="outlined"
+              fullWidth={{ xs: true, sm: false }}
               sx={{
                 borderRadius: 2,
                 textTransform: "none",
-                borderColor: "#ddd",
-                color: "#666",
-                "&:hover": { borderColor: "#999", bgcolor: "#f5f5f5" },
+                borderColor: "#e5e7eb",
+                color: "#6b7280",
+                "&:hover": {
+                  borderColor: "#d1d5db",
+                  bgcolor: "#f9fafb",
+                },
               }}
             >
               Hủy bỏ
@@ -575,17 +679,17 @@ const Universities = () => {
             <Button
               onClick={handleSave}
               variant="contained"
+              fullWidth={{ xs: true, sm: false }}
               sx={{
                 borderRadius: 2,
                 textTransform: "none",
-                background: "linear-gradient(90deg, #2ecc71 0%, #26b86a 100%)",
+                background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
                 "&:hover": {
-                  background:
-                    "linear-gradient(90deg, #26b86a 0%, #20a25c 100%)",
+                  background: "linear-gradient(135deg, #6d28d9 0%, #9333ea 100%)",
                   transform: "translateY(-1px)",
-                  boxShadow: "0 6px 26px rgba(38,184,106,0.2)",
+                  boxShadow: "0 8px 24px rgba(124,58,237,0.3)",
                 },
-                transition: "all 0.15s ease-in-out",
+                transition: "all 0.2s ease",
               }}
             >
               {editId ? "Cập nhật" : "Thêm mới"}
