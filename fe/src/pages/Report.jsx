@@ -427,38 +427,29 @@ const Report = () => {
           {/* Cột trái: Thống kê và Bảng dữ liệu */}
           <Grid item xs={12} lg={8}>
             <Stack spacing={3}>
-              {/* Analytics Cards - CẢI TIẾN */}
+              {/* Analytics Cards - LOẠI BỎ SUBTITLE */}
               <Grid container spacing={3}>
                 {[
                   {
                     title: "Tổng số lượt Check-in",
                     value: analytics.totalCheckIns,
                     icon: <CheckCircleOutline sx={{ fontSize: 48 }} />,
-                    color: "#7c3aed", // Đổi sang màu tím
-                    bgGradient: "linear-gradient(135deg, #f3f0ff 0%, #e9d5ff 100%)", // Gradient tím nhạt
-                    trend: mockTrends.checkIns,
-                    subtitle: `${analytics.averageCheckInsPerEvent} lượt/sự kiện`,
+                    color: "#7c3aed",
+                    bgGradient: "linear-gradient(135deg, #f3f0ff 0%, #e9d5ff 100%)",
                   },
                   {
                     title: "Sinh viên đã Check-in",
                     value: analytics.uniqueStudents,
                     icon: <Group sx={{ fontSize: 48 }} />,
-                    color: "#9333ea", // Màu tím đậm hơn
-                    bgGradient: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)", // Gradient tím nhạt
-                    trend: mockTrends.students,
-                    subtitle: `${analytics.uniqueStudents} sinh viên duy nhất`,
+                    color: "#9333ea",
+                    bgGradient: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
                   },
                   {
                     title: "Tổng số Sự kiện",
                     value: analytics.uniqueEvents,
                     icon: <EventNote sx={{ fontSize: 48 }} />,
-                    color: "#a855f7", // Màu tím trung bình
-                    bgGradient: "linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%)", // Gradient tím nhạt
-                    trend: mockTrends.events,
-                    subtitle:
-                      ongoingEvents > 0
-                        ? `${ongoingEvents} sự kiện đang diễn ra`
-                        : "Không có sự kiện đang diễn ra",
+                    color: "#a855f7",
+                    bgGradient: "linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%)",
                   },
                 ].map((item) => (
                   <Grid item xs={12} sm={6} md={4} key={item.title}>
@@ -489,43 +480,22 @@ const Report = () => {
                       }}
                     >
                       <Stack spacing={1.5}>
-                        {/* Icon và Trend Badge */}
-                        <Stack
-                          direction="row"
-                          justifyContent="space-between"
-                          alignItems="flex-start"
+                        {/* Icon */}
+                        <Box
+                          sx={{
+                            color: item.color,
+                            backgroundColor: "rgba(255,255,255,0.9)",
+                            borderRadius: "12px",
+                            p: 1,
+                            display: "flex",
+                            width: "fit-content",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                          }}
                         >
-                          <Box
-                            sx={{
-                              color: item.color,
-                              backgroundColor: "rgba(255,255,255,0.9)",
-                              borderRadius: "12px",
-                              p: 1,
-                              display: "flex",
-                              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                            }}
-                          >
-                            {item.icon}
-                          </Box>
-                          <Chip
-                            icon={
-                              item.trend.isUp ? (
-                                <ArrowUpward sx={{ fontSize: 16 }} />
-                              ) : (
-                                <ArrowDownward sx={{ fontSize: 16 }} />
-                              )
-                            }
-                            label={`${item.trend.isUp ? "+" : "-"}${item.trend.value}%`}
-                            size="small"
-                            color={item.trend.isUp ? "success" : "error"}
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: "0.75rem",
-                            }}
-                          />
-                        </Stack>
+                          {item.icon}
+                        </Box>
 
-                        {/* Giá trị và Thông tin */}
+                        {/* Giá trị và Tiêu đề - ĐÃ LOẠI BỎ SUBTITLE */}
                         <Box>
                           <Typography
                             variant="h3"
@@ -542,27 +512,6 @@ const Report = () => {
                             sx={{ mt: 0.5 }}
                           >
                             {item.title}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="text.secondary"
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              mt: 1,
-                              gap: 0.5,
-                            }}
-                          >
-                            {item.trend.isUp ? (
-                              <TrendingUp
-                                sx={{ fontSize: 16, color: "success.main" }}
-                              />
-                            ) : (
-                              <TrendingDown
-                                sx={{ fontSize: 16, color: "error.main" }}
-                              />
-                            )}
-                            {item.subtitle}
                           </Typography>
                         </Box>
                       </Stack>
@@ -707,7 +656,7 @@ const Report = () => {
                           <QrCode fontSize="small" sx={{ mr: 1, color: "#7c3aed" }} /> QR Code
                         </Typography>
                         <Typography variant="body2" fontWeight="bold">
-                          {analytics.methodBreakdown.qr} ({qrPercentage.toFixed(0)}%)
+                          {analytics.methodBreakdown.qr}
                         </Typography>
                       </Stack>
                       <Box
@@ -739,7 +688,7 @@ const Report = () => {
                           <Edit fontSize="small" sx={{ mr: 1, color: "#9333ea" }} /> Thủ công
                         </Typography>
                         <Typography variant="body2" fontWeight="bold">
-                          {analytics.methodBreakdown.manual} ({manualPercentage.toFixed(0)}%)
+                          {analytics.methodBreakdown.manual}
                         </Typography>
                       </Stack>
                       <Box
