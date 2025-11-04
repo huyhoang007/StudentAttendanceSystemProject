@@ -185,7 +185,7 @@ const EventSessions = () => {
     if (role !== "student") {
       if (now > end) return { text: "Đã kết thúc", color: "error" };
       if (now >= start) return { text: "Đang diễn ra", color: "warning" };
-      return { text: "Chưa bắt đầu", color: "info" };
+      return { text: "Chưa bắt đầu", color: "warning" };
     }
 
     // Với student: hiển thị cả trạng thái điểm danh
@@ -199,7 +199,7 @@ const EventSessions = () => {
     if (now > end) return { text: "Đã kết thúc - Vắng mặt", color: "error" };
     if (now >= start)
       return { text: "Đang diễn ra - Chưa điểm danh", color: "warning" };
-    return { text: "Chưa bắt đầu", color: "info" };
+    return { text: "Chưa bắt đầu", color: "warning" };
   };
 
   const handleBackToEvent = () => {
@@ -237,41 +237,51 @@ const EventSessions = () => {
       <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
           justifyContent: "center",
           alignItems: "center",
-          minHeight: "60vh",
+          minHeight: "100vh",
+          background: "linear-gradient(135deg, #f5f0ff 0%, #e8d5ff 100%)",
         }}
       >
-        <CircularProgress />
+        <CircularProgress sx={{ color: "#764ba2" }} size={50} />
+        <Typography sx={{ mt: 2, color: "#764ba2", fontWeight: 600 }}>
+          Đang tải danh sách phiên...
+        </Typography>
       </Box>
     );
   }
 
-  if (error) {
+  if (error || !event) {
     return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
+      <Box
+        sx={{
+          p: 4,
+          textAlign: "center",
+          background: "linear-gradient(135deg, #f5f0ff 0%, #e8d5ff 100%)",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Alert severity="error" sx={{ borderRadius: 3, mb: 3, maxWidth: 600 }}>
+          {error || "Không tìm thấy thông tin sự kiện"}
+        </Alert>
         <Button
-          variant="outlined"
+          variant="contained"
           onClick={handleBackToEvents}
-          sx={{ mt: 2, borderColor: '#7c3aed', color: '#7c3aed' }}
           startIcon={<ArrowBack />}
-        >
-          Quay lại danh sách
-        </Button>
-      </Box>
-    );
-  }
-
-  if (!event) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="info">Không tìm thấy thông tin sự kiện</Alert>
-        <Button
-          variant="outlined"
-          onClick={handleBackToEvents}
-          sx={{ mt: 2, borderColor: '#7c3aed', color: '#7c3aed' }}
-          startIcon={<ArrowBack />}
+          sx={{
+            borderRadius: 3,
+            px: 4,
+            py: 1.5,
+            background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #9b59b6 0%, #764ba2 100%)",
+            },
+          }}
         >
           Quay lại danh sách
         </Button>
@@ -280,162 +290,219 @@ const EventSessions = () => {
   }
 
   return (
-    <Box sx={{ p: 3, maxWidth: 1000, mx: "auto" }}>
-      {/* Header - gradient purple to match previous pages */}
-      <Card
-        sx={{
-          mb: 3,
-          borderRadius: "24px",
-          background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
-          boxShadow: "0 8px 24px rgba(134, 76, 232, 0.18)",
-        }}
-      >
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            {role === "student" && (
-              <Button
-                variant="outlined"
-                onClick={handleBackToEvent}
-                startIcon={<ArrowBack />}
-                sx={{
-                  mr: 2,
-                  borderColor: "rgba(255,255,255,0.2)",
-                  color: "rgba(255,255,255,0.95)",
-                }}
-              >
-                Quay lại sự kiện đã đăng ký
-              </Button>
-            )}
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Schedule sx={{ fontSize: 36, color: "#fff" }} />
-              <Typography variant="h4" fontWeight={700} color="#fff">
-                {targetSessionId ? "Chi tiết phiên" : "Danh sách phiên"}
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Thông tin sự kiện */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.12)" }}>
-              <EventIcon sx={{ color: "#fff" }} />
-            </Avatar>
-            <Box sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" fontWeight={600}>
-                {event.title}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                📅 {formatDate(event.startDate)} - {formatDate(event.endDate)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                📍 {event.location}
-              </Typography>
-            </Box>
-            <Chip
-              label={`${sessions.length} phiên`}
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #f5f0ff 0%, #e8d5ff 100%)",
+        py: { xs: 3, md: 4 },
+      }}
+    >
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: { xs: 2, md: 3 } }}>
+        {/* THÔNG TIN SỰ KIỆN */}
+        <Card
+          sx={{
+            borderRadius: "20px",
+            mb: 3,
+            boxShadow: "0 8px 32px rgba(118, 75, 162, 0.15)",
+            background: "linear-gradient(135deg, #ffffff 0%, #f9f5ff 100%)",
+            border: "1px solid rgba(118, 75, 162, 0.1)",
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            {/* NÚT QUAY LẠI */}
+            <Button
               variant="outlined"
+              onClick={handleBackToEvent}
+              startIcon={<ArrowBack />}
               sx={{
-                color: "#7c3aed",
-                borderColor: "#7c3aed",
+                borderRadius: 3,
+                textTransform: "none",
+                px: 3,
+                py: 1,
+                mb: 3,
+                borderColor: "rgba(118, 75, 162, 0.3)",
+                color: "#764ba2",
+                "&:hover": {
+                  borderColor: "#764ba2",
+                  background: "rgba(118, 75, 162, 0.05)",
+                },
               }}
-            />
-          </Box>
+            >
+              Quay lại
+            </Button>
 
-          {event.description && (
-            <Typography variant="body2" color="text.secondary">
-              {event.description}
+            {/* THÔNG TIN SỰ KIỆN */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              <Box>
+                <Typography
+                  variant="h4"
+                  fontWeight={700}
+                  sx={{
+                    background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                    fontSize: { xs: "1.5rem", md: "2rem" },
+                    mb: 1,
+                  }}
+                >
+                  {event.title}
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mt: 2 }}>
+                  <Chip
+                    label={`${sessions.length} phiên`}
+                    sx={{
+                      background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+                      color: "white",
+                      fontWeight: 600,
+                    }}
+                  />
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    📅{" "}
+                    {formatDate(event.startDate)} -{" "}
+                    {formatDate(event.endDate)}
+                  </Typography>
+                  {event.location && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      📍 {event.location}
+                    </Typography>
+                  )}
+                </Box>
+              </Box>
+
+              {event.description && (
+                <Box
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    background: "rgba(118, 75, 162, 0.05)",
+                    border: "1px solid rgba(118, 75, 162, 0.1)",
+                  }}
+                >
+                  <Typography variant="body2" color="text.secondary">
+                    {event.description}
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* DANH SÁCH PHIÊN */}
+        <Card
+          sx={{
+            borderRadius: "20px",
+            boxShadow: "0 8px 32px rgba(118, 75, 162, 0.15)",
+            border: "1px solid rgba(118, 75, 162, 0.1)",
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, md: 4 } }}>
+            <Typography
+              variant="h6"
+              fontWeight={700}
+              mb={3}
+              sx={{
+                background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              📋 Các phiên trong sự kiện ({sessions.length})
             </Typography>
-          )}
-        </CardContent>
-      </Card>
 
-      {/* Danh sách phiên */}
-      <Card>
-        <CardContent sx={{ p: 3 }}>
-          <Typography variant="h6" fontWeight={600} mb={3}>
-            Các phiên trong sự kiện ({sessions.length})
-          </Typography>
+            {sessions.length === 0 ? (
+              <Box sx={{ textAlign: "center", py: 4 }}>
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    mx: "auto",
+                    mb: 2,
+                    background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+                  }}
+                >
+                  <EventNoteIcon sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography color="textSecondary">
+                  Sự kiện này chưa có phiên nào được tạo.
+                </Typography>
+              </Box>
+            ) : (
+              <List sx={{ p: 0 }}>
+                {sessions.map((session, index) => {
+                  const isCheckedIn =
+                    checkInStatus[
+                      session.id || session.sessionId || session.SessionId
+                    ];
+                  const status = getSessionStatus(
+                    session.startTime,
+                    session.endTime,
+                    isCheckedIn
+                  );
+                  const sessionId = session.id || session.sessionId;
 
-          {sessions.length === 0 ? (
-            <Alert severity="info">
-              Sự kiện này chưa có phiên nào được tạo.
-            </Alert>
-          ) : (
-            <List sx={{ p: 0 }}>
-              {sessions.map((session, index) => {
-                const isCheckedIn =
-                  checkInStatus[
-                    session.id || session.sessionId || session.SessionId
-                  ];
-                const status = getSessionStatus(
-                  session.startTime,
-                  session.endTime,
-                  isCheckedIn
-                );
-                const sessionId = session.id || session.sessionId;
-
-                return (
-                  <React.Fragment key={sessionId || index}>
-                    <ListItem sx={{ px: 0 }}>
-                      <ListItemButton
-                        onClick={() => handleViewSessionDetails(sessionId)}
-                        sx={{
-                          borderRadius: 2,
-                          border: "1px solid #eae6ff",
-                          mb: 1,
-                          p: 2,
-                          backgroundColor:
-                            role === "student" &&
-                            checkInStatus[
-                              sessionId || session.id || session.SessionId
-                            ]
-                              ? "rgba(16, 185, 129, 0.06)"
-                              : undefined,
-                          "&:hover": {
-                            backgroundColor:
-                              role === "student" &&
-                              checkInStatus[
-                                sessionId || session.id || session.SessionId
-                              ]
-                                ? "rgba(16, 185, 129, 0.10)"
-                                : "rgba(124, 58, 237, 0.04)",
+                  return (
+                    <React.Fragment key={sessionId || index}>
+                      <ListItem sx={{ px: 0, mb: 2 }}>
+                        <Card
+                          sx={{
+                            width: "100%",
+                            borderRadius: 3,
+                            border: "2px solid",
                             borderColor:
-                              role === "student" &&
-                              checkInStatus[
-                                sessionId || session.id || session.SessionId
-                              ]
-                                ? "#10b981"
-                                : "#7c3aed",
-                          },
-                        }}
-                      >
-                        <ListItemAvatar>
-                                <Avatar sx={{ bgcolor: "rgba(124,58,237,0.12)" }}>
-                                  <PlayCircleOutline sx={{ color: "#7c3aed" }} />
-                                </Avatar>
-                        </ListItemAvatar>
-
-                        <ListItemText
-                          primary={
+                              isCheckedIn && role === "student"
+                                ? "rgba(118, 75, 162, 0.3)"
+                                : "rgba(118, 75, 162, 0.15)",
+                            background:
+                              isCheckedIn && role === "student"
+                                ? "linear-gradient(135deg, rgba(118, 75, 162, 0.08) 0%, rgba(155, 89, 182, 0.08) 100%)"
+                                : "white",
+                            transition: "all 0.3s ease",
+                            cursor: "pointer",
+                            "&:hover": {
+                              borderColor: "#764ba2",
+                              boxShadow: "0 4px 20px rgba(118, 75, 162, 0.2)",
+                              transform: "translateY(-2px)",
+                            },
+                          }}
+                          onClick={() => handleViewSessionDetails(sessionId)}
+                        >
+                          <CardContent sx={{ p: 3 }}>
+                            {/* HEADER */}
                             <Box
                               sx={{
                                 display: "flex",
                                 justifyContent: "space-between",
-                                alignItems: "center",
-                                mb: 1,
+                                alignItems: "flex-start",
+                                mb: 2,
                               }}
                             >
-                              <Typography variant="h6" fontWeight={500}>
+                              <Typography
+                                variant="h6"
+                                fontWeight={600}
+                                sx={{
+                                  flex: 1,
+                                  color: "#764ba2",
+                                }}
+                              >
                                 {session.title &&
                                 session.title.trim() &&
                                 session.title !== session.id &&
                                 session.title !== session.sessionId &&
                                 session.title !== session.SessionId &&
-                                session.title !== session.Id &&
                                 !session.title.match(
                                   /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i
                                 ) &&
@@ -446,34 +513,18 @@ const EventSessions = () => {
                               <Box
                                 sx={{
                                   display: "flex",
-                                  alignItems: "center",
                                   gap: 1,
+                                  alignItems: "center",
                                 }}
                               >
                                 <Chip
                                   label={status.text}
                                   color={status.color}
                                   size="small"
-                                  sx={
-                                    role === "student"
-                                      ? {
-                                          fontWeight: isCheckedIn
-                                            ? "bold"
-                                            : "normal",
-                                          "& .MuiChip-label": {
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                          },
-                                        }
-                                      : {
-                                          "& .MuiChip-label": {
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                          },
-                                        }
-                                  }
+                                  sx={{
+                                    fontWeight: 600,
+                                    fontSize: "0.8rem",
+                                  }}
                                 />
                                 {(role === "organizer" || role === "admin") && (
                                   <IconButton
@@ -483,10 +534,14 @@ const EventSessions = () => {
                                       handleGenerateQR(session);
                                     }}
                                     sx={{
-                                      bgcolor: "#7c3aed",
+                                      background:
+                                        "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
                                       color: "white",
+                                      width: 32,
+                                      height: 32,
                                       "&:hover": {
-                                        bgcolor: "#6d28d9",
+                                        background:
+                                          "linear-gradient(135deg, #9b59b6 0%, #764ba2 100%)",
                                       },
                                     }}
                                   >
@@ -495,112 +550,120 @@ const EventSessions = () => {
                                 )}
                               </Box>
                             </Box>
-                          }
-                          secondary={
-                            <Box>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 1,
-                                  mb: 1,
-                                }}
-                              >
-                                <Schedule fontSize="small" color="action" />
+
+                            {/* THÔNG TIN CHI TIẾT */}
+                            <Grid container spacing={2}>
+                              <Grid item xs={12} sm={6}>
                                 <Typography
                                   variant="body2"
                                   color="text.secondary"
-                                >
-                                  {formatDate(session.startTime)} -{" "}
-                                  {formatDate(session.endTime)}
-                                </Typography>
-                              </Box>
-
-                              {session.location && (
-                                <Box
                                   sx={{
                                     display: "flex",
                                     alignItems: "center",
                                     gap: 1,
-                                    mb: 1,
                                   }}
                                 >
-                                  <LocationOn fontSize="small" color="action" />
-                                  <Typography
-                                    variant="body2"
-                                    color="text.secondary"
-                                  >
-                                    {session.location}
-                                  </Typography>
-                                </Box>
-                              )}
-
-                              {session.description && (
+                                  🕐 Bắt đầu:{" "}
+                                  <strong>{formatDate(session.startTime)}</strong>
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={12} sm={6}>
                                 <Typography
                                   variant="body2"
                                   color="text.secondary"
-                                  sx={{ mt: 1 }}
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 1,
+                                  }}
                                 >
-                                  {session.description.length > 100
-                                    ? `${session.description.substring(
-                                        0,
-                                        100
-                                      )}...`
+                                  🕐 Kết thúc:{" "}
+                                  <strong>{formatDate(session.endTime)}</strong>
+                                </Typography>
+                              </Grid>
+                              {session.location && (
+                                <Grid item xs={12}>
+                                  <Typography
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: 1,
+                                    }}
+                                  >
+                                    📍 Địa điểm:{" "}
+                                    <strong>{session.location}</strong>
+                                  </Typography>
+                                </Grid>
+                              )}
+                            </Grid>
+
+                            {session.description && (
+                              <Box
+                                sx={{
+                                  mt: 2,
+                                  p: 2,
+                                  borderRadius: 2,
+                                  background: "rgba(118, 75, 162, 0.05)",
+                                  borderLeft: "3px solid #764ba2",
+                                }}
+                              >
+                                <Typography variant="body2" color="text.secondary">
+                                  {session.description.length > 150
+                                    ? `${session.description.substring(0, 150)}...`
                                     : session.description}
                                 </Typography>
-                              )}
-                            </Box>
-                          }
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                    {index < sessions.length - 1 && <Divider sx={{ my: 1 }} />}
-                  </React.Fragment>
-                );
-              })}
-            </List>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Actions */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-        <Button
-          variant="outlined"
-          onClick={handleBackToEvent}
-          startIcon={<ArrowBack />}
-          sx={{ borderColor: '#7c3aed', color: '#7c3aed' }}
-        >
-          {role === "student"
-            ? "Quay lại sự kiện đã đăng ký"
-            : "Quay lại quản lý sự kiện"}
-        </Button>
+                              </Box>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </ListItem>
+                    </React.Fragment>
+                  );
+                })}
+              </List>
+            )}
+          </CardContent>
+        </Card>
       </Box>
 
-      {/* QR Code Dialog */}
+      {/* QR CODE DIALOG */}
       <Dialog
         open={qrDialogOpen}
         onClose={handleCloseQR}
         maxWidth="sm"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            boxShadow: "0 8px 32px rgba(118, 75, 162, 0.2)",
+          },
+        }}
       >
         <DialogTitle
           sx={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            background: "linear-gradient(135deg, #764ba2 0%, #9b59b6 100%)",
+            color: "white",
           }}
         >
-          <Typography variant="h6">Tạo mã QR điểm danh</Typography>
-          <IconButton onClick={handleCloseQR}>
+          <Typography variant="h6" fontWeight={600}>
+            Tạo mã QR điểm danh
+          </Typography>
+          <IconButton onClick={handleCloseQR} sx={{ color: "white" }}>
             <Close />
           </IconButton>
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 3 }}>
           {selectedSession ? (
             <QRCodeGenerator session={selectedSession} event={event} />
           ) : (
-            <Typography>Đang tải...</Typography>
+            <Box sx={{ textAlign: "center", py: 4 }}>
+              <CircularProgress sx={{ color: "#764ba2" }} />
+            </Box>
           )}
         </DialogContent>
       </Dialog>

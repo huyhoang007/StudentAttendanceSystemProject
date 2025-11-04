@@ -9,23 +9,22 @@ import {
   Chip,
   Grid,
   Paper,
-  Button, // added
+  Button,
 } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import EventIcon from "@mui/icons-material/Event";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PeopleIcon from "@mui/icons-material/People";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings"; // added
-import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner"; // added
-import BarChartIcon from "@mui/icons-material/BarChart"; // added
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import Logo from "../assets/Logo.png";
 
 const Dashboard = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
 
-  // Dashboard for Admin and Organizer
   return (
     <Box
       sx={{
@@ -269,10 +268,9 @@ const Dashboard = () => {
                   spacing={3}
                   justifyContent="center"
                   alignItems="stretch"
-                  wrap={{ xs: "wrap", sm: "nowrap" }} // wrap on very small screens, otherwise single row
+                  wrap={{ xs: "wrap", sm: "nowrap" }}
                   sx={{
                     px: { xs: 0, sm: 2 },
-                    // remove internal horizontal scrollbar; allow cards to shrink if needed
                   }}
                 >
                   <Grid item sx={{ flex: "1 1 280px", minWidth: 220, maxWidth: 320 }}>
@@ -288,7 +286,7 @@ const Dashboard = () => {
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        minHeight: 140, // uniform height
+                        height: 180, // Fixed height instead of 100%
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
@@ -310,11 +308,31 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                        sx={{ 
+                          mb: 0.5, 
+                          fontSize: "1rem", 
+                          overflowWrap: "break-word", 
+                          wordBreak: "break-word", 
+                          height: "1.5em", // Fixed height
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
                         Quản lý Sự kiện
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                      <Typography 
+                        variant="caption" 
+                        color="text.secondary" 
+                        sx={{ 
+                          fontSize: 13, 
+                          height: "3em", // Fixed height for 2 lines
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          px: 1,
+                        }}
+                      >
                         Tạo & quản lý các phiên sự kiện
                       </Typography>
                     </Paper>
@@ -333,7 +351,7 @@ const Dashboard = () => {
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        minHeight: 140,
+                        height: 180, // Fixed height
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
@@ -355,11 +373,31 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                        sx={{ 
+                          mb: 0.5, 
+                          fontSize: "1rem", 
+                          overflowWrap: "break-word", 
+                          wordBreak: "break-word", 
+                          height: "1.5em",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
                         Điểm danh QR
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                      <Typography 
+                        variant="caption" 
+                        color="text.secondary" 
+                        sx={{ 
+                          fontSize: 13, 
+                          height: "3em",
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          px: 1,
+                        }}
+                      >
                         Quét QR / Check-in thủ công
                       </Typography>
                     </Paper>
@@ -378,7 +416,7 @@ const Dashboard = () => {
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        minHeight: 140,
+                        height: 180, // Fixed height
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
@@ -400,20 +438,40 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ mb: 0.5, fontSize: "1rem", overflowWrap: "break-word", wordBreak: "break-word" }}
+                        sx={{ 
+                          mb: 0.5, 
+                          fontSize: "1rem", 
+                          overflowWrap: "break-word", 
+                          wordBreak: "break-word", 
+                          height: "1.5em",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
                       >
                         Báo cáo & Thống kê
                       </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: 13 }}>
+                      <Typography 
+                        variant="caption" 
+                        color="text.secondary" 
+                        sx={{ 
+                          fontSize: 13, 
+                          height: "3em",
+                          display: "flex", 
+                          alignItems: "center", 
+                          justifyContent: "center",
+                          px: 1,
+                        }}
+                      >
                         Báo cáo, xuất Excel/PDF, phân tích
                       </Typography>
                     </Paper>
                   </Grid>
                 </Grid>
+              </Box>
                </Box>
              </Box>
-           </Box>
-         </Card>
+           </Card>
 
         {/* Info Cards */}
         <Grid
@@ -497,14 +555,13 @@ const Dashboard = () => {
                 color="text.secondary"
                 sx={{ lineHeight: 1.8, mb: 2 }}
               >
-                Tạo, chỉnh sửa và quản lý các sự kiện của sinh viên tại NVH SV.
-                Hỗ trợ tạo nhiều phiên (session) cho mỗi sự kiện.
+                Tạo, chỉnh sửa và quản lý sự kiện sinh viên tại Nhà Văn Hóa Sinh Viên, hỗ trợ nhiều phiên (session) cho mỗi sự kiện và dễ dàng sử dụng.
               </Typography>
               <Box
                 sx={{
-                  display: "flex",
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
                   gap: 1,
-                  flexWrap: "wrap",
                 }}
               >
                 <Chip
@@ -514,6 +571,7 @@ const Dashboard = () => {
                     bgcolor: "#667eea15",
                     color: "#667eea",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -523,6 +581,7 @@ const Dashboard = () => {
                     bgcolor: "#764ba215",
                     color: "#764ba2",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -532,6 +591,7 @@ const Dashboard = () => {
                     bgcolor: "#f093fb15",
                     color: "#f093fb",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
               </Box>
@@ -614,9 +674,9 @@ const Dashboard = () => {
               </Typography>
               <Box
                 sx={{
-                  display: "flex",
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
                   gap: 1,
-                  flexWrap: "wrap",
                 }}
               >
                 <Chip
@@ -626,6 +686,7 @@ const Dashboard = () => {
                     bgcolor: "#764ba215",
                     color: "#764ba2",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -635,6 +696,7 @@ const Dashboard = () => {
                     bgcolor: "#f093fb15",
                     color: "#f093fb",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -644,6 +706,7 @@ const Dashboard = () => {
                     bgcolor: "#f5576c15",
                     color: "#f5576c",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
               </Box>
@@ -725,9 +788,9 @@ const Dashboard = () => {
               </Typography>
               <Box
                 sx={{
-                  display: "flex",
+                  display: "grid",
+                  gridTemplateColumns: "1fr",
                   gap: 1,
-                  flexWrap: "wrap",
                 }}
               >
                 <Chip
@@ -737,6 +800,7 @@ const Dashboard = () => {
                     bgcolor: "#f5576c15",
                     color: "#f5576c",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -746,6 +810,7 @@ const Dashboard = () => {
                     bgcolor: "#f093fb15",
                     color: "#f093fb",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
                 <Chip
@@ -755,6 +820,7 @@ const Dashboard = () => {
                     bgcolor: "#43e97b15",
                     color: "#43e97b",
                     fontWeight: 600,
+                    justifyContent: "flex-start",
                   }}
                 />
               </Box>

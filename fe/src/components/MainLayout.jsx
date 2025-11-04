@@ -9,7 +9,14 @@ import {
   Avatar,
   Tooltip,
   IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import Logo from "../assets/Logo.png";
 import { Link, Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -18,10 +25,15 @@ const MainLayout = () => {
   const { user, role, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
   const handleLogout = () => {
     logout();
     navigate("/login");
+  };
+
+  const toggleDrawer = (open) => () => {
+    setDrawerOpen(open);
   };
 
   // determine if the current route is active
@@ -29,7 +41,7 @@ const MainLayout = () => {
     return location.pathname === path;
   };
 
-  // build nav items depending on role (preserve existing logic)
+  // build nav items depending on role
   const studentNav = [
     { to: "/", label: "Trang chủ" },
     { to: "/events-student", label: "Sự kiện" },
@@ -40,7 +52,6 @@ const MainLayout = () => {
 
   const adminOrgNav = [
     { to: "/", label: "Trang chủ" },
-    // admin extras will be inserted conditionally below
     { to: "/events", label: "Sự kiện" },
     { to: "/sessions", label: "Phiên" },
     { to: "/student-in-event-management", label: "Quản lý SV" },
@@ -51,10 +62,8 @@ const MainLayout = () => {
     adminOrgNav.push({ to: "/organizer-profile", label: "Hồ sơ" });
   }
 
-  // compose final nav array for non-student roles, inserting admin-only items when role === 'admin'
   let nonStudentNav = [...adminOrgNav];
   if (role === "admin") {
-    // insert admin-specific links after Trang chủ (index 0)
     nonStudentNav.splice(
       1,
       0,
@@ -68,11 +77,12 @@ const MainLayout = () => {
 
   return (
     <Box sx={{ bgcolor: "#f8fafc" }}>
+      {/* ===== HEADER / APPBAR ===== */}
       <AppBar
         position="static"
         color="primary"
         sx={{
-          background: "linear-gradient(90deg, #6a1b9a 0%, #ab47bc 100%)", // purple gradient
+          background: "linear-gradient(90deg, #6a1b9a 0%, #ab47bc 100%)",
           boxShadow: "none",
           borderBottom: "1px solid rgba(0,0,0,0.06)",
         }}
@@ -85,6 +95,7 @@ const MainLayout = () => {
             gap: 1,
           }}
         >
+          {/* ===== LOGO + TITLE ===== */}
           <Box
             sx={{
               display: "flex",
@@ -122,9 +133,11 @@ const MainLayout = () => {
               Student Attendance System
             </Typography>
           </Box>
+
+          {/* ===== NAV LINKS (desktop) ===== */}
           <Box
             sx={{
-              display: "flex",
+              display: { xs: "none", sm: "flex" },
               gap: 0.5,
               alignItems: "center",
               flexWrap: "wrap",
@@ -148,19 +161,15 @@ const MainLayout = () => {
                     borderRadius: 2,
                     gap: 0.5,
                     fontSize: { xs: "0.875rem", sm: "1rem" },
-                    // hover effect
                     "&:hover": {
                       background: "rgba(255,255,255,0.06)",
                       transform: "translateY(-2px)",
                       boxShadow: "0 6px 18px rgba(106,27,154,0.08)",
                     },
-                    // active state styling
                     bgcolor: active ? "rgba(255,255,255,0.10)" : "transparent",
-                    // subtle underline for active using boxShadow inset
                     boxShadow: active
                       ? "inset 0 -3px 0 rgba(255,255,255,0.12)"
                       : "none",
-                    // ensure text alignment
                     display: "flex",
                     alignItems: "center",
                     color: "inherit",
@@ -171,10 +180,20 @@ const MainLayout = () => {
               );
             })}
           </Box>
+
+          {/* ===== MENU ICON (mobile) ===== */}
+          <IconButton
+            sx={{ display: { xs: "flex", sm: "none" }, color: "#fff" }}
+            onClick={toggleDrawer(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+
+          {/* ===== USER SECTION ===== */}
           {user && (
             <Box
               sx={{
-                display: "flex",
+                display: { xs: "none", sm: "flex" },
                 alignItems: "center",
                 ml: { xs: 0, sm: 2 },
                 width: { xs: "100%", sm: "auto" },
@@ -211,10 +230,69 @@ const MainLayout = () => {
           )}
         </Toolbar>
       </AppBar>
+
+      {/* ===== DRAWER MENU (mobile) ===== */}
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+        <Box
+          sx={{
+            width: 260,
+            bgcolor: "#faf5ff",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+          role="presentation"
+          onClick={toggleDrawer(false)}
+        >
+          <Box sx={{ p: 2, textAlign: "center" }}>
+            <Avatar
+              src={Logo}
+              alt="Logo"
+              sx={{
+                width: 48,
+                height: 48,
+                mx: "auto",
+                mb: 1,
+              }}
+            />
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Student Attendance System
+            </Typography>
+          </Box>
+          <Divider />
+          <List>
+            {navItems.map((item) => (
+              <ListItem key={item.to} disablePadding>
+                <ListItemButton onClick={() => navigate(item.to)}>
+                  <ListItemText primary={item.label} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+          <Divider />
+          {user && (
+            <Box sx={{ p: 2 }}>
+              <Typography variant="body2" sx={{ mb: 1 }}>
+                Đăng nhập với: <strong>{user.username}</strong>
+              </Typography>
+              <Button
+                fullWidth
+                variant="contained"
+                color="secondary"
+                onClick={handleLogout}
+              >
+                Đăng xuất
+              </Button>
+            </Box>
+          )}
+        </Box>
+      </Drawer>
+
+      {/* ===== MAIN CONTENT ===== */}
       <Box
         sx={{
           mt: 0,
-          background: "linear-gradient(135deg, #faf5ff 0%, #efe6fb 100%)", // light purple background
+          background: "linear-gradient(135deg, #faf5ff 0%, #efe6fb 100%)",
           minHeight: "calc(100vh - 64px)",
           p: { xs: 1, sm: 2 },
         }}
