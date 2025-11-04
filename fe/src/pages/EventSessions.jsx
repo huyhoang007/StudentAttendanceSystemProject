@@ -254,7 +254,7 @@ const EventSessions = () => {
         <Button
           variant="outlined"
           onClick={handleBackToEvents}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, borderColor: '#7c3aed', color: '#7c3aed' }}
           startIcon={<ArrowBack />}
         >
           Quay lại danh sách
@@ -270,7 +270,7 @@ const EventSessions = () => {
         <Button
           variant="outlined"
           onClick={handleBackToEvents}
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, borderColor: '#7c3aed', color: '#7c3aed' }}
           startIcon={<ArrowBack />}
         >
           Quay lại danh sách
@@ -281,39 +281,48 @@ const EventSessions = () => {
 
   return (
     <Box sx={{ p: 3, maxWidth: 1000, mx: "auto" }}>
-      {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        {role === "student" && (
-          <Button
-            variant="outlined"
-            onClick={handleBackToEvent}
-            startIcon={<ArrowBack />}
-            sx={{ mr: 2 }}
-          >
-            Quay lại sự kiện đã đăng ký
-          </Button>
-        )}
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          sx={{
-            color: "#1976d2",
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-          }}
-        >
-          <Schedule fontSize="large" />
-          {targetSessionId ? "Chi tiết phiên" : "Danh sách phiên"}
-        </Typography>
-      </Box>
+      {/* Header - gradient purple to match previous pages */}
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: "24px",
+          background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
+          boxShadow: "0 8px 24px rgba(134, 76, 232, 0.18)",
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            {role === "student" && (
+              <Button
+                variant="outlined"
+                onClick={handleBackToEvent}
+                startIcon={<ArrowBack />}
+                sx={{
+                  mr: 2,
+                  borderColor: "rgba(255,255,255,0.2)",
+                  color: "rgba(255,255,255,0.95)",
+                }}
+              >
+                Quay lại sự kiện đã đăng ký
+              </Button>
+            )}
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Schedule sx={{ fontSize: 36, color: "#fff" }} />
+              <Typography variant="h4" fontWeight={700} color="#fff">
+                {targetSessionId ? "Chi tiết phiên" : "Danh sách phiên"}
+              </Typography>
+            </Box>
+          </Box>
+        </CardContent>
+      </Card>
 
       {/* Thông tin sự kiện */}
       <Card sx={{ mb: 3 }}>
         <CardContent sx={{ p: 3 }}>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Avatar sx={{ bgcolor: "#1976d2" }}>
-              <EventIcon />
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.12)" }}>
+              <EventIcon sx={{ color: "#fff" }} />
             </Avatar>
             <Box sx={{ flexGrow: 1 }}>
               <Typography variant="h6" fontWeight={600}>
@@ -328,8 +337,11 @@ const EventSessions = () => {
             </Box>
             <Chip
               label={`${sessions.length} phiên`}
-              color="primary"
               variant="outlined"
+              sx={{
+                color: "#7c3aed",
+                borderColor: "#7c3aed",
+              }}
             />
           </Box>
 
@@ -373,7 +385,7 @@ const EventSessions = () => {
                         onClick={() => handleViewSessionDetails(sessionId)}
                         sx={{
                           borderRadius: 2,
-                          border: "1px solid #e0e0e0",
+                          border: "1px solid #eae6ff",
                           mb: 1,
                           p: 2,
                           backgroundColor:
@@ -381,7 +393,7 @@ const EventSessions = () => {
                             checkInStatus[
                               sessionId || session.id || session.SessionId
                             ]
-                              ? "rgba(76, 175, 80, 0.08)"
+                              ? "rgba(16, 185, 129, 0.06)"
                               : undefined,
                           "&:hover": {
                             backgroundColor:
@@ -389,22 +401,22 @@ const EventSessions = () => {
                               checkInStatus[
                                 sessionId || session.id || session.SessionId
                               ]
-                                ? "rgba(76, 175, 80, 0.12)"
-                                : "rgba(25, 118, 210, 0.04)",
+                                ? "rgba(16, 185, 129, 0.10)"
+                                : "rgba(124, 58, 237, 0.04)",
                             borderColor:
                               role === "student" &&
                               checkInStatus[
                                 sessionId || session.id || session.SessionId
                               ]
-                                ? "#4caf50"
-                                : "#1976d2",
+                                ? "#10b981"
+                                : "#7c3aed",
                           },
                         }}
                       >
                         <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: "#1976d2" }}>
-                            <PlayCircleOutline />
-                          </Avatar>
+                                <Avatar sx={{ bgcolor: "rgba(124,58,237,0.12)" }}>
+                                  <PlayCircleOutline sx={{ color: "#7c3aed" }} />
+                                </Avatar>
                         </ListItemAvatar>
 
                         <ListItemText
@@ -468,17 +480,13 @@ const EventSessions = () => {
                                     size="small"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      console.log(
-                                        "QR button clicked for session:",
-                                        session
-                                      );
                                       handleGenerateQR(session);
                                     }}
                                     sx={{
-                                      bgcolor: "primary.main",
+                                      bgcolor: "#7c3aed",
                                       color: "white",
                                       "&:hover": {
-                                        bgcolor: "primary.dark",
+                                        bgcolor: "#6d28d9",
                                       },
                                     }}
                                   >
@@ -561,6 +569,7 @@ const EventSessions = () => {
           variant="outlined"
           onClick={handleBackToEvent}
           startIcon={<ArrowBack />}
+          sx={{ borderColor: '#7c3aed', color: '#7c3aed' }}
         >
           {role === "student"
             ? "Quay lại sự kiện đã đăng ký"

@@ -10,8 +10,12 @@ import {
   Alert,
   Chip,
   Button,
+  IconButton,
   Paper,
+  Avatar,
+  Stack,
   Card,
+  CardContent,
   CircularProgress,
   TablePagination,
   Dialog,
@@ -29,6 +33,7 @@ import {
   QrCodeScanner,
   EventAvailable,
   Warning,
+  Event,
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import {
@@ -341,25 +346,45 @@ const StudentRegisteredEvents = () => {
         </Alert>
       </Snackbar>
 
-      {/* Header */}
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={4}
+      {/* Header (styled as gradient card like AdminUserManagement) */}
+      <Card
+        sx={{
+          mb: 3,
+          borderRadius: "24px",
+          background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
+          boxShadow: "0 8px 24px rgba(134, 76, 232, 0.3)",
+        }}
       >
-        <Box display="flex" alignItems="center" gap={2}>
-          <EventAvailable color="primary" sx={{ fontSize: 40 }} />
-          <Box>
-            <Typography variant="h4" fontWeight={700} color="text.primary">
-              Sự kiện đã đăng ký
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Theo dõi các sự kiện và phiên bạn đã tham gia.
-            </Typography>
-          </Box>
-        </Box>
-      </Box>
+        <CardContent sx={{ p: 4 }}>
+          <Stack direction="row" alignItems="center" spacing={3}>
+            <Avatar
+              sx={{
+                width: 72,
+                height: 72,
+                bgcolor: "rgba(255,255,255,0.2)",
+              }}
+            >
+              <Event sx={{ fontSize: 40, color: "#fff" }} />
+            </Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="h4"
+                fontWeight={700}
+                color="#fff"
+                sx={{ mb: 0.5 }}
+              >
+                Sự kiện đã đăng ký
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: "rgba(255,255,255,0.9)" }}
+              >
+                Theo dõi các sự kiện và phiên bạn đã tham gia.
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
       {error && (
         <Alert
@@ -417,38 +442,38 @@ const StudentRegisteredEvents = () => {
             {/* ====================================================
                 BẮT ĐẦU PHẦN TABLEHEAD (GIỮ NGUYÊN)
             ======================================================= */}
-            <TableHead sx={{ backgroundColor: "grey.100" }}>
+            <TableHead sx={{ bgcolor: "#f9fafb", color: "#374151" }}>
               <TableRow>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
                   Tên sự kiện
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
                   Mô tả
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
                   Tổ chức
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
                   Ngày bắt đầu
                 </TableCell>
-                <TableCell sx={{ fontWeight: 600, color: "text.secondary" }}>
+                <TableCell sx={{ fontWeight: 700, color: "#374151" }}>
                   Ngày kết thúc
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 600, color: "text.secondary" }}
+                  sx={{ fontWeight: 700, color: "#374151" }}
                 >
                   Trạng thái đăng ký
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 600, color: "text.secondary" }}
+                  sx={{ fontWeight: 700, color: "#374151" }}
                 >
                   Trạng thái phiên
                 </TableCell>
                 <TableCell
                   align="center"
-                  sx={{ fontWeight: 600, color: "text.secondary" }}
+                  sx={{ fontWeight: 700, color: "#374151" }}
                 >
                   Thao tác
                 </TableCell>
@@ -495,10 +520,10 @@ const StudentRegisteredEvents = () => {
                       registration.studentInEventId ||
                       registration.StudentInEventId
                     }
-                    hover
-                    sx={{
-                      "&:hover": { backgroundColor: "action.hover" },
-                    }}
+                      hover
+                      sx={{
+                        "&:hover": { bgcolor: "#f9fafb" },
+                      }}
                   >
                     {/* Giữ nguyên 100% các TableCell của bạn */}
                     <TableCell>
@@ -602,39 +627,20 @@ const StudentRegisteredEvents = () => {
                     </TableCell>
 
                     <TableCell align="center">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          flexDirection: "row",
-                          gap: 1,
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {/* Nút xem chi tiết phiên - GIỮ NGUYÊN LOGIC */}
+                      <Box sx={{ display: "flex", gap: 1, justifyContent: "center", alignItems: "center" }}>
                         {hasActiveSessions && (
                           <Button
                             variant="outlined"
                             color="info"
                             size="small"
                             startIcon={<Visibility />}
-                            onClick={() => {
-                              navigate(`/event-sessions/${eventId}`);
-                            }}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              borderRadius: 2,
-                            }}
+                            onClick={() => navigate(`/event-sessions/${eventId}`)}
+                            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                           >
-                            Xem danh sách phiên{" "}
-                            {eventSessions.length > 0
-                              ? `(${eventSessions.length})`
-                              : ""}
+                            Xem danh sách phiên {eventSessions.length > 0 ? `(${eventSessions.length})` : ""}
                           </Button>
                         )}
 
-                        {/* Nút hủy đăng ký - GIỮ NGUYÊN LOGIC */}
                         {status?.toLowerCase() !== "attended" && (
                           <Button
                             variant="outlined"
@@ -643,36 +649,24 @@ const StudentRegisteredEvents = () => {
                             startIcon={<Close />}
                             onClick={() =>
                               handleCancelRegistration(
-                                registration.studentInEventId ||
-                                  registration.StudentInEventId,
+                                registration.studentInEventId || registration.StudentInEventId,
                                 eventTitle
                               )
                             }
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              borderRadius: 2,
-                            }}
+                            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                           >
                             Hủy đăng ký
                           </Button>
                         )}
 
-                        {/* Nút điểm danh - GIỮ NGUYÊN LOGIC */}
                         {hasActiveSessions && (
                           <Button
                             variant="contained"
                             color="success"
                             size="small"
                             startIcon={<QrCodeScanner />}
-                            onClick={() => {
-                              navigate(`/checkin?eventId=${eventId}`);
-                            }}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              borderRadius: 2,
-                            }}
+                            onClick={() => navigate(`/checkin?eventId=${eventId}`)}
+                            sx={{ textTransform: "none", fontWeight: 600, borderRadius: 2 }}
                           >
                             Điểm danh
                           </Button>
@@ -702,6 +696,7 @@ const StudentRegisteredEvents = () => {
             labelDisplayedRows={({ from, to, count }) =>
               `${from}–${to} trong số ${count}`
             }
+            sx={{ '& .MuiIconButton-root': { color: '#7c3aed' } }}
           />
         </Card>
       )}

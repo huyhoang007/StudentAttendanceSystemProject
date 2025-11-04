@@ -16,6 +16,7 @@ import {
   ListItemText,
   Button,
 } from "@mui/material";
+import Logo from "../assets/Logo.png";
 import {
   RocketLaunch,
   CheckCircle,
@@ -188,24 +189,21 @@ const StudentDashboard = () => {
           <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
             <Avatar
               sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                bgcolor: "#fff",
                 width: 110,
                 height: 110,
                 mb: 3,
-                boxShadow: "0 12px 35px rgba(102, 126, 234, 0.4)",
-                animation: "float 3s ease-in-out infinite",
-                "@keyframes float": {
-                  "0%, 100%": { transform: "translateY(0px)" },
-                  "50%": { transform: "translateY(-10px)" },
-                },
+                boxShadow: 2,
+                padding: "6px",
               }}
             >
               <img
-                src="https://img.icons8.com/fluency/64/000000/student-center.png"
-                alt="student"
-                style={{ width: 64, height: 64 }}
+                src={Logo}
+                alt="Logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%" }}
               />
             </Avatar>
+            
 
             <Typography
               variant="h3"

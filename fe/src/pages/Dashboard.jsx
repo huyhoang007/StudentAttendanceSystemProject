@@ -19,6 +19,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings"; // added
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner"; // added
 import BarChartIcon from "@mui/icons-material/BarChart"; // added
+import Logo from "../assets/Logo.png";
 
 const Dashboard = () => {
   const { user, role } = useAuth();
@@ -104,22 +105,18 @@ const Dashboard = () => {
           >
             <Avatar
               sx={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                bgcolor: "#fff",
                 width: 110,
                 height: 110,
                 mb: 3,
-                boxShadow: "0 12px 35px rgba(102, 126, 234, 0.4)",
-                animation: "float 3s ease-in-out infinite",
-                "@keyframes float": {
-                  "0%, 100%": { transform: "translateY(0px)" },
-                  "50%": { transform: "translateY(-10px)" },
-                },
+                boxShadow: 2,
+                padding: "6px",
               }}
             >
               <img
-                src="https://img.icons8.com/fluency/64/000000/student-center.png"
-                alt="dashboard"
-                style={{ width: 64, height: 64 }}
+                src={Logo}
+                alt="dashboard logo"
+                style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%" }}
               />
             </Avatar>
 
