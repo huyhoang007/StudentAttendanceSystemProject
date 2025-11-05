@@ -349,10 +349,10 @@ const StudentRegisteredEvents = () => {
       {/* Header (styled as gradient card like AdminUserManagement) */}
       <Card
         sx={{
-          mb: 3,
+          mb: 4,
           borderRadius: "24px",
-          background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
-          boxShadow: "0 8px 24px rgba(134, 76, 232, 0.3)",
+          background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)",
+          boxShadow: "0 8px 24px rgba(124, 58, 237, 0.3)",
         }}
       >
         <CardContent sx={{ p: 4 }}>

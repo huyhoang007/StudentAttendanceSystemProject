@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
   Box,
   Typography,
+  Avatar,
+  Stack,
   Card,
   CardContent,
   Button,
@@ -278,13 +280,31 @@ const CheckIn = () => {
   };
 
   return (
-    <Box sx={{ p: 3, maxWidth: 800, mx: "auto" }}>
-      <Typography
-        variant="h4"
-        sx={{ mb: 3, color: "#1976d2", fontWeight: 600 }}
+    <Box sx={{ p: 3, maxWidth: 900, mx: "auto" }}>
+      {/* Page header - purple gradient card */}
+      <Card
+        sx={{
+          mb: 4,
+          background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)",
+          color: "#fff",
+        }}
       >
-        Điểm danh QR dành cho Sinh Viên
-      </Typography>
+        <CardContent sx={{ py: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar sx={{ bgcolor: "rgba(255,255,255,0.15)", width: 56, height: 56 }}>
+              <EventIcon sx={{ color: "#fff" }} />
+            </Avatar>
+            <Box>
+              <Typography variant="h5" sx={{ fontWeight: 700 }}>
+                Điểm danh QR dành cho Sinh Viên
+              </Typography>
+              <Typography variant="body2" sx={{ opacity: 0.95 }}>
+                Quét mã QR để điểm danh nhanh chóng
+              </Typography>
+            </Box>
+          </Stack>
+        </CardContent>
+      </Card>
 
       {/* QR Scanner Card - Only for Students */}
       {role === "student" && (
@@ -302,7 +322,7 @@ const CheckIn = () => {
               </>
             ) : isAutoCheckIn ? (
               <>
-                <CircularProgress sx={{ mb: 2 }} />
+                <CircularProgress sx={{ mb: 2, color: "#7c3aed" }} />
                 <Typography variant="h5" gutterBottom>
                   Đang xử lý điểm danh...
                 </Typography>
@@ -331,9 +351,7 @@ const CheckIn = () => {
               </>
             ) : (
               <>
-                <QrCodeScanner
-                  sx={{ fontSize: 64, color: "primary.main", mb: 2 }}
-                />
+                <QrCodeScanner sx={{ fontSize: 64, color: "#7c3aed", mb: 2 }} />
                 <Typography variant="h5" gutterBottom>
                   Quét mã QR điểm danh
                 </Typography>
@@ -347,10 +365,17 @@ const CheckIn = () => {
                 <Button
                   variant="contained"
                   size="large"
-                  startIcon={<QrCodeScanner />}
+                  startIcon={<QrCodeScanner sx={{ color: "#fff" }} />}
                   onClick={() => setQrModalOpen(true)}
                   disabled={!user || loading}
-                  sx={{ px: 4 }}
+                  sx={{
+                    px: 4,
+                    background: "linear-gradient(135deg, #7c3aed 0%, #864ce8ff 100%)",
+                    color: "#fff",
+                    '&:hover': {
+                      background: "linear-gradient(135deg, #6938ef 0%, #7c3aed 100%)",
+                    },
+                  }}
                 >
                   Mở máy quét QR
                 </Button>
@@ -364,7 +389,7 @@ const CheckIn = () => {
       {checkInStatus && (
         <Alert
           severity={checkInStatus.type}
-          sx={{ mb: 3 }}
+          sx={{ mb: 3, backgroundColor: "#f3e8ff", color: "#6d28d9" }}
           onClose={() => setCheckInStatus(null)}
         >
           {checkInStatus.message}
@@ -378,12 +403,9 @@ const CheckIn = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>
-          <Typography
-            variant="h6"
-            sx={{ display: "flex", alignItems: "center", gap: 1 }}
-          >
-            <QrCodeScanner />
+        <DialogTitle sx={{ backgroundColor: "#f3e8ff" }}>
+          <Typography variant="h6" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <QrCodeScanner sx={{ color: "#7c3aed" }} />
             Quét mã QR điểm danh
           </Typography>
         </DialogTitle>
@@ -394,7 +416,9 @@ const CheckIn = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setQrModalOpen(false)}>Đóng</Button>
+          <Button onClick={() => setQrModalOpen(false)} sx={{ color: "#7c3aed" }}>
+            Đóng
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
