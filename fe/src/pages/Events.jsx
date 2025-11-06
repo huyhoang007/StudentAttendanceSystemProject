@@ -403,7 +403,7 @@ const Events = () => {
                   renderValue: (selected) => {
                     if (!selected)
                       return (
-                        <span style={{ color: "#9e9e9e" }}>Chọn trường</span>
+                        <span style={{ color: "#9e9e9e" }}>Chọn Trường </span>
                       );
                     const u = universities.find(
                       (x) => x.universityId === selected
