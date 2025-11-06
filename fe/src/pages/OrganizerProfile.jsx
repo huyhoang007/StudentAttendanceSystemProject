@@ -14,8 +14,14 @@ import {
   Snackbar,
   Avatar,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from '@mui/material/styles'; // Import ThemeProvider và createTheme
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {
   Person,
   Business,
@@ -23,6 +29,9 @@ import {
   School,
   Save,
   EditNote,
+  Lock,
+  Visibility,
+  VisibilityOff,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import {
@@ -30,6 +39,7 @@ import {
   updateProfile,
 } from "../services/organizerService";
 import { getUniversities } from "../services/universityService";
+import { changePassword } from "../services/authService";
 
 // Định nghĩa theme với tông màu tím
 const purpleTheme = createTheme({
@@ -119,6 +129,18 @@ const OrganizerProfile = () => {
   const [message, setMessage] = useState({ text: "", type: "success" });
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
+  // Change password states
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -198,6 +220,64 @@ const OrganizerProfile = () => {
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
+  };
+
+  const handleOpenPasswordDialog = () => {
+    setPasswordDialogOpen(true);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
+  const handleClosePasswordDialog = () => {
+    setPasswordDialogOpen(false);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ text: "Mật khẩu mới không khớp!", type: "error" });
+      setOpenSnackbar(true);
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setMessage({ text: "Mật khẩu mới phải có ít nhất 6 ký tự!", type: "error" });
+      setOpenSnackbar(true);
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+      setMessage({ text: "Đổi mật khẩu thành công!", type: "success" });
+      setOpenSnackbar(true);
+      handleClosePasswordDialog();
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setMessage({ 
+        text: error?.message || "Có lỗi khi đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.", 
+        type: "error" 
+      });
+      setOpenSnackbar(true);
+    } finally {
+      setPasswordLoading(false);
+    }
   };
 
   return (
@@ -383,7 +463,7 @@ const OrganizerProfile = () => {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary" // Sử dụng màu primary từ theme
+              color="primary"
               startIcon={<Save />}
               sx={{
                 mt: 3,
@@ -391,13 +471,126 @@ const OrganizerProfile = () => {
                 py: 1.5,
                 fontWeight: 600,
                 fontSize: "1.1rem",
-                // Các style gradient và hover đã được chuyển vào theme.components.MuiButton
               }}
             >
               Cập nhật Hồ sơ
             </Button>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="primary"
+              startIcon={<Lock />}
+              onClick={handleOpenPasswordDialog}
+              sx={{ mb: 2, py: 1.5, fontWeight: 600 }}
+            >
+              Đổi mật khẩu
+            </Button>
           </Box>
         </Paper>
+
+        {/* Change Password Dialog */}
+        <Dialog 
+          open={passwordDialogOpen} 
+          onClose={handleClosePasswordDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ 
+            background: "linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)",
+            color: "white",
+            fontWeight: 600
+          }}>
+            Đổi mật khẩu
+          </DialogTitle>
+          <form onSubmit={handleChangePassword}>
+            <DialogContent sx={{ pt: 3 }}>
+              <TextField
+                fullWidth
+                label="Mật khẩu hiện tại"
+                name="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        edge="end"
+                      >
+                        {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Mật khẩu mới"
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                helperText="Mật khẩu phải có ít nhất 6 ký tự"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Xác nhận mật khẩu mới"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </DialogContent>
+            <DialogActions sx={{ p: 3, pt: 0 }}>
+              <Button onClick={handleClosePasswordDialog} disabled={passwordLoading}>
+                Hủy
+              </Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                disabled={passwordLoading}
+                sx={{
+                  background: "linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)",
+                  color: "white"
+                }}
+              >
+                {passwordLoading ? <CircularProgress size={24} /> : "Đổi mật khẩu"}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
 
         <Snackbar
           open={openSnackbar}

@@ -17,12 +17,24 @@ import {
   Container,
   InputAdornment,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
 } from "@mui/material";
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Person, Save } from '@mui/icons-material';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import {
+  Person,
+  Save,
+  Lock,
+  Visibility,
+  VisibilityOff,
+} from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 import { getUniversities } from "../services/universityService";
 import { getStudentByUserId, updateStudent } from "../services/studentService";
+import { changePassword } from "../services/authService";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -38,6 +50,18 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: "", type: "" });
+
+  // Change password states
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -101,6 +125,60 @@ const Profile = () => {
     }
   };
 
+  const handleOpenPasswordDialog = () => {
+    setPasswordDialogOpen(true);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+  };
+
+  const handleClosePasswordDialog = () => {
+    setPasswordDialogOpen(false);
+    setPasswordForm({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value });
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ text: "Mật khẩu mới không khớp!", type: "error" });
+      return;
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setMessage({ text: "Mật khẩu mới phải có ít nhất 6 ký tự!", type: "error" });
+      return;
+    }
+
+    try {
+      setPasswordLoading(true);
+      await changePassword(passwordForm.currentPassword, passwordForm.newPassword);
+      setMessage({ text: "Đổi mật khẩu thành công!", type: "success" });
+      handleClosePasswordDialog();
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setMessage({ 
+        text: error?.message || "Có lỗi khi đổi mật khẩu. Vui lòng kiểm tra lại mật khẩu hiện tại.", 
+        type: "error" 
+      });
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <Box
@@ -116,8 +194,8 @@ const Profile = () => {
 
   const purpleTheme = createTheme({
     palette: {
-      primary: { main: '#673ab7' },
-      background: { default: '#f3e5f5' },
+      primary: { main: "#673ab7" },
+      background: { default: "#f3e5f5" },
     },
   });
 
@@ -127,48 +205,293 @@ const Profile = () => {
         maxWidth="sm"
         sx={{
           position: "relative",
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: 'calc(100vh - 64px)',
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "calc(100vh - 64px)",
           pb: 4,
           pt: 2,
           backgroundColor: purpleTheme.palette.background.default,
         }}
       >
-        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(135deg, rgba(159,94,235,0.06), rgba(190,150,240,0.04))', borderRadius: 3, zIndex: -1 }} />
-        <Paper elevation={3} sx={{ p: { xs: 3, md: 4 }, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', maxWidth: 500 }}>
-          <Avatar sx={{ width: 80, height: 80, m: 1, background: 'linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)', boxShadow: '0 3px 15px rgba(126,87,194,0.4)', transition: 'transform 0.3s', '&:hover': { transform: 'scale(1.1)' } }}>
-            <Person sx={{ fontSize: 40, color: 'white' }} />
+        <Box
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background:
+              "linear-gradient(135deg, rgba(159,94,235,0.06), rgba(190,150,240,0.04))",
+            borderRadius: 3,
+            zIndex: -1,
+          }}
+        />
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 3, md: 4 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            width: "100%",
+            maxWidth: 500,
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 80,
+              height: 80,
+              m: 1,
+              background: "linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)",
+              boxShadow: "0 3px 15px rgba(126,87,194,0.4)",
+              transition: "transform 0.3s",
+              "&:hover": { transform: "scale(1.1)" },
+            }}
+          >
+            <Person sx={{ fontSize: 40, color: "white" }} />
           </Avatar>
-          <Typography component="h1" variant="h4" gutterBottom sx={{ fontWeight: 700, background: 'linear-gradient(45deg, #42a5f5 30%, #673ab7 90%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent', textAlign: 'center', mb: 1 }}>Thông tin cá nhân</Typography>
-          <Typography variant="body1" align="center" sx={{ mb: 3, fontSize: '1.1rem', maxWidth: '80%', lineHeight: 1.6, background: 'linear-gradient(45deg, #42a5f5 30%, #673ab7 90%)', backgroundClip: 'text', WebkitBackgroundClip: 'text', color: 'transparent' }}>Cập nhật thông tin sinh viên.</Typography>
+          <Typography
+            component="h1"
+            variant="h4"
+            gutterBottom
+            sx={{
+              fontWeight: 700,
+              background: "linear-gradient(45deg, #42a5f5 30%, #673ab7 90%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+              textAlign: "center",
+              mb: 1,
+            }}
+          >
+            Thông tin cá nhân
+          </Typography>
+          <Typography
+            variant="body1"
+            align="center"
+            sx={{
+              mb: 3,
+              fontSize: "1.1rem",
+              maxWidth: "80%",
+              lineHeight: 1.6,
+              background: "linear-gradient(45deg, #42a5f5 30%, #673ab7 90%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+            }}
+          >
+            Cập nhật thông tin sinh viên.
+          </Typography>
 
           {message.text && (
-            <Alert severity={message.type} sx={{ mb: 3, width: '100%' }}>{message.text}</Alert>
+            <Alert severity={message.type} sx={{ mb: 3, width: "100%" }}>
+              {message.text}
+            </Alert>
           )}
 
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
-            <TextField fullWidth label="Họ và tên" name="name" value={form.name} onChange={handleChange} required margin="normal" InputProps={{ startAdornment: (<InputAdornment position="start"><Person /></InputAdornment>) }} />
-            <TextField fullWidth label="Mã sinh viên" name="student_code" value={form.student_code} onChange={handleChange} required margin="normal" />
-            <TextField fullWidth label="Email" name="email" type="email" value={form.email} onChange={handleChange} required margin="normal" />
-            <TextField fullWidth label="Số điện thoại" name="phone" value={form.phone} onChange={handleChange} margin="normal" />
+          <Box
+            component="form"
+            onSubmit={handleSubmit}
+            sx={{ mt: 1, width: "100%" }}
+          >
+            <TextField
+              fullWidth
+              label="Họ và tên"
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              required
+              margin="normal"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Person />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              fullWidth
+              label="Mã sinh viên"
+              name="student_code"
+              value={form.student_code}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Email"
+              name="email"
+              type="email"
+              value={form.email}
+              onChange={handleChange}
+              required
+              margin="normal"
+            />
+            <TextField
+              fullWidth
+              label="Số điện thoại"
+              name="phone"
+              value={form.phone}
+              onChange={handleChange}
+              margin="normal"
+            />
 
             <FormControl fullWidth margin="normal">
               <InputLabel>Chọn trường đại học</InputLabel>
-              <Select label="Chọn trường đại học" name="university_id" value={form.university_id} onChange={handleChange}>
-                <MenuItem value=""><em>Chọn trường của bạn</em></MenuItem>
+              <Select
+                label="Chọn trường đại học"
+                name="university_id"
+                value={form.university_id}
+                onChange={handleChange}
+              >
+                <MenuItem value="">
+                  <em>Chọn trường của bạn</em>
+                </MenuItem>
                 {universities.map((university) => (
-                  <MenuItem key={university.universityId || university.university_id} value={university.universityId || university.university_id}>{university.name}</MenuItem>
+                  <MenuItem
+                    key={university.universityId || university.university_id}
+                    value={university.universityId || university.university_id}
+                  >
+                    {university.name}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
-            <Button type="submit" fullWidth variant="contained" color="primary" disabled={saving} startIcon={<Save />} sx={{ mt: 3, py: 1.5, fontWeight: 600 }}>
-              {saving ? <CircularProgress size={24} color="inherit" /> : 'Cập nhật thông tin'}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              disabled={saving}
+              startIcon={<Save />}
+              sx={{ mt: 3, py: 1.5, fontWeight: 600 }}
+            >
+              {saving ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Cập nhật thông tin"
+              )}
+            </Button>
+
+            <Button
+              fullWidth
+              variant="outlined"
+              color="primary"
+              startIcon={<Lock />}
+              onClick={handleOpenPasswordDialog}
+              sx={{ mt: 2, py: 1.5, fontWeight: 600 }}
+            >
+              Đổi mật khẩu
             </Button>
           </Box>
         </Paper>
+
+        {/* Change Password Dialog */}
+        <Dialog 
+          open={passwordDialogOpen} 
+          onClose={handleClosePasswordDialog}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ 
+            background: "linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)",
+            color: "white",
+            fontWeight: 600
+          }}>
+            Đổi mật khẩu
+          </DialogTitle>
+          <form onSubmit={handleChangePassword}>
+            <DialogContent sx={{ pt: 3 }}>
+              <TextField
+                fullWidth
+                label="Mật khẩu hiện tại"
+                name="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                value={passwordForm.currentPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        edge="end"
+                      >
+                        {showCurrentPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Mật khẩu mới"
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                value={passwordForm.newPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                helperText="Mật khẩu phải có ít nhất 6 ký tự"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+              <TextField
+                fullWidth
+                label="Xác nhận mật khẩu mới"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                value={passwordForm.confirmPassword}
+                onChange={handlePasswordChange}
+                required
+                margin="normal"
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </DialogContent>
+            <DialogActions sx={{ p: 3, pt: 0 }}>
+              <Button onClick={handleClosePasswordDialog} disabled={passwordLoading}>
+                Hủy
+              </Button>
+              <Button 
+                type="submit" 
+                variant="contained" 
+                disabled={passwordLoading}
+                sx={{
+                  background: "linear-gradient(45deg, #7e57c2 30%, #9c27b0 90%)",
+                  color: "white"
+                }}
+              >
+                {passwordLoading ? <CircularProgress size={24} /> : "Đổi mật khẩu"}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
       </Container>
     </ThemeProvider>
   );
