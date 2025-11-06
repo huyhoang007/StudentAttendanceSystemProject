@@ -43,29 +43,29 @@ import {
 import { getOrganizerById, getOrganizers } from "../services/organizerService";
 import { getUniversities } from "../services/universityService";
 import { useAuth } from "../contexts/AuthContext";
-import { createTheme, ThemeProvider } from '@mui/material/styles'; // Import ThemeProvider và createTheme
+import { createTheme, ThemeProvider } from "@mui/material/styles"; // Import ThemeProvider và createTheme
 
 // Định nghĩa theme với tông màu tím
 const purpleTheme = createTheme({
   palette: {
     primary: {
-      main: '#673ab7', // Màu tím đậm chính
+      main: "#673ab7", // Màu tím đậm chính
     },
     secondary: {
-      main: '#9c27b0', // Màu tím magenta
+      main: "#9c27b0", // Màu tím magenta
     },
     info: {
-      main: '#ba68c8', // Màu tím nhạt hơn cho icon info
+      main: "#ba68c8", // Màu tím nhạt hơn cho icon info
     },
     success: {
-      main: '#4caf50', // Giữ màu xanh lá cho trạng thái "Đang diễn ra"
+      main: "#4caf50", // Giữ màu xanh lá cho trạng thái "Đang diễn ra"
     },
     error: {
-      main: '#f44336', // Giữ màu đỏ cho lỗi
+      main: "#f44336", // Giữ màu đỏ cho lỗi
     },
     background: {
-      default: '#f3e5f5', // Nền màu tím rất nhạt
-      paper: '#ffffff', // Nền card và dialog
+      default: "#f3e5f5", // Nền màu tím rất nhạt
+      paper: "#ffffff", // Nền card và dialog
     },
   },
   components: {
@@ -79,10 +79,10 @@ const purpleTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         containedPrimary: {
-          background: 'linear-gradient(135deg, #7e57c2 0%, #9c27b0 100%)', // Gradient tím
-          color: 'white',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #673ab7 0%, #8e24aa 100%)',
+          background: "linear-gradient(135deg, #7e57c2 0%, #9c27b0 100%)", // Gradient tím
+          color: "white",
+          "&:hover": {
+            background: "linear-gradient(135deg, #673ab7 0%, #8e24aa 100%)",
           },
         },
       },
@@ -91,7 +91,7 @@ const purpleTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12, // Bo tròn nhiều hơn cho card
-          boxShadow: '0 8px 30px rgba(0,0,0,0.1)', // Đổ bóng mềm mại hơn
+          boxShadow: "0 8px 30px rgba(0,0,0,0.1)", // Đổ bóng mềm mại hơn
         },
       },
     },
@@ -99,29 +99,29 @@ const purpleTheme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: 12,
-        }
-      }
+        },
+      },
     },
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          backgroundColor: '#673ab7', // Nền tím đậm cho tiêu đề dialog
-          color: 'white',
-        }
-      }
+          backgroundColor: "#673ab7", // Nền tím đậm cho tiêu đề dialog
+          color: "white",
+        },
+      },
     },
     MuiTableHead: {
       styleOverrides: {
         root: {
-          backgroundColor: '#ede7f6', // Nền tím nhạt cho tiêu đề bảng
-        }
-      }
+          backgroundColor: "#ede7f6", // Nền tím nhạt cho tiêu đề bảng
+        },
+      },
     },
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&:hover': {
-            backgroundColor: '#f3e5f5 !important', // Nền tím nhạt khi hover
+          "&:hover": {
+            backgroundColor: "#f3e5f5 !important", // Nền tím nhạt khi hover
           },
         },
       },
@@ -130,22 +130,22 @@ const purpleTheme = createTheme({
       styleOverrides: {
         head: {
           fontWeight: 700,
-          color: '#424242',
-        }
-      }
+          color: "#424242",
+        },
+      },
     },
     MuiTextField: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
-            '& fieldset': {
-              borderColor: '#d1c4e9', // Viền tím nhạt
+          "& .MuiOutlinedInput-root": {
+            "& fieldset": {
+              borderColor: "#d1c4e9", // Viền tím nhạt
             },
-            '&:hover fieldset': {
-              borderColor: '#9575cd', // Viền tím đậm hơn khi hover
+            "&:hover fieldset": {
+              borderColor: "#9575cd", // Viền tím đậm hơn khi hover
             },
-            '&.Mui-focused fieldset': {
-              borderColor: '#673ab7', // Viền tím đậm khi focus
+            "&.Mui-focused fieldset": {
+              borderColor: "#673ab7", // Viền tím đậm khi focus
             },
           },
         },
@@ -327,12 +327,20 @@ const Events = () => {
   };
 
   return (
-    <ThemeProvider theme={purpleTheme}> {/* Áp dụng theme tím */}
-      <Box sx={{ p: 4, backgroundColor: purpleTheme.palette.background.default, minHeight: "100vh" }}>
+    <ThemeProvider theme={purpleTheme}>
+      {" "}
+      {/* Áp dụng theme tím */}
+      <Box
+        sx={{
+          p: 4,
+          backgroundColor: purpleTheme.palette.background.default,
+          minHeight: "100vh",
+        }}
+      >
         <Card
           sx={{
             mb: 3,
-            background: 'linear-gradient(135deg, #673ab7 0%, #9c27b0 100%)', // Gradient tím cho header
+            background: "linear-gradient(135deg, #673ab7 0%, #9c27b0 100%)", // Gradient tím cho header
             color: "white",
             // Đã có borderRadius và boxShadow từ theme.components.MuiCard
           }}
@@ -345,7 +353,8 @@ const Events = () => {
                   Quản lý Sự kiện NVH Sinh viên
                 </Typography>
                 <Typography variant="body1" sx={{ opacity: 0.9 }}>
-                  Quản lý, theo dõi và điểm danh sinh viên tham gia các hoạt động.
+                  Quản lý, theo dõi và điểm danh sinh viên tham gia các hoạt
+                  động.
                 </Typography>
               </Box>
             </Box>
@@ -392,8 +401,13 @@ const Events = () => {
                 SelectProps={{
                   displayEmpty: true,
                   renderValue: (selected) => {
-                    if (!selected) return <span style={{ color: '#9e9e9e' }}>Chọn trường để xem sự kiện</span>;
-                    const u = universities.find((x) => x.universityId === selected);
+                    if (!selected)
+                      return (
+                        <span style={{ color: "#9e9e9e" }}>Chọn trường</span>
+                      );
+                    const u = universities.find(
+                      (x) => x.universityId === selected
+                    );
                     return u ? u.name : selected;
                   },
                 }}
@@ -467,7 +481,9 @@ const Events = () => {
             }}
           >
             <Table>
-              <TableHead sx={{ backgroundColor: purpleTheme.palette.grey[100] }}>
+              <TableHead
+                sx={{ backgroundColor: purpleTheme.palette.grey[100] }}
+              >
                 <TableRow>
                   <TableCell>Tiêu đề</TableCell>
                   <TableCell>Mô tả</TableCell>
@@ -644,7 +660,12 @@ const Events = () => {
             {editId ? "✏️ Chỉnh sửa sự kiện" : "🗓️ Thêm sự kiện mới"}
           </DialogTitle>
 
-          <DialogContent sx={{ backgroundColor: purpleTheme.palette.background.default, p: 3 }}>
+          <DialogContent
+            sx={{
+              backgroundColor: purpleTheme.palette.background.default,
+              p: 3,
+            }}
+          >
             <Box
               sx={{
                 borderRadius: 2,
@@ -666,7 +687,11 @@ const Events = () => {
 
               {role === "admin" && (
                 <Box sx={{ mb: 3 }}>
-                  <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1 }}>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight={600}
+                    sx={{ mb: 1 }}
+                  >
                     👥 Chọn người tổ chức
                   </Typography>
                   <TextField
@@ -754,7 +779,9 @@ const Events = () => {
                   type="date"
                   fullWidth
                   value={form.EndDate}
-                  onChange={(e) => setForm({ ...form, EndDate: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, EndDate: e.target.value })
+                  }
                   InputLabelProps={{ shrink: true }}
                   size="small"
                 />
