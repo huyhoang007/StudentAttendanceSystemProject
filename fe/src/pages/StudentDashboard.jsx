@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-// ...existing code...
 import {
   Box,
   Card,
@@ -35,7 +34,6 @@ const StudentDashboard = () => {
   const [checkIns, setCheckIns] = useState([]);
 
   useEffect(() => {
-    // ...existing code...
     const fetchCheckIns = async () => {
       try {
         setLoading(true);
@@ -57,7 +55,6 @@ const StudentDashboard = () => {
     const timeoutId = setTimeout(fetchCheckIns, 500);
     return () => clearTimeout(timeoutId);
   }, [user]);
-  // ...existing code...
 
   return (
     <Box
@@ -65,7 +62,7 @@ const StudentDashboard = () => {
         minHeight: "100vh",
         py: 6,
         px: 3,
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #e9d5ff 0%, #f3e8ff 50%, #faf5ff 100%)",
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -76,10 +73,10 @@ const StudentDashboard = () => {
           right: 0,
           bottom: 0,
           background: `
-        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.2) 0%, transparent 50%)
-      `,
+            radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(192, 132, 252, 0.06) 0%, transparent 50%)
+          `,
           animation: "gradientShift 15s ease infinite",
           zIndex: 0,
         },
@@ -96,14 +93,14 @@ const StudentDashboard = () => {
         },
       }}
     >
-      {/* decorative floating blobs (visual only) */}
+      {/* decorative floating blobs */}
       <Box
         sx={{
           position: "absolute",
           width: 220,
           height: 220,
           borderRadius: "50%",
-          background: "rgba(255,255,255,0.06)",
+          background: "rgba(124, 58, 237, 0.06)",
           top: 40,
           left: -40,
           filter: "blur(30px)",
@@ -121,7 +118,7 @@ const StudentDashboard = () => {
           width: 160,
           height: 160,
           borderRadius: "50%",
-          background: "rgba(255,255,255,0.04)",
+          background: "rgba(168, 85, 247, 0.04)",
           bottom: 40,
           right: -30,
           filter: "blur(20px)",
@@ -140,7 +137,7 @@ const StudentDashboard = () => {
           height: 120,
           borderRadius: "50%",
           background:
-            "linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))",
+            "linear-gradient(135deg, rgba(192, 132, 252, 0.06), rgba(192, 132, 252, 0.02))",
           top: "30%",
           right: "40%",
           filter: "blur(18px)",
@@ -154,7 +151,7 @@ const StudentDashboard = () => {
       />
 
       <Box sx={{ maxWidth: 1200, mx: "auto", position: "relative", zIndex: 1 }}>
-        {/* Main Welcome Card with Dashboard style */}
+        {/* Main Welcome Card */}
         <Card
           elevation={0}
           sx={{
@@ -163,8 +160,8 @@ const StudentDashboard = () => {
             mb: 4,
             background: "rgba(255, 255, 255, 0.98)",
             backdropFilter: "blur(20px)",
-            boxShadow: "0 25px 80px rgba(0,0,0,0.2)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: "0 25px 80px rgba(124, 58, 237, 0.12)",
+            border: "1px solid rgba(233, 213, 255, 0.5)",
             position: "relative",
             overflow: "hidden",
             "&::before": {
@@ -174,15 +171,15 @@ const StudentDashboard = () => {
               left: -2,
               right: -2,
               bottom: -2,
-              background: "linear-gradient(135deg, #667eea, #764ba2, #f093fb)",
+              background: "linear-gradient(135deg, #e9d5ff, #f3e8ff, #faf5ff)",
               borderRadius: 5,
               zIndex: -1,
-              opacity: 0.1,
+              opacity: 0.3,
               animation: "borderGlow 3s ease infinite",
             },
             "@keyframes borderGlow": {
-              "0%, 100%": { opacity: 0.1 },
-              "50%": { opacity: 0.3 },
+              "0%, 100%": { opacity: 0.2 },
+              "50%": { opacity: 0.4 },
             },
           }}
         >
@@ -193,8 +190,9 @@ const StudentDashboard = () => {
                 width: 110,
                 height: 110,
                 mb: 3,
-                boxShadow: 2,
+                boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)",
                 padding: "6px",
+                border: "3px solid #f3e8ff",
               }}
             >
               <img
@@ -203,14 +201,13 @@ const StudentDashboard = () => {
                 style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "50%" }}
               />
             </Avatar>
-            
 
             <Typography
               variant="h3"
               fontWeight={800}
               sx={{
                 background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+                  "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)",
                 backgroundSize: "200% auto",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
@@ -241,10 +238,10 @@ const StudentDashboard = () => {
                 mt: 3,
                 p: 4,
                 borderRadius: 4,
-                background: "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
+                background: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
                 width: "100%",
                 maxWidth: 1000,
-                border: "2px solid rgba(102, 126, 234, 0.2)",
+                border: "2px solid #e9d5ff",
                 position: "relative",
                 overflow: "hidden",
                 "&::before": {
@@ -254,7 +251,7 @@ const StudentDashboard = () => {
                   left: "-100%",
                   width: "100%",
                   height: "100%",
-                  background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                  background: "linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent)",
                   animation: "shimmer 3s infinite",
                 },
                 "@keyframes shimmer": {
@@ -263,7 +260,7 @@ const StudentDashboard = () => {
                 },
               }}
             >
-              <Typography variant="h4" align="center" sx={{ fontWeight: 700, color: "#2d3748", mb: 1.5 }}>
+              <Typography variant="h4" align="center" sx={{ fontWeight: 700, color: "#2d3748", mb: 1.5, textShadow: "0 2px 4px rgba(124, 58, 237, 0.08)" }}>
                 Xin chào, {user?.name || user?.username || "Sinh viên"}! 👋
               </Typography>
               <Typography variant="h6" align="center" color="text.secondary" sx={{ mb: 2.5, fontWeight: 500, lineHeight: 1.6 }}>
@@ -282,10 +279,14 @@ const StudentDashboard = () => {
                     fontWeight: 800,
                     textTransform: "none",
                     borderRadius: 3,
-                    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
                     color: "#fff",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.18)",
-                    "&:hover": { transform: "translateY(-3px)" },
+                    boxShadow: "0 8px 30px rgba(124, 58, 237, 0.25)",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      transform: "translateY(-3px)",
+                      boxShadow: "0 14px 40px rgba(124, 58, 237, 0.3)",
+                    },
                   }}
                 >
                   Trang sinh viên
@@ -295,59 +296,61 @@ const StudentDashboard = () => {
           </Box>
         </Card>
 
-        {/* Main Student Content (keeps original StudentDashboard JSX structure & logic) */}
+        {/* Main Student Content */}
         <Grid container spacing={4}>
           <Grid item xs={12}>
             <Paper
               sx={{
                 p: 4,
                 borderRadius: 4,
-                boxShadow: "0 6px 18px rgba(0,0,0,0.08)",
-                background: "linear-gradient(145deg, #ffffff, #f5f8fb)",
+                boxShadow: "0 12px 40px rgba(124, 58, 237, 0.12)",
+                background: "rgba(255, 255, 255, 0.98)",
+                backdropFilter: "blur(20px)",
+                border: "1px solid #e9d5ff",
                 transition: "transform 0.3s ease",
-                "&:hover": { transform: "translateY(-4px)" },
+                "&:hover": { transform: "translateY(-4px)", boxShadow: "0 20px 60px rgba(124, 58, 237, 0.2)" },
               }}
             >
               <CardContent>
-                <Box 
-                  display="flex" 
-                  alignItems="center" 
+                <Box
+                  display="flex"
+                  alignItems="center"
                   mb={3}
                   sx={{
                     transition: "all 0.3s ease",
                     p: 1.5,
                     borderRadius: 2,
                     "&:hover": {
-                      backgroundColor: "rgba(25, 118, 210, 0.04)",
+                      backgroundColor: "rgba(124, 58, 237, 0.04)",
                       transform: "translateX(8px)",
                       "& .header-icon": {
                         transform: "scale(1.1) rotate(5deg)",
                       },
                       "& .header-text": {
-                        background: "linear-gradient(45deg, #1976d2, #42a5f5)",
+                        background: "linear-gradient(45deg, #7c3aed, #a855f7)",
                         backgroundClip: "text",
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         letterSpacing: "0.5px",
-                      }
-                    }
+                      },
+                    },
                   }}
                 >
-                  <School 
+                  <School
                     className="header-icon"
-                    sx={{ 
-                      fontSize: 40, 
-                      color: "#1976d2", 
+                    sx={{
+                      fontSize: 40,
+                      color: "#7c3aed",
                       mr: 2,
                       transition: "transform 0.3s ease",
-                    }} 
+                    }}
                   />
-                  <Typography 
-                    variant="h5" 
+                  <Typography
+                    variant="h5"
                     className="header-text"
-                    sx={{ 
-                      fontWeight: "bold", 
-                      color: "#1976d2",
+                    sx={{
+                      fontWeight: "bold",
+                      color: "#7c3aed",
                       transition: "all 0.3s ease",
                     }}
                   >
@@ -360,16 +363,18 @@ const StudentDashboard = () => {
                 </Typography>
 
                 <Divider sx={{ my: 3 }}>
-                  <Chip 
-                    label="🎯 Mục tiêu của hệ thống" 
-                    color="primary" 
-                    variant="outlined"
+                  <Chip
+                    label="🎯 Mục tiêu của hệ thống"
                     sx={{
+                      bgcolor: "#f3e8ff",
+                      color: "#7c3aed",
+                      border: "1px solid #e9d5ff",
+                      fontWeight: 600,
                       transition: "all 0.3s ease",
                       "&:hover": {
                         transform: "scale(1.05)",
-                        backgroundColor: "rgba(25, 118, 210, 0.08)", // using primary color with opacity
-                      }
+                        backgroundColor: "#e9d5ff",
+                      },
                     }}
                   />
                 </Divider>
@@ -377,22 +382,22 @@ const StudentDashboard = () => {
                 <Grid container spacing={2} sx={{ mb: 4 }}>
                   {[
                     {
-                      color: "#4caf50",
+                      color: "#7c3aed",
                       title: "Hiện đại hóa quy trình điểm danh",
                       desc: "Ứng dụng QR Code nhanh chóng và chính xác.",
                     },
                     {
-                      color: "#ff9800",
+                      color: "#a855f7",
                       title: "Tối ưu hóa trải nghiệm sinh viên",
                       desc: "Thiết kế thân thiện, dễ sử dụng trên mọi thiết bị.",
                     },
                     {
-                      color: "#2196f3",
+                      color: "#c084fc",
                       title: "Tăng cường kết nối cộng đồng",
                       desc: "Khuyến khích sinh viên tham gia hoạt động văn hóa.",
                     },
                     {
-                      color: "#9c27b0",
+                      color: "#9333ea",
                       title: "Hỗ trợ học tập & nghiên cứu",
                       desc: "Cung cấp cơ hội tham gia sự kiện học thuật.",
                     },
@@ -402,17 +407,18 @@ const StudentDashboard = () => {
                         elevation={0}
                         sx={{
                           p: 2.5,
-                          borderRadius: 3,
+                          borderRadius: 1,
                           display: "flex",
                           alignItems: "flex-start",
                           gap: 2,
-                          bgcolor: "#fafafa",
-                          // Thêm các hiệu ứng hover
+                          bgcolor: "#fafbff",
+                          border: "1px solid #f3e8ff",
                           transition: "all 0.3s cubic-bezier(.17,.67,.83,.67)",
                           position: "relative",
                           "&:hover": {
                             transform: "translateY(-8px)",
-                            boxShadow: (theme) => `0 12px 25px ${item.color}15`,
+                            boxShadow: `0 12px 25px ${item.color}25`,
+                            bgcolor: "#faf5ff",
                             "& .icon": {
                               transform: "scale(1.2) rotate(5deg)",
                             },
@@ -421,10 +427,9 @@ const StudentDashboard = () => {
                             },
                             "&::before": {
                               height: "100%",
-                              opacity: 0.05,
+                              opacity: 0.08,
                             },
                           },
-                          // Thêm gradient overlay
                           "&::before": {
                             content: '""',
                             position: "absolute",
@@ -440,19 +445,19 @@ const StudentDashboard = () => {
                           },
                         }}
                       >
-                        <CheckCircle 
+                        <CheckCircle
                           className="icon"
-                          sx={{ 
+                          sx={{
                             color: item.color,
                             mt: 0.5,
                             transition: "transform 0.3s ease",
-                          }} 
+                          }}
                         />
                         <Box>
-                          <Typography 
-                            variant="subtitle1" 
+                          <Typography
+                            variant="subtitle1"
                             className="title"
-                            sx={{ 
+                            sx={{
                               fontWeight: "bold",
                               transition: "color 0.3s ease",
                             }}
@@ -469,51 +474,55 @@ const StudentDashboard = () => {
                 </Grid>
 
                 <Divider sx={{ my: 3 }}>
-                  <Chip 
-                    label="💡 Tính năng nổi bật" 
-                    color="secondary" 
-                    variant="outlined"
+                  <Chip
+                    label="💡 Tính năng nổi bật"
                     sx={{
+                      bgcolor: "#f3e8ff",
+                      color: "#a855f7",
+                      border: "1px solid #e9d5ff",
+                      fontWeight: 600,
                       transition: "all 0.3s ease",
                       "&:hover": {
                         transform: "scale(1.05)",
-                        backgroundColor: "rgba(156, 39, 176, 0.08)",
-                      }
+                        backgroundColor: "#e9d5ff",
+                      },
                     }}
                   />
                 </Divider>
 
-                <List sx={{
-                  "& .MuiListItem-root": {
-                    transition: "all 0.3s ease",
-                    borderRadius: 2,
-                    mb: 1,
-                    "&:hover": {
-                      backgroundColor: "rgba(66, 165, 245, 0.08)",
-                      transform: "translateX(8px)",
-                      "& .MuiListItemIcon-root": {
-                        transform: "scale(1.2) rotate(5deg)",
+                <List
+                  sx={{
+                    "& .MuiListItem-root": {
+                      transition: "all 0.3s ease",
+                      borderRadius: 2,
+                      mb: 1,
+                      "&:hover": {
+                        backgroundColor: "rgba(124, 58, 237, 0.08)",
+                        transform: "translateX(8px)",
+                        "& .MuiListItemIcon-root": {
+                          transform: "scale(1.2) rotate(5deg)",
+                        },
+                        "& .MuiTypography-root": {
+                          color: "#7c3aed",
+                          fontWeight: 600,
+                        },
                       },
-                      "& .MuiTypography-root": {
-                        color: "#1976d2",
-                        fontWeight: 600,
-                      }
-                    }
-                  },
-                  "& .MuiListItemIcon-root": {
-                    transition: "transform 0.3s ease",
-                    minWidth: 40,
-                  }
-                }}>
+                    },
+                    "& .MuiListItemIcon-root": {
+                      transition: "transform 0.3s ease",
+                      minWidth: 40,
+                    },
+                  }}
+                >
                   {[
                     "Điểm danh QR Code: Nhanh chóng, tiện lợi và chính xác",
                     "Quản lý sự kiện: Xem và đăng ký tham gia dễ dàng",
                     "Theo dõi lịch sử: Xem lại các sự kiện đã tham gia",
                     "Thông báo tự động: Nhận thông tin mới nhất về hoạt động",
                   ].map((feature, idx) => (
-                    <ListItem 
-                      key={idx} 
-                      sx={{ 
+                    <ListItem
+                      key={idx}
+                      sx={{
                         px: 2,
                         animation: `fadeSlideIn 0.5s ease ${idx * 0.1}s both`,
                         "@keyframes fadeSlideIn": {
@@ -524,14 +533,14 @@ const StudentDashboard = () => {
                           "100%": {
                             opacity: 1,
                             transform: "translateX(0)",
-                          }
-                        }
+                          },
+                        },
                       }}
                     >
                       <ListItemIcon>
-                        <EmojiEvents 
-                          sx={{ 
-                            color: "#42a5f5",
+                        <EmojiEvents
+                          sx={{
+                            color: "#a855f7",
                             animation: `pulse 2s infinite ${idx * 0.2}s`,
                             "@keyframes pulse": {
                               "0%, 100%": {
@@ -539,17 +548,17 @@ const StudentDashboard = () => {
                               },
                               "50%": {
                                 transform: "scale(1.1)",
-                              }
-                            }
-                          }} 
+                              },
+                            },
+                          }}
                         />
                       </ListItemIcon>
-                      <ListItemText 
+                      <ListItemText
                         primary={feature}
                         sx={{
                           "& .MuiTypography-root": {
                             transition: "all 0.3s ease",
-                          }
+                          },
                         }}
                       />
                     </ListItem>
@@ -567,12 +576,13 @@ const StudentDashboard = () => {
             py: 3,
             px: 2,
             borderRadius: 3,
-            background: "linear-gradient(135deg, #E3F2FD, #FCE4EC)",
-            boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+            background: "linear-gradient(135deg, #faf5ff, #f3e8ff)",
+            border: "1px solid #e9d5ff",
+            boxShadow: "0 4px 12px rgba(124, 58, 237, 0.08)",
             textAlign: "center",
           }}
         >
-          <Typography variant="body1" sx={{ fontWeight: "bold", mb: 1, color: "#1976d2" }}>
+          <Typography variant="body1" sx={{ fontWeight: "bold", mb: 1, color: "#7c3aed" }}>
             🏛️ Nhà Văn hóa Sinh viên - Đại học Quốc gia Việt Nam
           </Typography>
           <Typography variant="body2" color="text.secondary">

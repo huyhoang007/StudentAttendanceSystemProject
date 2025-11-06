@@ -642,7 +642,7 @@ const Report = () => {
           <Grid item xs={12} lg={4}>
             <Stack spacing={3}>
               {/* Method Breakdown */}
-              <Card sx={{ borderRadius: "16px", width: "310px" }}>
+              <Card sx={{ borderRadius: "16px", width: "313px" }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 2 }}>
                     Phân tích phương thức

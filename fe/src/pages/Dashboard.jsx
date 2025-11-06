@@ -31,7 +31,7 @@ const Dashboard = () => {
         minHeight: "100vh",
         py: 6,
         px: 3,
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, #e9d5ff 0%, #f3e8ff 50%, #faf5ff 100%)",
         position: "relative",
         overflow: "hidden",
         "&::before": {
@@ -42,10 +42,10 @@ const Dashboard = () => {
           right: 0,
           bottom: 0,
           background: `
-        radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(240, 147, 251, 0.2) 0%, transparent 50%)
-      `,
+            radial-gradient(circle at 20% 50%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(192, 132, 252, 0.06) 0%, transparent 50%)
+          `,
           animation: "gradientShift 15s ease infinite",
           zIndex: 0,
         },
@@ -72,8 +72,8 @@ const Dashboard = () => {
             mb: 4,
             background: "rgba(255, 255, 255, 0.98)",
             backdropFilter: "blur(20px)",
-            boxShadow: "0 25px 80px rgba(0,0,0,0.2)",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
+            boxShadow: "0 25px 80px rgba(124, 58, 237, 0.12)",
+            border: "1px solid rgba(233, 213, 255, 0.5)",
             position: "relative",
             overflow: "hidden",
             "&::before": {
@@ -83,15 +83,15 @@ const Dashboard = () => {
               left: -2,
               right: -2,
               bottom: -2,
-              background: "linear-gradient(135deg, #667eea, #764ba2, #f093fb)",
+              background: "linear-gradient(135deg, #e9d5ff, #f3e8ff, #faf5ff)",
               borderRadius: 5,
               zIndex: -1,
-              opacity: 0.1,
+              opacity: 0.3,
               animation: "borderGlow 3s ease infinite",
             },
             "@keyframes borderGlow": {
-              "0%, 100%": { opacity: 0.1 },
-              "50%": { opacity: 0.3 },
+              "0%, 100%": { opacity: 0.2 },
+              "50%": { opacity: 0.4 },
             },
           }}
         >
@@ -108,8 +108,9 @@ const Dashboard = () => {
                 width: 110,
                 height: 110,
                 mb: 3,
-                boxShadow: 2,
+                boxShadow: "0 8px 24px rgba(124, 58, 237, 0.15)",
                 padding: "6px",
+                border: "3px solid #f3e8ff",
               }}
             >
               <img
@@ -124,7 +125,7 @@ const Dashboard = () => {
               fontWeight={800}
               sx={{
                 background:
-                  "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)",
+                  "linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%)",
                 backgroundSize: "200% auto",
                 backgroundClip: "text",
                 WebkitBackgroundClip: "text",
@@ -170,11 +171,10 @@ const Dashboard = () => {
                 mt: 3,
                 p: 4,
                 borderRadius: 4,
-                background:
-                  "linear-gradient(135deg, #667eea15 0%, #764ba215 100%)",
+                background: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
                 width: "100%",
-                maxWidth: 1000, // tăng từ 700 -> 1000 để có thêm không gian cho 3 card
-                border: "2px solid rgba(102, 126, 234, 0.2)",
+                maxWidth: 1000,
+                border: "2px solid #e9d5ff",
                 position: "relative",
                 overflow: "hidden",
                 "&::before": {
@@ -185,7 +185,7 @@ const Dashboard = () => {
                   width: "100%",
                   height: "100%",
                   background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)",
+                    "linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.1), transparent)",
                   animation: "shimmer 3s infinite",
                 },
                 "@keyframes shimmer": {
@@ -201,7 +201,7 @@ const Dashboard = () => {
                   fontWeight: 700,
                   color: "#2d3748",
                   mb: 1.5,
-                  textShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                  textShadow: "0 2px 4px rgba(124, 58, 237, 0.08)",
                 }}
               >
                 Xin chào, {user?.firstName || user?.username}! 👋
@@ -243,13 +243,14 @@ const Dashboard = () => {
                     borderRadius: 3,
                     background:
                       role === "admin"
-                        ? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
-                        : "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+                        ? "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)"
+                        : "linear-gradient(135deg, #a855f7 0%, #c084fc 100%)",
                     color: "#fff",
-                    boxShadow: "0 8px 30px rgba(0,0,0,0.18)",
+                    boxShadow: "0 8px 30px rgba(124, 58, 237, 0.25)",
+                    transition: "all 0.3s ease",
                     "&:hover": {
                       transform: "translateY(-3px)",
-                      boxShadow: "0 14px 40px rgba(0,0,0,0.2)",
+                      boxShadow: "0 14px 40px rgba(124, 58, 237, 0.3)",
                     },
                   }}
                 >
@@ -261,7 +262,7 @@ const Dashboard = () => {
                 </Button>
               </Box>
 
-              {/* New quick-action cards section (3 columns) */}
+              {/* Quick-action cards */}
               <Box sx={{ mt: 3 }}>
                 <Grid
                   container
@@ -282,15 +283,17 @@ const Dashboard = () => {
                         borderRadius: 3,
                         textAlign: "center",
                         transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                        border: "1px solid rgba(102,126,234,0.08)",
+                        border: "1px solid #e9d5ff",
+                        bgcolor: "#fefbff",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        height: 180, // Fixed height instead of 100%
+                        height: 180,
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
-                          boxShadow: "0 12px 30px rgba(102,126,234,0.12)",
+                          boxShadow: "0 12px 30px rgba(124, 58, 237, 0.15)",
+                          bgcolor: "#faf5ff",
                         },
                       }}
                     >
@@ -298,7 +301,7 @@ const Dashboard = () => {
                         sx={{
                           mx: "auto",
                           mb: 1.25,
-                          background: "linear-gradient(135deg,#667eea,#764ba2)",
+                          background: "linear-gradient(135deg, #7c3aed, #a855f7)",
                           width: 54,
                           height: 54,
                         }}
@@ -308,27 +311,28 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ 
-                          mb: 0.5, 
-                          fontSize: "1rem", 
-                          overflowWrap: "break-word", 
-                          wordBreak: "break-word", 
-                          height: "1.5em", // Fixed height
+                        sx={{
+                          mb: 0.5,
+                          fontSize: "1rem",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
+                          height: "1.5em",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          color: "#2d3748",
                         }}
                       >
                         Quản lý Sự kiện
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary" 
-                        sx={{ 
-                          fontSize: 13, 
-                          height: "3em", // Fixed height for 2 lines
-                          display: "flex", 
-                          alignItems: "center", 
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: 13,
+                          height: "3em",
+                          display: "flex",
+                          alignItems: "center",
                           justifyContent: "center",
                           px: 1,
                         }}
@@ -347,15 +351,17 @@ const Dashboard = () => {
                         borderRadius: 3,
                         textAlign: "center",
                         transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                        border: "1px solid rgba(118,75,162,0.08)",
+                        border: "1px solid #e9d5ff",
+                        bgcolor: "#fefbff",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        height: 180, // Fixed height
+                        height: 180,
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
-                          boxShadow: "0 12px 30px rgba(118,75,162,0.12)",
+                          boxShadow: "0 12px 30px rgba(168, 85, 247, 0.15)",
+                          bgcolor: "#faf5ff",
                         },
                       }}
                     >
@@ -363,7 +369,7 @@ const Dashboard = () => {
                         sx={{
                           mx: "auto",
                           mb: 1.25,
-                          background: "linear-gradient(135deg,#764ba2,#f093fb)",
+                          background: "linear-gradient(135deg, #a855f7, #c084fc)",
                           width: 54,
                           height: 54,
                         }}
@@ -373,27 +379,28 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ 
-                          mb: 0.5, 
-                          fontSize: "1rem", 
-                          overflowWrap: "break-word", 
-                          wordBreak: "break-word", 
+                        sx={{
+                          mb: 0.5,
+                          fontSize: "1rem",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
                           height: "1.5em",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          color: "#2d3748",
                         }}
                       >
                         Điểm danh QR
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary" 
-                        sx={{ 
-                          fontSize: 13, 
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: 13,
                           height: "3em",
-                          display: "flex", 
-                          alignItems: "center", 
+                          display: "flex",
+                          alignItems: "center",
                           justifyContent: "center",
                           px: 1,
                         }}
@@ -412,15 +419,17 @@ const Dashboard = () => {
                         borderRadius: 3,
                         textAlign: "center",
                         transition: "transform 0.25s ease, box-shadow 0.25s ease",
-                        border: "1px solid rgba(245,87,108,0.08)",
+                        border: "1px solid #e9d5ff",
+                        bgcolor: "#fefbff",
                         display: "flex",
                         flexDirection: "column",
                         justifyContent: "center",
-                        height: 180, // Fixed height
+                        height: 180,
                         overflow: "visible",
                         "&:hover": {
                           transform: "translateY(-6px)",
-                          boxShadow: "0 12px 30px rgba(245,87,108,0.12)",
+                          boxShadow: "0 12px 30px rgba(192, 132, 252, 0.15)",
+                          bgcolor: "#faf5ff",
                         },
                       }}
                     >
@@ -428,7 +437,7 @@ const Dashboard = () => {
                         sx={{
                           mx: "auto",
                           mb: 1.25,
-                          background: "linear-gradient(135deg,#f5576c,#f093fb)",
+                          background: "linear-gradient(135deg, #c084fc, #e9d5ff)",
                           width: 54,
                           height: 54,
                         }}
@@ -438,27 +447,28 @@ const Dashboard = () => {
                       <Typography
                         variant="subtitle1"
                         fontWeight={700}
-                        sx={{ 
-                          mb: 0.5, 
-                          fontSize: "1rem", 
-                          overflowWrap: "break-word", 
-                          wordBreak: "break-word", 
+                        sx={{
+                          mb: 0.5,
+                          fontSize: "1rem",
+                          overflowWrap: "break-word",
+                          wordBreak: "break-word",
                           height: "1.5em",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          color: "#2d3748",
                         }}
                       >
                         Báo cáo & Thống kê
                       </Typography>
-                      <Typography 
-                        variant="caption" 
-                        color="text.secondary" 
-                        sx={{ 
-                          fontSize: 13, 
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontSize: 13,
                           height: "3em",
-                          display: "flex", 
-                          alignItems: "center", 
+                          display: "flex",
+                          alignItems: "center",
                           justifyContent: "center",
                           px: 1,
                         }}
@@ -469,9 +479,9 @@ const Dashboard = () => {
                   </Grid>
                 </Grid>
               </Box>
-               </Box>
-             </Box>
-           </Card>
+            </Box>
+          </Box>
+        </Card>
 
         {/* Info Cards */}
         <Grid
@@ -493,8 +503,8 @@ const Dashboard = () => {
                 borderRadius: 4,
                 background: "rgba(255, 255, 255, 0.98)",
                 backdropFilter: "blur(20px)",
-                boxShadow: "0 12px 40px rgba(102, 126, 234, 0.15)",
-                border: "1px solid rgba(102, 126, 234, 0.1)",
+                boxShadow: "0 12px 40px rgba(124, 58, 237, 0.12)",
+                border: "1px solid #e9d5ff",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 position: "relative",
                 overflow: "hidden",
@@ -505,14 +515,14 @@ const Dashboard = () => {
                   left: 0,
                   width: "100%",
                   height: "4px",
-                  background: "linear-gradient(90deg, #667eea, #764ba2)",
+                  background: "linear-gradient(90deg, #7c3aed, #a855f7)",
                   transform: "scaleX(0)",
                   transformOrigin: "left",
                   transition: "transform 0.4s ease",
                 },
                 "&:hover": {
                   transform: "translateY(-12px) scale(1.02)",
-                  boxShadow: "0 20px 60px rgba(102, 126, 234, 0.25)",
+                  boxShadow: "0 20px 60px rgba(124, 58, 237, 0.2)",
                   "&::before": {
                     transform: "scaleX(1)",
                   },
@@ -522,12 +532,11 @@ const Dashboard = () => {
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                 <Avatar
                   sx={{
-                    background:
-                      "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    background: "linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)",
                     width: 64,
                     height: 64,
                     mr: 2,
-                    boxShadow: "0 8px 20px rgba(102, 126, 234, 0.3)",
+                    boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)",
                   }}
                 >
                   <EventIcon sx={{ color: "#fff", fontSize: 36 }} />
@@ -568,8 +577,8 @@ const Dashboard = () => {
                   label="📝 Tạo sự kiện"
                   size="small"
                   sx={{
-                    bgcolor: "#667eea15",
-                    color: "#667eea",
+                    bgcolor: "#f3e8ff",
+                    color: "#7c3aed",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -578,8 +587,8 @@ const Dashboard = () => {
                   label="🕐 Quản lý phiên"
                   size="small"
                   sx={{
-                    bgcolor: "#764ba215",
-                    color: "#764ba2",
+                    bgcolor: "#faf5ff",
+                    color: "#a855f7",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -588,8 +597,8 @@ const Dashboard = () => {
                   label="👥 Quản lý sinh viên"
                   size="small"
                   sx={{
-                    bgcolor: "#f093fb15",
-                    color: "#f093fb",
+                    bgcolor: "#fefbff",
+                    color: "#c084fc",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -606,8 +615,8 @@ const Dashboard = () => {
                 borderRadius: 4,
                 background: "rgba(255, 255, 255, 0.98)",
                 backdropFilter: "blur(20px)",
-                boxShadow: "0 12px 40px rgba(118, 75, 162, 0.15)",
-                border: "1px solid rgba(118, 75, 162, 0.1)",
+                boxShadow: "0 12px 40px rgba(168, 85, 247, 0.12)",
+                border: "1px solid #e9d5ff",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 position: "relative",
                 overflow: "hidden",
@@ -618,14 +627,14 @@ const Dashboard = () => {
                   left: 0,
                   width: "100%",
                   height: "4px",
-                  background: "linear-gradient(90deg, #764ba2, #f093fb)",
+                  background: "linear-gradient(90deg, #a855f7, #c084fc)",
                   transform: "scaleX(0)",
                   transformOrigin: "left",
                   transition: "transform 0.4s ease",
                 },
                 "&:hover": {
                   transform: "translateY(-12px) scale(1.02)",
-                  boxShadow: "0 20px 60px rgba(118, 75, 162, 0.25)",
+                  boxShadow: "0 20px 60px rgba(168, 85, 247, 0.2)",
                   "&::before": {
                     transform: "scaleX(1)",
                   },
@@ -635,12 +644,11 @@ const Dashboard = () => {
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                 <Avatar
                   sx={{
-                    background:
-                      "linear-gradient(135deg, #764ba2 0%, #f093fb 100%)",
+                    background: "linear-gradient(135deg, #a855f7 0%, #c084fc 100%)",
                     width: 64,
                     height: 64,
                     mr: 2,
-                    boxShadow: "0 8px 20px rgba(118, 75, 162, 0.3)",
+                    boxShadow: "0 8px 20px rgba(168, 85, 247, 0.25)",
                   }}
                 >
                   <CheckCircleIcon sx={{ color: "#fff", fontSize: 36 }} />
@@ -683,8 +691,8 @@ const Dashboard = () => {
                   label="📱 Quét QR"
                   size="small"
                   sx={{
-                    bgcolor: "#764ba215",
-                    color: "#764ba2",
+                    bgcolor: "#f3e8ff",
+                    color: "#a855f7",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -693,8 +701,8 @@ const Dashboard = () => {
                   label="✍️ Check-in thủ công"
                   size="small"
                   sx={{
-                    bgcolor: "#f093fb15",
-                    color: "#f093fb",
+                    bgcolor: "#faf5ff",
+                    color: "#c084fc",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -703,8 +711,8 @@ const Dashboard = () => {
                   label="🕒 Theo dõi thời gian"
                   size="small"
                   sx={{
-                    bgcolor: "#f5576c15",
-                    color: "#f5576c",
+                    bgcolor: "#fefbff",
+                    color: "#7c3aed",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -721,8 +729,8 @@ const Dashboard = () => {
                 borderRadius: 4,
                 background: "rgba(255, 255, 255, 0.98)",
                 backdropFilter: "blur(20px)",
-                boxShadow: "0 12px 40px rgba(245, 87, 108, 0.15)",
-                border: "1px solid rgba(245, 87, 108, 0.1)",
+                boxShadow: "0 12px 40px rgba(192, 132, 252, 0.12)",
+                border: "1px solid #e9d5ff",
                 transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 position: "relative",
                 overflow: "hidden",
@@ -733,14 +741,14 @@ const Dashboard = () => {
                   left: 0,
                   width: "100%",
                   height: "4px",
-                  background: "linear-gradient(90deg, #f5576c, #f093fb)",
+                  background: "linear-gradient(90deg, #c084fc, #e9d5ff)",
                   transform: "scaleX(0)",
                   transformOrigin: "left",
                   transition: "transform 0.4s ease",
                 },
                 "&:hover": {
                   transform: "translateY(-12px) scale(1.02)",
-                  boxShadow: "0 20px 60px rgba(245, 87, 108, 0.25)",
+                  boxShadow: "0 20px 60px rgba(192, 132, 252, 0.2)",
                   "&::before": {
                     transform: "scaleX(1)",
                   },
@@ -750,12 +758,11 @@ const Dashboard = () => {
               <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
                 <Avatar
                   sx={{
-                    background:
-                      "linear-gradient(135deg, #f5576c 0%, #f093fb 100%)",
+                    background: "linear-gradient(135deg, #c084fc 0%, #e9d5ff 100%)",
                     width: 64,
                     height: 64,
                     mr: 2,
-                    boxShadow: "0 8px 20px rgba(245, 87, 108, 0.3)",
+                    boxShadow: "0 8px 20px rgba(192, 132, 252, 0.25)",
                   }}
                 >
                   <PeopleIcon sx={{ color: "#fff", fontSize: 36 }} />
@@ -797,8 +804,8 @@ const Dashboard = () => {
                   label="📊 Dashboard thống kê"
                   size="small"
                   sx={{
-                    bgcolor: "#f5576c15",
-                    color: "#f5576c",
+                    bgcolor: "#f3e8ff",
+                    color: "#c084fc",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -807,8 +814,8 @@ const Dashboard = () => {
                   label="📥 Xuất Excel/PDF"
                   size="small"
                   sx={{
-                    bgcolor: "#f093fb15",
-                    color: "#f093fb",
+                    bgcolor: "#faf5ff",
+                    color: "#a855f7",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
@@ -817,8 +824,8 @@ const Dashboard = () => {
                   label="📈 Phân tích xu hướng"
                   size="small"
                   sx={{
-                    bgcolor: "#43e97b15",
-                    color: "#43e97b",
+                    bgcolor: "#fefbff",
+                    color: "#7c3aed",
                     fontWeight: 600,
                     justifyContent: "flex-start",
                   }}
