@@ -352,6 +352,7 @@ const Report = () => {
                   Sự kiện
                 </Typography>
                 <FormControl fullWidth size="small" sx={{
+                  minWidth: 150,
                   '& .MuiOutlinedInput-root': {
                     '&.Mui-focused fieldset': {
                       borderColor: '#7c3aed',
@@ -387,6 +388,7 @@ const Report = () => {
                   Trường đại học
                 </Typography>
                 <FormControl fullWidth size="small" sx={{
+                  minWidth: 150,
                   '& .MuiOutlinedInput-root': {
                     '&.Mui-focused fieldset': {
                       borderColor: '#7c3aed',
@@ -452,9 +454,12 @@ const Report = () => {
                     bgGradient: "linear-gradient(135deg, #fdf4ff 0%, #f5d0fe 100%)",
                   },
                 ].map((item) => (
-                  <Grid item xs={12} sm={6} md={4} key={item.title}>
+                  <Grid item xs={12} sm={6} md={4} key={item.title} sx={{ display: 'flex' , width: "255px"}}>
                     <Card
                       sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        flex: 1,
                         p: 2.5,
                         borderRadius: "16px",
                         background: item.bgGradient,
@@ -466,7 +471,7 @@ const Report = () => {
                           transform: "translateY(-4px)",
                         },
                         "&::before": {
-                          content: '""',
+                          content: '\"\"',
                           position: "absolute",
                           top: 0,
                           right: 0,
@@ -637,7 +642,7 @@ const Report = () => {
           <Grid item xs={12} lg={4}>
             <Stack spacing={3}>
               {/* Method Breakdown */}
-              <Card sx={{ borderRadius: "16px" }}>
+              <Card sx={{ borderRadius: "16px", width: "310px" }}>
                 <CardContent>
                   <Typography variant="h6" sx={{ mb: 2 }}>
                     Phân tích phương thức
