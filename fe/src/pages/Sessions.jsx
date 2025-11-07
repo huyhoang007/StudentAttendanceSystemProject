@@ -699,7 +699,7 @@ const Sessions = () => {
         <DialogTitle
           sx={{
             fontWeight: 700,
-            bgcolor: purple.main,
+            background: "linear-gradient(90deg, #6a1b9a 0%, #ab47bc 100%)",
             color: purple.contrastText,
             py: 2,
             px: 3,
@@ -719,7 +719,7 @@ const Sessions = () => {
           )}
         </DialogTitle>
 
-        <DialogContent sx={{ backgroundColor: '#f9f9f9', p: 3 }}>
+        <DialogContent sx={{ backgroundColor: '#fce0f3ff', p: 3 }}>
           <Paper
             elevation={0}
             sx={{
@@ -727,7 +727,8 @@ const Sessions = () => {
               borderRadius: 2,
               border: `1px solid ${alpha(purple.main, 0.2)}`,
               bgcolor: 'white',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.04)'
+              boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+              marginTop: 3,
             }}
           >
             {!selectedEventId && (

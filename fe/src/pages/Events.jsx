@@ -655,6 +655,7 @@ const Events = () => {
               // backgroundColor và color đã được định nghĩa trong theme.components.MuiDialogTitle
               py: 1.5,
               px: 3,
+              background: "linear-gradient(135deg, #673ab7 0%, #9c27b0 100%)"
             }}
           >
             {editId ? "✏️ Chỉnh sửa sự kiện" : "🗓️ Thêm sự kiện mới"}
@@ -669,9 +670,10 @@ const Events = () => {
             <Box
               sx={{
                 borderRadius: 2,
-                border: "1px solid #e0e0e0",
+                border: "1px solid #f9f9f9ff",
                 bgcolor: "white",
                 p: 3,
+                marginTop: 3,
               }}
             >
               {role === "organizer" && organizerInfo && (

@@ -343,7 +343,7 @@ const AdminUserManagement = () => {
           sx={{
             mb: 3,
             borderRadius: "24px",
-            background: "linear-gradient(135deg, #864ce8ff 0%, #864ce8ff 100%)",
+            background: "linear-gradient(90deg, #6a1b9a 0%, #ab47bc 100%)",
             boxShadow: "0 8px 24px rgba(124, 58, 237, 0.3)",
           }}
         >
@@ -488,7 +488,7 @@ const AdminUserManagement = () => {
             <Card
               sx={{
                 borderRadius: "20px",
-                background: "linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)",
+                background: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
                 boxShadow: "0 2px 8px rgba(139, 92, 246, 0.1)",
                 transition: "all 0.3s ease",
                 position: "relative",
@@ -545,7 +545,7 @@ const AdminUserManagement = () => {
             <Card
               sx={{
                 borderRadius: "20px",
-                background: "linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%)",
+                background: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
                 boxShadow: "0 2px 8px rgba(147, 51, 234, 0.1)",
                 transition: "all 0.3s ease",
                 position: "relative",
@@ -602,7 +602,7 @@ const AdminUserManagement = () => {
             <Card
               sx={{
                 borderRadius: "20px",
-                background: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)",
+                background: "linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)",
                 boxShadow: "0 2px 8px rgba(168, 85, 247, 0.1)",
                 transition: "all 0.3s ease",
                 position: "relative",
