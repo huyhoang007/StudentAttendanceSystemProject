@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Typography,
   Box,
@@ -19,29 +19,78 @@ import {
   Chip,
   Paper,
   Stack,
-  TablePagination, // <-- THÊM IMPORT NÀY
-  Container, // Giữ lại Container để căn giữa tổng thể
+  TablePagination,
+  Container,
+  CircularProgress,
 } from "@mui/material";
 import {
   FileDownload,
-  PictureAsPdf,
   Assessment,
-  TrendingUp,
-  TrendingDown, // <-- THÊM LẠI TrendingDown
   Group,
   EventNote,
   FilterList,
   QrCode,
   Edit,
-  CheckCircleOutline, // <-- THÊM LẠI CheckCircleOutline
-  ArrowUpward,      // <-- THÊM LẠI ArrowUpward
-  ArrowDownward,    // <-- THÊM LẠI ArrowDownward
+  CheckCircleOutline,
 } from "@mui/icons-material";
-import { exportExcel, exportPDF } from "../services/reportService";
+import { exportExcel } from "../services/reportService";
 import { getCheckIns } from "../services/sessionCheckInService";
 import { getEvents } from "../services/eventService";
 import { getUniversities } from "../services/universityService";
 import { useAuth } from "../contexts/AuthContext";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const METHOD_PRIORITY = { qr: 0, manual: 1 };
+const EMPTY_DATA_NOTE = "Không có dữ liệu phù hợp với bộ lọc hiện tại.";
+
+const formatDateTimeDisplay = (value) => {
+  if (!value) {
+    return "Không rõ";
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "Không rõ";
+  }
+  return new Intl.DateTimeFormat("vi-VN", {
+    hour12: false,
+    dateStyle: "short",
+    timeStyle: "medium",
+  }).format(date);
+};
+
+const extractDateKey = (value) => {
+  if (!value && value !== 0) {
+    return null;
+  }
+  const match = String(value).match(/\d{4}-\d{2}-\d{2}/);
+  return match ? match[0] : null;
+};
+
+const toDateKey = (value) => {
+  if (!value && value !== 0) {
+    return null;
+  }
+  const direct = extractDateKey(value);
+  if (direct) {
+    return direct;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeGuid = (value) => {
+  if (!value && value !== 0) {
+    return "";
+  }
+  return String(value).toLowerCase();
+};
 
 const Report = () => {
   const { user, role } = useAuth();
@@ -58,6 +107,14 @@ const Report = () => {
   // --- THÊM STATE CHO PHÂN TRANG ---
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+
+  const isDateRangeInvalid = useMemo(() => {
+    if (!filters.startDate || !filters.endDate) {
+      return false;
+    }
+    return filters.startDate > filters.endDate;
+  }, [filters.startDate, filters.endDate]);
 
   // =================================================================
   // LOGIC ĐƯỢC GIỮ NGUYÊN (CHỈ XÓA MOCK DATA)
@@ -143,35 +200,90 @@ const Report = () => {
     fetchUniversities();
   }, [role, user, fetchUniversities, fetchData, fetchEvents]);
 
-  // LOGIC LỌC VÀ TÍNH TOÁN CỦA BẠN ĐƯỢC GIỮ NGUYÊN
-  const filteredData = data.filter((item) => {
-    const checkinTime = item.checkinTime || item.checkin_time;
-    if (!checkinTime) return false;
+  const sessionIdToEvent = useMemo(() => {
+    const map = new Map();
+    events.forEach((event) => {
+      const sessions = Array.isArray(event.sessions) ? event.sessions : [];
+      sessions.forEach((session) => {
+        const key = normalizeGuid(session.sessionId || session.SessionId);
+        if (key) {
+          map.set(key, event);
+        }
+      });
+    });
+    return map;
+  }, [events]);
 
-    const checkinDate = new Date(checkinTime).toISOString().slice(0, 10);
-    if (filters.startDate && checkinDate < filters.startDate) return false;
-    if (filters.endDate && checkinDate > filters.endDate) return false;
+  const eventIdToEvent = useMemo(() => {
+    const map = new Map();
+    events.forEach((event) => {
+      const key = normalizeGuid(event.eventId || event.EventId);
+      if (key) {
+        map.set(key, event);
+      }
+    });
+    return map;
+  }, [events]);
 
-    if (filters.eventId) {
-      const event = events.find(
-        (e) =>
-          (Array.isArray(e.sessions) &&
-            e.sessions.some((s) => s.sessionId === item.sessionId)) ||
-          e.eventId === item.sessionId // Assuming sessionId might sometimes match eventId if structure is inconsistent
+  const availableEvents = useMemo(() => {
+    if (!Array.isArray(events)) {
+      return [];
+    }
+
+    const universityFilter = normalizeGuid(filters.universityId);
+    const startFilter = filters.startDate || "";
+    const endFilter = filters.endDate || "";
+
+    return events
+      .map((event) => {
+        const eventId = event.eventId || event.EventId;
+        const eventIdKey = normalizeGuid(eventId);
+        const universityKey = normalizeGuid(
+          event.universityId || event.UniversityId
+        );
+        const startKey = toDateKey(event.startDate || event.StartDate);
+        const endKey = toDateKey(event.endDate || event.EndDate) || startKey;
+
+        return {
+          ...event,
+          eventId,
+          eventIdKey,
+          universityKey,
+          startKey,
+          endKey,
+        };
+      })
+      .filter((event) => {
+        if (universityFilter && event.universityKey !== universityFilter) {
+          return false;
+        }
+        if (startFilter && event.endKey && event.endKey < startFilter) {
+          return false;
+        }
+        if (endFilter && event.startKey && event.startKey > endFilter) {
+          return false;
+        }
+        return true;
+      })
+      .sort((a, b) =>
+        (a.title || "").localeCompare(b.title || "", "vi", {
+          sensitivity: "base",
+        })
       );
-      if (!event || event.eventId !== filters.eventId) return false;
-    }
+  }, [events, filters.universityId, filters.startDate, filters.endDate]);
 
-
-    if (
-      filters.universityId &&
-      (item.universityId || item.university_id) !== filters.universityId
-    ) {
-      return false;
-    }
-
-    return true;
-  });
+  useEffect(() => {
+    setFilters((prev) => {
+      if (!prev.eventId) {
+        return prev;
+      }
+      const current = normalizeGuid(prev.eventId);
+      const stillValid = availableEvents.some(
+        (event) => event.eventIdKey === current
+      );
+      return stillValid ? prev : { ...prev, eventId: "" };
+    });
+  }, [availableEvents]);
 
   // --- THÊM useEffect ĐỂ RESET TRANG KHI BỘ LỌC THAY ĐỔI ---
   useEffect(() => {
@@ -185,61 +297,393 @@ const Report = () => {
 
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0); // Quay về trang đầu tiên
+    setPage(0);
   };
 
-  const analytics = {
-    totalCheckIns: filteredData.length,
-    uniqueStudents: new Set(
-      filteredData.map((d) => d.studentId || d.student_id)
-    ).size,
-    uniqueEvents: new Set(
-      filteredData.map((d) => d.eventId || d.event_id || d.sessionId) // Consider sessionId as well for uniqueness
-    ).size,
-    averageCheckInsPerEvent:
-      filteredData.length > 0 &&
-      new Set(filteredData.map((d) => d.eventId || d.event_id || d.sessionId))
-        .size > 0
-        ? (
-            filteredData.length /
-            new Set(
-              filteredData.map((d) => d.eventId || d.event_id || d.sessionId)
-            ).size
-          ).toFixed(2)
-        : 0,
-    methodBreakdown: {
-      qr: filteredData.filter((d) => (d.method || "").toLowerCase() === "qr")
-        .length,
-      manual: filteredData.filter(
-        (d) => (d.method || "").toLowerCase() !== "qr"
-      ).length,
-    },
-  };
+  const selectedUniversity = useMemo(() => {
+    if (!filters.universityId) {
+      return null;
+    }
+    return (
+      universities.find((uni) => {
+        const id = uni.universityId || uni.id || uni.UniversityId;
+        return id && String(id) === filters.universityId;
+      }) || null
+    );
+  }, [universities, filters.universityId]);
 
-  // Tính toán tỷ lệ phần trăm cho thanh phân tích
+  const selectedUniversityName =
+    selectedUniversity?.name || selectedUniversity?.Name || "";
+
+  const selectedEvent = useMemo(() => {
+    const eventIdKey = normalizeGuid(filters.eventId);
+    if (!eventIdKey) {
+      return null;
+    }
+    return (
+      availableEvents.find((event) => event.eventIdKey === eventIdKey) || null
+    );
+  }, [availableEvents, filters.eventId]);
+
+  const eventsForSummary = useMemo(() => {
+    const eventIdKey = normalizeGuid(filters.eventId);
+    if (eventIdKey) {
+      return availableEvents.filter((event) => event.eventIdKey === eventIdKey);
+    }
+    return availableEvents;
+  }, [availableEvents, filters.eventId]);
+
+  const enrichedCheckins = useMemo(() => {
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    return data.map((item, index) => {
+      const sessionId =
+        item.sessionId || item.session_id || item.SessionId || null;
+      const sessionKey = normalizeGuid(sessionId);
+      const eventFromSession = sessionKey
+        ? sessionIdToEvent.get(sessionKey)
+        : undefined;
+      const eventIdRaw = item.eventId || item.event_id || item.EventId || null;
+      const eventKey = normalizeGuid(eventIdRaw);
+      const eventFromId = eventKey ? eventIdToEvent.get(eventKey) : undefined;
+      const eventData = eventFromSession || eventFromId || null;
+
+      const mergedEventId =
+        normalizeGuid(
+          eventData?.eventId ||
+            eventData?.EventId ||
+            eventIdRaw ||
+            sessionId
+        ) || "";
+
+      const eventTitle =
+        eventData?.title ||
+        eventData?.Title ||
+        item.eventTitle ||
+        item.event_name ||
+        item.sessionTitle ||
+        item.eventName ||
+        "Không rõ";
+
+      const universityIdKey =
+        normalizeGuid(
+          eventData?.universityId ||
+            eventData?.UniversityId ||
+            item.universityId ||
+            item.university_id ||
+            item.UniversityId
+        ) || "";
+
+      const checkinTime =
+        item.checkinTime || item.checkin_time || item.CheckinTime || null;
+      const checkinDateKey = toDateKey(checkinTime);
+
+      const studentName =
+        item.studentName || item.student_name || item.StudentName || "";
+      const studentCode =
+        item.studentCode || item.student_code || item.StudentCode || "";
+      const studentIdKey = normalizeGuid(
+        item.studentId ||
+          item.student_id ||
+          item.StudentId ||
+          item.studentInEventId ||
+          item.student_in_event_id
+      );
+
+      const methodNormalized =
+        (item.method || item.Method || "").trim().toLowerCase() === "qr"
+          ? "qr"
+          : "manual";
+
+      const checkinId =
+        item.checkinId ||
+        item.checkin_id ||
+        item.CheckinId ||
+        `${sessionId || "checkin"}-${index}`;
+
+      const studentKey =
+        studentIdKey ||
+        (studentCode
+          ? `code:${studentCode.toLowerCase()}`
+          : `name:${studentName.toLowerCase()}-${checkinId}`);
+
+      return {
+        original: item,
+        checkinId,
+        sessionId: sessionKey,
+        eventId: mergedEventId,
+        eventTitle,
+        universityId: universityIdKey,
+        checkinTime,
+        checkinDateKey,
+        studentName,
+        studentCode,
+        studentId: studentIdKey,
+        studentKey,
+        methodNormalized,
+      };
+    });
+  }, [data, sessionIdToEvent, eventIdToEvent]);
+
+  const filteredRows = useMemo(() => {
+    const startKey = filters.startDate || "";
+    const endKey = filters.endDate || "";
+    const universityKey = normalizeGuid(filters.universityId);
+    const eventKey = normalizeGuid(filters.eventId);
+
+    return enrichedCheckins.filter((row) => {
+      if (!row.checkinDateKey) {
+        return false;
+      }
+      if (startKey && row.checkinDateKey < startKey) {
+        return false;
+      }
+      if (endKey && row.checkinDateKey > endKey) {
+        return false;
+      }
+      if (universityKey && row.universityId !== universityKey) {
+        return false;
+      }
+      if (eventKey && row.eventId !== eventKey) {
+        return false;
+      }
+      return true;
+    });
+  }, [enrichedCheckins, filters.startDate, filters.endDate, filters.universityId, filters.eventId]);
+
+  const sortedRows = useMemo(() => {
+    return filteredRows.slice().sort((a, b) => {
+      const eventCompare = (a.eventTitle || "").localeCompare(
+        b.eventTitle || "",
+        "vi",
+        { sensitivity: "base" }
+      );
+      if (eventCompare !== 0) {
+        return eventCompare;
+      }
+      const studentCompare = (a.studentName || "").localeCompare(
+        b.studentName || "",
+        "vi",
+        { sensitivity: "base" }
+      );
+      if (studentCompare !== 0) {
+        return studentCompare;
+      }
+      return (
+        (METHOD_PRIORITY[a.methodNormalized] ?? 99) -
+        (METHOD_PRIORITY[b.methodNormalized] ?? 99)
+      );
+    });
+  }, [filteredRows]);
+
+  const preparedRows = useMemo(() => {
+    return sortedRows.map((row) => ({
+      ...row,
+      displayCheckinTime: formatDateTimeDisplay(row.checkinTime),
+      methodLabel: row.methodNormalized === "qr" ? "QR Code" : "Thủ công",
+      statusLabel: "Đã check-in",
+    }));
+  }, [sortedRows]);
+
+  const eventSummaries = useMemo(() => {
+    const summaryMap = new Map();
+
+    eventsForSummary.forEach((event) => {
+      const key = event.eventIdKey;
+      if (!key || summaryMap.has(key)) {
+        return;
+      }
+      summaryMap.set(key, {
+        eventId: event.eventId,
+        title: event.title || "Không rõ",
+        startDate: event.startKey,
+        endDate: event.endKey,
+        totalCheckIns: 0,
+        uniqueStudents: 0,
+        qrCount: 0,
+        manualCount: 0,
+        _studentSet: new Set(),
+      });
+    });
+
+    sortedRows.forEach((row) => {
+      const summary = summaryMap.get(row.eventId);
+      if (!summary) {
+        return;
+      }
+      summary.totalCheckIns += 1;
+      if (row.methodNormalized === "qr") {
+        summary.qrCount += 1;
+      } else {
+        summary.manualCount += 1;
+      }
+      summary._studentSet.add(row.studentKey);
+    });
+
+    summaryMap.forEach((summary) => {
+      summary.uniqueStudents = summary._studentSet.size;
+      delete summary._studentSet;
+    });
+
+    return Array.from(summaryMap.values()).sort((a, b) =>
+      (a.title || "").localeCompare(b.title || "", "vi", {
+        sensitivity: "base",
+      })
+    );
+  }, [eventsForSummary, sortedRows]);
+
+  const analytics = useMemo(() => {
+    const uniqueStudentKeys = new Set();
+    let qr = 0;
+    let manual = 0;
+
+    sortedRows.forEach((row) => {
+      uniqueStudentKeys.add(row.studentKey);
+      if (row.methodNormalized === "qr") {
+        qr += 1;
+      } else {
+        manual += 1;
+      }
+    });
+
+    return {
+      totalCheckIns: sortedRows.length,
+      uniqueStudents: uniqueStudentKeys.size,
+      uniqueEvents: eventSummaries.length,
+      methodBreakdown: {
+        qr,
+        manual,
+      },
+    };
+  }, [sortedRows, eventSummaries]);
+
   const totalMethods =
     analytics.methodBreakdown.qr + analytics.methodBreakdown.manual;
-  const qrPercentage =
-    totalMethods > 0 ? (analytics.methodBreakdown.qr / totalMethods) * 100 : 0;
-  const manualPercentage =
-    totalMethods > 0
-      ? (analytics.methodBreakdown.manual / totalMethods) * 100
-      : 0;
+  const qrPercentage = totalMethods
+    ? (analytics.methodBreakdown.qr / totalMethods) * 100
+    : 0;
+  const manualPercentage = totalMethods
+    ? (analytics.methodBreakdown.manual / totalMethods) * 100
+    : 0;
 
-  // Tính toán số sự kiện đang diễn ra (logic mới cho thông tin bổ sung)
-  const ongoingEvents = events.filter((event) => {
-    const now = new Date();
-    const startDate = event.startDate ? new Date(event.startDate) : null;
-    const endDate = event.endDate ? new Date(event.endDate) : null;
-    return startDate && endDate && now >= startDate && now <= endDate;
-  }).length;
+  const detailRowsForExport = useMemo(() => {
+    return preparedRows.map((row) => ({
+      eventName: row.eventTitle,
+      studentName: row.studentName || "Không rõ",
+      studentCode: row.studentCode || "",
+      checkedAt: row.displayCheckinTime,
+      method: row.methodLabel,
+      status: row.statusLabel,
+    }));
+  }, [preparedRows]);
 
-  // Mock trends (có thể thay bằng dữ liệu thực từ API)
-  const mockTrends = {
-    checkIns: { value: 12, isUp: true },
-    students: { value: 8, isUp: true },
-    events: { value: 3, isUp: false },
-  };
+  const paginatedRows = useMemo(() => {
+    if (rowsPerPage === -1) {
+      return preparedRows;
+    }
+    const start = page * rowsPerPage;
+    return preparedRows.slice(start, start + rowsPerPage);
+  }, [preparedRows, page, rowsPerPage]);
+
+  const createExportPayload = useCallback(
+    (generatedAt) => ({
+      filters,
+      universityName: selectedUniversityName || "",
+      eventName: selectedEvent?.title || selectedEvent?.Title,
+      analytics,
+      methodBreakdown: analytics.methodBreakdown,
+      eventSummaries,
+      detailRows: detailRowsForExport,
+      generatedAt,
+      includeEventSummary: !filters.eventId,
+      noteWhenEmpty: EMPTY_DATA_NOTE,
+    }),
+    [
+      analytics,
+      detailRowsForExport,
+      eventSummaries,
+      filters,
+      selectedEvent,
+      selectedUniversityName,
+    ]
+  );
+
+  const isExportEnabled = Boolean(
+    filters.universityId &&
+      filters.startDate &&
+      filters.endDate &&
+      !isDateRangeInvalid
+  );
+
+  const dateErrorMessage =
+    "Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc.";
+
+  const handleResetFilters = useCallback(() => {
+    setFilters({
+      startDate: "",
+      endDate: "",
+      eventId: "",
+      universityId: "",
+    });
+  }, [setFilters]);
+
+  const handleUniversityChange = useCallback((event) => {
+    const { value } = event.target;
+    setFilters((prev) => ({
+      ...prev,
+      universityId: value,
+      eventId: "",
+    }));
+  }, [setFilters]);
+
+  const handleEventChange = useCallback((event) => {
+    const { value } = event.target;
+    setFilters((prev) => ({
+      ...prev,
+      eventId: value,
+    }));
+  }, [setFilters]);
+
+  const handleDateChange = useCallback(
+    (field) => (event) => {
+      const { value } = event.target;
+      setFilters((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    },
+    [setFilters]
+  );
+
+  const notifyMissingFilters = useCallback(() => {
+    toast.warning(
+      "Vui lòng chọn trường và khoảng thời gian hợp lệ trước khi xuất."
+    );
+  }, []);
+
+  const handleExportExcel = useCallback(async () => {
+    if (!isExportEnabled) {
+      notifyMissingFilters();
+      return;
+    }
+    const generationTime = new Date();
+    const payload = createExportPayload(generationTime);
+    try {
+      setIsExportingExcel(true);
+      await exportExcel(payload);
+      toast.success("Xuất Excel thành công.");
+    } catch (error) {
+      console.error("Xuất Excel thất bại:", error);
+      toast.error(
+        error?.message
+          ? `Xuất Excel thất bại: ${error.message}`
+          : "Xuất Excel thất bại."
+      );
+    } finally {
+      setIsExportingExcel(false);
+    }
+  }, [createExportPayload, isExportEnabled, notifyMissingFilters]);
 
   // =================================================================
   // GIAO DIỆN MỚI BẮT ĐẦU TỪ ĐÂY
@@ -277,12 +721,7 @@ const Report = () => {
               <Button
                 variant="text"
                 size="large"
-                onClick={() => setFilters({
-                  startDate: "",
-                  endDate: "",
-                  eventId: "",
-                  universityId: "",
-                })}
+                onClick={handleResetFilters}
                 sx={{
                   color: "#7c3aed",
                   "&:hover": {
@@ -295,8 +734,96 @@ const Report = () => {
             </Stack>
             
             <Grid container spacing={2} sx={{ mb: 2 }}>
-              {/* Bộ lọc ngày */}
+              {/* Bộ lọc trường */}
               <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+                  Trường đại học
+                </Typography>
+                <FormControl
+                  fullWidth
+                  size="small"
+                  sx={{
+                    minWidth: 150,
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#7c3aed',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#7c3aed',
+                    },
+                  }}
+                >
+                  <InputLabel>Chọn trường</InputLabel>
+                  <Select
+                    value={filters.universityId}
+                    label="Chọn trường"
+                    onChange={handleUniversityChange}
+                  >
+                    <MenuItem value="">
+                      <em>Chọn trường</em>
+                    </MenuItem>
+                    {universities.map((uni) => {
+                      const id = uni.universityId || uni.id || uni.UniversityId;
+                      return (
+                        <MenuItem key={String(id)} value={String(id)}>
+                          {uni.name || uni.Name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Bộ lọc sự kiện */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
+                  Sự kiện
+                </Typography>
+                <FormControl
+                  fullWidth
+                  size="small"
+                  sx={{
+                    minWidth: 150,
+                    '& .MuiOutlinedInput-root': {
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#7c3aed',
+                      },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: '#7c3aed',
+                    },
+                  }}
+                >
+                  <InputLabel>Chọn sự kiện</InputLabel>
+                  <Select
+                    value={filters.eventId}
+                    label="Chọn sự kiện"
+                    onChange={handleEventChange}
+                    disabled={!filters.universityId}
+                  >
+                    <MenuItem value="">
+                      <em>Tất cả sự kiện</em>
+                    </MenuItem>
+                    {filters.universityId && !availableEvents.length && (
+                      <MenuItem value="" disabled>
+                        Không có sự kiện phù hợp
+                      </MenuItem>
+                    )}
+                    {availableEvents.map((event) => (
+                      <MenuItem
+                        key={String(event.eventId)}
+                        value={String(event.eventId)}
+                      >
+                        {event.title}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Bộ lọc ngày */}
+              <Grid item xs={12} md={4}>
                 <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
                   Khoảng thời gian
                 </Typography>
@@ -306,10 +833,9 @@ const Report = () => {
                     type="date"
                     size="small"
                     value={filters.startDate}
-                    onChange={(e) =>
-                      setFilters({ ...filters, startDate: e.target.value })
-                    }
+                    onChange={handleDateChange("startDate")}
                     InputLabelProps={{ shrink: true }}
+                    error={isDateRangeInvalid}
                     sx={{
                       flex: 1,
                       '& .MuiOutlinedInput-root': {
@@ -327,10 +853,10 @@ const Report = () => {
                     type="date"
                     size="small"
                     value={filters.endDate}
-                    onChange={(e) =>
-                      setFilters({ ...filters, endDate: e.target.value })
-                    }
+                    onChange={handleDateChange("endDate")}
                     InputLabelProps={{ shrink: true }}
+                    error={isDateRangeInvalid}
+                    helperText={isDateRangeInvalid ? dateErrorMessage : ""}
                     sx={{
                       flex: 1,
                       '& .MuiOutlinedInput-root': {
@@ -344,81 +870,6 @@ const Report = () => {
                     }}
                   />
                 </Stack>
-              </Grid>
-
-              {/* Bộ lọc sự kiện */}
-              <Grid item xs={12} sm={6} md={5}>
-                <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
-                  Sự kiện
-                </Typography>
-                <FormControl fullWidth size="small" sx={{
-                  minWidth: 150,
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#7c3aed',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#7c3aed',
-                  },
-                }}>
-                  <InputLabel>Chọn sự kiện</InputLabel>
-                  <Select
-                    value={filters.eventId}
-                    label="Chọn sự kiện"
-                    onChange={(e) =>
-                      setFilters({ ...filters, eventId: e.target.value })
-                    }
-                  >
-                    <MenuItem value="">
-                      <em>Tất cả sự kiện</em>
-                    </MenuItem>
-                    {events.map((event) => (
-                      <MenuItem key={event.eventId} value={event.eventId}>
-                        {event.title}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-
-              {/* Bộ lọc trường */}
-              <Grid item xs={12} sm={6} md={4}>
-                <Typography variant="body2" fontWeight={600} sx={{ mb: 1 }}>
-                  Trường đại học
-                </Typography>
-                <FormControl fullWidth size="small" sx={{
-                  minWidth: 150,
-                  '& .MuiOutlinedInput-root': {
-                    '&.Mui-focused fieldset': {
-                      borderColor: '#7c3aed',
-                    },
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: '#7c3aed',
-                  },
-                }}>
-                  <InputLabel>Chọn trường</InputLabel>
-                  <Select
-                    value={filters.universityId}
-                    label="Chọn trường"
-                    onChange={(e) =>
-                      setFilters({ ...filters, universityId: e.target.value })
-                    }
-                  >
-                    <MenuItem value="">
-                      <em>Tất cả trường</em>
-                    </MenuItem>
-                    {universities.map((uni) => (
-                      <MenuItem
-                        key={uni.universityId}
-                        value={uni.universityId}
-                      >
-                        {uni.name}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
               </Grid>
             </Grid>
           </CardContent>
@@ -471,7 +922,7 @@ const Report = () => {
                           transform: "translateY(-4px)",
                         },
                         "&::before": {
-                          content: '\"\"',
+                          content: '""',
                           position: "absolute",
                           top: 0,
                           right: 0,
@@ -528,7 +979,7 @@ const Report = () => {
               {/* Data Table */}
               <Paper sx={{ p: 2, borderRadius: "16px", overflowX: "auto" }}>
                 <Typography variant="h6" sx={{ mb: 2 }}>
-                  Chi tiết Check-ins ({filteredData.length} bản ghi)
+                  Chi tiết Check-ins ({preparedRows.length} bản ghi)
                 </Typography>
                 <Table>
                   <TableHead sx={{ backgroundColor: "#f9fafb" }}>
@@ -545,89 +996,72 @@ const Report = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {/* --- CẬP NHẬT LOGIC RENDER VỚI SLICE --- */}
-                    {(rowsPerPage > 0
-                      ? filteredData.slice(
-                          page * rowsPerPage,
-                          page * rowsPerPage + rowsPerPage
-                        )
-                      : filteredData
-                    ).map((c) => {
-                      const formatDate = (dateString) => {
-                        if (!dateString) return "N/A";
-                        try {
-                          const date = new Date(dateString);
-                          return isNaN(date.getTime())
-                            ? "Invalid Date"
-                            : date.toLocaleString("vi-VN");
-                        } catch (error) {
-                          return "Formatting Error";
-                        }
-                      };
-                      return (
-                        <TableRow key={c.checkinId || c.checkin_id || c.id} hover>
-                          <TableCell>
-                            {c.eventTitle ||
-                              c.sessionTitle ||
-                              c.eventName ||
-                              "Không rõ"}
-                          </TableCell>
-                          <TableCell>
-                            <Typography variant="body2">
-                              {c.studentName || "Không rõ"}
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {c.studentCode || c.studentId || "N/A"}
-                            </Typography>
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(c.checkinTime || c.checkin_time)}
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label={
-                                (c.method || "").toLowerCase() === "qr"
-                                  ? "QR Code"
-                                  : "Thủ công"
-                              }
-                              color={
-                                (c.method || "").toLowerCase() === "qr"
-                                  ? "primary"
-                                  : "secondary"
-                              }
-                              size="small"
-                              sx={{
-                                backgroundColor: (c.method || "").toLowerCase() === "qr" ? "#e0f2f7" : "#f3e5f5", // Màu nền nhẹ hơn
-                                color: (c.method || "").toLowerCase() === "qr" ? "#0288d1" : "#ab47bc", // Màu chữ đậm hơn
-                              }}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Chip
-                              label="Đã check-in"
-                              color="success"
-                              size="small"
-                              variant="outlined"
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
+                    {paginatedRows.length === 0 ? (
+                      <TableRow>
+                        <TableCell align="center" colSpan={5}>
+                          {EMPTY_DATA_NOTE}
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedRows.map((row) => {
+                        const isQr = row.methodNormalized === "qr";
+                        return (
+                          <TableRow key={row.checkinId} hover>
+                            <TableCell>{row.eventTitle || "Không rõ"}</TableCell>
+                            <TableCell>
+                              <Typography variant="body2">
+                                {row.studentName || "Không rõ"}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                color="text.secondary"
+                              >
+                                {row.studentCode || row.studentId || "N/A"}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>{row.displayCheckinTime}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={row.methodLabel}
+                                color={isQr ? "primary" : "secondary"}
+                                size="small"
+                                sx={{
+                                  backgroundColor: isQr
+                                    ? "#e0f2f7"
+                                    : "#f3e5f5",
+                                  color: isQr ? "#0288d1" : "#ab47bc",
+                                }}
+                              />
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={row.statusLabel}
+                                color="success"
+                                size="small"
+                                variant="outlined"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })
+                    )}
                   </TableBody>
                 </Table>
                 {/* --- THÊM COMPONENT PHÂN TRANG --- */}
                 <TablePagination
                   rowsPerPageOptions={[5, 10, 25, { label: 'Tất cả', value: -1 }]}
                   component="div"
-                  count={filteredData.length} // Tổng số bản ghi đã lọc
+                  count={preparedRows.length}
                   rowsPerPage={rowsPerPage}
                   page={page}
                   onPageChange={handleChangePage}
                   onRowsPerPageChange={handleChangeRowsPerPage}
                   labelRowsPerPage="Số hàng mỗi trang:"
                   labelDisplayedRows={({ from, to, count }) => {
-                     if (count === -1) return `Tất cả ${filteredData.length} bản ghi`; // Hiển thị tổng số khi chọn "Tất cả"
-                     return `${from}–${to} trong số ${count !== -1 ? count : `hơn ${to}`}`;
+                     if (rowsPerPage === -1) {
+                       return `Tất cả ${count} bản ghi`;
+                     }
+                     return `${from}–${to} trong ${count}`;
                   }}
                    SelectProps={{
                      inputProps: { 'aria-label': 'Số hàng mỗi trang' },
@@ -725,8 +1159,15 @@ const Report = () => {
                   <Stack spacing={2}>
                     <Button
                       variant="contained"
-                      startIcon={<FileDownload />}
-                      onClick={() => exportExcel(filteredData)}
+                      startIcon={
+                        isExportingExcel ? (
+                          <CircularProgress size={18} color="inherit" />
+                        ) : (
+                          <FileDownload />
+                        )
+                      }
+                      onClick={handleExportExcel}
+                      disabled={!isExportEnabled || isExportingExcel}
                       sx={{
                         backgroundColor: "#7c3aed",
                         "&:hover": {
@@ -734,22 +1175,7 @@ const Report = () => {
                         },
                       }}
                     >
-                      Xuất Excel
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      startIcon={<PictureAsPdf />}
-                      onClick={() => exportPDF(filteredData)}
-                      sx={{
-                        borderColor: "#7c3aed",
-                        color: "#7c3aed",
-                        "&:hover": {
-                          borderColor: "#6d28d9",
-                          backgroundColor: "#f3f0ff",
-                        },
-                      }}
-                    >
-                      Xuất PDF
+                      {isExportingExcel ? "Đang xuất..." : "Xuất Excel"}
                     </Button>
                   </Stack>
                 </CardContent>
@@ -758,6 +1184,7 @@ const Report = () => {
           </Grid>
         </Grid>
       </Container>
+      <ToastContainer position="top-right" autoClose={3000} limit={3} />
     </Box>
   );
 };
