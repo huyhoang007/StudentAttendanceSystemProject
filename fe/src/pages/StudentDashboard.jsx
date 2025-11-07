@@ -21,9 +21,6 @@ import {
   CheckCircle,
   School,
   EmojiEvents,
-  Event as EventIcon,
-  QrCodeScanner as QrCodeScannerIcon,
-  BarChart as BarChartIcon,
 } from "@mui/icons-material";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -55,6 +52,30 @@ const StudentDashboard = () => {
     const timeoutId = setTimeout(fetchCheckIns, 500);
     return () => clearTimeout(timeoutId);
   }, [user]);
+
+  // nhóm dữ liệu mục tiêu (không đổi nội dung, chỉ gom ra biến để dễ chia cột)
+  const goals = [
+    {
+      color: "#7c3aed",
+      title: "Hiện đại hóa quy trình điểm danh",
+      desc: "Ứng dụng QR Code nhanh chóng và chính xác.",
+    },
+    {
+      color: "#c084fc",
+      title: "Tăng cường kết nối cộng đồng",
+      desc: "Khuyến khích sinh viên tham gia hoạt động văn hóa.",
+    },
+    {
+      color: "#a855f7",
+      title: "Tối ưu hóa trải nghiệm sinh viên",
+      desc: "Thiết kế thân thiện, dễ sử dụng trên mọi thiết bị.",
+    },
+    {
+      color: "#9333ea",
+      title: "Hỗ trợ học tập & nghiên cứu",
+      desc: "Cung cấp cơ hội tham gia sự kiện học thuật.",
+    },
+  ];
 
   return (
     <Box
@@ -379,31 +400,12 @@ const StudentDashboard = () => {
                   />
                 </Divider>
 
-                <Grid container spacing={2} sx={{ mb: 4 }}>
-                  {[
-                    {
-                      color: "#7c3aed",
-                      title: "Hiện đại hóa quy trình điểm danh",
-                      desc: "Ứng dụng QR Code nhanh chóng và chính xác.",
-                    },
-                    {
-                      color: "#a855f7",
-                      title: "Tối ưu hóa trải nghiệm sinh viên",
-                      desc: "Thiết kế thân thiện, dễ sử dụng trên mọi thiết bị.",
-                    },
-                    {
-                      color: "#c084fc",
-                      title: "Tăng cường kết nối cộng đồng",
-                      desc: "Khuyến khích sinh viên tham gia hoạt động văn hóa.",
-                    },
-                    {
-                      color: "#9333ea",
-                      title: "Hỗ trợ học tập & nghiên cứu",
-                      desc: "Cung cấp cơ hội tham gia sự kiện học thuật.",
-                    },
-                  ].map((item, i) => (
-                    <Grid item xs={12} sm={6} key={i}>
+                <Grid container spacing={2} sx={{ mb: 4, alignItems: "stretch" }}>
+                  {/* Cột trái: hiện đại hóa + tăng cường kết nối */}
+                  <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {goals.slice(0, 2).map((item, i) => (
                       <Paper
+                        key={`left-${i}`}
                         elevation={0}
                         sx={{
                           p: 2.5,
@@ -415,20 +417,14 @@ const StudentDashboard = () => {
                           border: "1px solid #f3e8ff",
                           transition: "all 0.3s cubic-bezier(.17,.67,.83,.67)",
                           position: "relative",
+                          flex: 1,
                           "&:hover": {
                             transform: "translateY(-8px)",
                             boxShadow: `0 12px 25px ${item.color}25`,
                             bgcolor: "#faf5ff",
-                            "& .icon": {
-                              transform: "scale(1.2) rotate(5deg)",
-                            },
-                            "& .title": {
-                              color: item.color,
-                            },
-                            "&::before": {
-                              height: "100%",
-                              opacity: 0.08,
-                            },
+                            "& .icon": { transform: "scale(1.2) rotate(5deg)" },
+                            "& .title": { color: item.color },
+                            "&::before": { height: "100%", opacity: 0.08 },
                           },
                           "&::before": {
                             content: '""',
@@ -447,21 +443,10 @@ const StudentDashboard = () => {
                       >
                         <CheckCircle
                           className="icon"
-                          sx={{
-                            color: item.color,
-                            mt: 0.5,
-                            transition: "transform 0.3s ease",
-                          }}
+                          sx={{ color: item.color, mt: 0.5, transition: "transform 0.3s ease" }}
                         />
                         <Box>
-                          <Typography
-                            variant="subtitle1"
-                            className="title"
-                            sx={{
-                              fontWeight: "bold",
-                              transition: "color 0.3s ease",
-                            }}
-                          >
+                          <Typography variant="subtitle1" className="title" sx={{ fontWeight: "bold", transition: "color 0.3s ease" }}>
                             {item.title}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
@@ -469,8 +454,64 @@ const StudentDashboard = () => {
                           </Typography>
                         </Box>
                       </Paper>
-                    </Grid>
-                  ))}
+                    ))}
+                  </Grid>
+
+                  {/* Cột phải: tối ưu hóa + hỗ trợ học tập */}
+                  <Grid item xs={12} md={6} sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {goals.slice(2).map((item, i) => (
+                      <Paper
+                        key={`right-${i}`}
+                        elevation={0}
+                        sx={{
+                          p: 2.5,
+                          borderRadius: 1,
+                          display: "flex",
+                          alignItems: "flex-start",
+                          gap: 2,
+                          bgcolor: "#fafbff",
+                          border: "1px solid #f3e8ff",
+                          transition: "all 0.3s cubic-bezier(.17,.67,.83,.67)",
+                          position: "relative",
+                          flex: 1,
+                          "&:hover": {
+                            transform: "translateY(-8px)",
+                            boxShadow: `0 12px 25px ${item.color}25`,
+                            bgcolor: "#faf5ff",
+                            "& .icon": { transform: "scale(1.2) rotate(5deg)" },
+                            "& .title": { color: item.color },
+                            "&::before": { height: "100%", opacity: 0.08 },
+                          },
+                          "&::before": {
+                            content: '""',
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            height: "3px",
+                            background: `linear-gradient(90deg, ${item.color}, transparent)`,
+                            transition: "all 0.3s ease",
+                            opacity: 0.3,
+                            borderTopLeftRadius: "12px",
+                            borderTopRightRadius: "12px",
+                          },
+                        }}
+                      >
+                        <CheckCircle
+                          className="icon"
+                          sx={{ color: item.color, mt: 0.5, transition: "transform 0.3s ease" }}
+                        />
+                        <Box>
+                          <Typography variant="subtitle1" className="title" sx={{ fontWeight: "bold", transition: "color 0.3s ease" }}>
+                            {item.title}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {item.desc}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    ))}
+                  </Grid>
                 </Grid>
 
                 <Divider sx={{ my: 3 }}>
